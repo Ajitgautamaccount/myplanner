@@ -3731,5 +3731,31 @@ onSnapshot(collection(db, TCODES_COL), snap => {
 // Fallback: hide loading after 6s if Firestore is slow — localStorage data already shown
 setTimeout(() => { if (!todosLoaded) { todosLoaded = true; goalsLoaded = true; hideLoading(); renderTasks(); } }, 6000);
 </script>
+<div id="devBadge" style="
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%) rotate(90deg);
+  transform-origin: right center;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  color: #fff;
+  font-size: .65rem;
+  font-weight: 800;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  padding: 5px 16px;
+  border-radius: 8px 8px 0 0;
+  z-index: 9999;
+  pointer-events: none;
+  white-space: nowrap;
+  animation: devFlash 2s ease-in-out infinite;
+  box-shadow: 0 -2px 12px rgba(99,102,241,.45);
+">&#9654; Developed by Ajit Gautam</div>
+<style>
+@keyframes devFlash {
+  0%,100% { opacity: 1; box-shadow: 0 -2px 12px rgba(99,102,241,.45); }
+  50%      { opacity: .35; box-shadow: 0 -2px 22px rgba(139,92,246,.8); }
+}
+</style>
 </body>
 </html>
