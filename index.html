@@ -425,18 +425,6 @@ body {
 .gs-sep { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
 @keyframes taskFlash { 0%,100% { box-shadow: none; } 25%,75% { box-shadow: 0 0 0 3px var(--accent); } }
 .task-highlight { animation: taskFlash 1.8s ease; }
-.sidebar-dev-credit {
-  text-align: center;
-  font-size: .62rem;
-  color: var(--text3);
-  padding: 8px 18px 14px;
-  letter-spacing: .04em;
-  animation: devPulse 3s ease-in-out infinite;
-}
-@keyframes devPulse {
-  0%,100% { opacity: .5; }
-  50%      { opacity: 1; color: var(--accent); }
-}
 /* ── 3D Button base ── */
 .add-btn {
   color: #fff;
@@ -1465,7 +1453,7 @@ body.has-install-banner #content { padding-bottom: 100px; }
       <span id="syncLabel">–</span>
     </div>
   </div>
-  <div class="sidebar-dev-credit">&#10022; Made with &#9829; by Ajit Gautam</div>
+
 </nav>
 
 <!-- Shortcuts panel -->
