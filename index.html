@@ -1374,6 +1374,7 @@ body.has-install-banner #content { padding-bottom: 100px; }
           <option value="date">Sort: Date</option>
           <option value="due">Sort: Due Date</option>
           <option value="priority">Sort: Priority</option>
+          <option value="status">Sort: Status</option>
           <option value="alpha">Sort: A–Z</option>
         </select>
       </div>
@@ -2308,9 +2309,15 @@ function getVisibleTodos() {
   }
   if (filterTag) list = list.filter(t => t.tag === filterTag);
   if (searchQ)   list = list.filter(t => (t.title+' '+t.tag+' '+(t.notes||'')).toLowerCase().includes(searchQ));
+  const statusOrder = { inprogress: 0, open: 1, done: 2 };
   list.sort((a, b) => {
     if (sortMode === 'priority') return (a.priority||4) - (b.priority||4);
     if (sortMode === 'due') { const da = a.dueDate||'9999', db = b.dueDate||'9999'; return da < db ? -1 : da > db ? 1 : 0; }
+    if (sortMode === 'status') {
+      const sa = statusOrder[a.done ? 'done' : (a.status === 'inprogress' ? 'inprogress' : 'open')];
+      const sb = statusOrder[b.done ? 'done' : (b.status === 'inprogress' ? 'inprogress' : 'open')];
+      return sa !== sb ? sa - sb : a.title.localeCompare(b.title);
+    }
     if (sortMode === 'alpha') return a.title.localeCompare(b.title);
     return a.date < b.date ? -1 : a.date > b.date ? 1 : 0;
   });
