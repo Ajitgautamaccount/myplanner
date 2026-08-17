@@ -496,35 +496,6 @@ body {
 .view { display: none; }
 .view.active { display: block; }
 
-/* ── Stats ── */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-}
-.stat-card {
-  background: var(--surface);
-  border-radius: var(--radius);
-  padding: 16px 18px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-}
-.stat-card { position: relative; overflow: hidden; }
-.stat-card-icon { margin-bottom: 8px; opacity: .8; }
-.stat-label { font-size: .72rem; color: var(--text2); font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .05em; }
-.stat-value { font-size: 1.9rem; font-weight: 800; line-height: 1; }
-.stat-sub { font-size: .72rem; color: var(--text3); margin-top: 4px; }
-.stat-card.accent  { border-top: 3px solid var(--accent); }
-.stat-card.success { border-top: 3px solid var(--success); }
-.stat-card.warning { border-top: 3px solid var(--warning); }
-.stat-card.danger  { border-top: 3px solid var(--danger); }
-.stat-card.accent  .stat-value { color: var(--accent); }
-.stat-card.danger  .stat-value { color: var(--danger); }
-.stat-card.success .stat-value { color: var(--success); }
-.stat-card.warning .stat-value { color: var(--warning); }
-.stat-card-alert { animation: cardPulse 2.5s ease-in-out infinite; }
-@keyframes cardPulse { 0%,100% { box-shadow: var(--shadow); } 50% { box-shadow: 0 0 0 3px var(--danger-light), var(--shadow-md); } }
 .progress-bar-track { height: 6px; background: var(--surface2); border-radius: 10px; overflow: hidden; margin-top: 8px; }
 .progress-bar-fill { height: 100%; border-radius: 10px; background: var(--accent); transition: width .4s ease; }
 
@@ -589,6 +560,8 @@ body {
 .kanban-col-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .kanban-col-title { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; flex: 1; }
 .kanban-col-count { font-size: .7rem; font-weight: 700; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 1px 8px; color: var(--text3); }
+.kb-overdue-pill { font-size: .65rem; font-weight: 700; background: var(--danger-light); color: var(--danger); border-radius: 20px; padding: 1px 7px; }
+.kb-pct { font-size: .65rem; font-weight: 700; background: var(--success-light); color: var(--success); border-radius: 20px; padding: 1px 7px; }
 .kanban-cards { padding: 10px 8px; display: flex; flex-direction: column; gap: 7px; min-height: 60px; }
 .kanban-cards.drag-over { background: var(--accent-light); border-radius: 0 0 var(--radius) var(--radius); outline: 2px dashed var(--accent); outline-offset: -4px; }
 .task { cursor: grab; }
@@ -1338,9 +1311,7 @@ body.has-install-banner #content { padding-bottom: 100px; }
   .add-menu-caret { display: none; }
   .add-menu-dropdown { right: 0; left: auto; min-width: 180px; }
   #content { padding: 16px 14px; }
-  .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
-  .stat-value { font-size: 1.5rem; }
-  .field-row, .field-row3 { grid-template-columns: 1fr; }
+.field-row, .field-row3 { grid-template-columns: 1fr; }
   .filter-bar { gap: 5px; }
   .filter-sep { display: none; }
   .sort-select { width: 100%; margin-left: 0; }
@@ -1550,7 +1521,6 @@ body.has-install-banner #content { padding-bottom: 100px; }
   <div id="content">
     <!-- Tasks view -->
     <div class="view active" id="viewTasks">
-      <div class="stats-grid" id="statsGrid"></div>
       <div class="filter-bar" id="filterBar">
         <button class="filter-chip active" data-status="all">All</button>
         <button class="filter-chip" data-status="open">Open</button>
@@ -2434,28 +2404,7 @@ function renderStats() {
   const inprogress = todos.filter(t => t.status === 'inprogress');
   const done       = todos.filter(t => t.done);
   const overdue    = todos.filter(t => !t.done && (function(){ const d = dueDiff(t.dueDate); return d !== null && d < 0; })());
-  const pct        = todos.length ? Math.round(done.length / todos.length * 100) : 0;
-  document.getElementById('statsGrid').innerHTML = `
-    <div class="stat-card accent">
-      <div class="stat-label">Open</div>
-      <div class="stat-value">${open.length}</div>
-      <div class="stat-sub">remaining</div>
-    </div>
-    <div class="stat-card warning">
-      <div class="stat-label">In Progress</div>
-      <div class="stat-value">${inprogress.length}</div>
-      <div class="stat-sub">active</div>
-    </div>
-    <div class="stat-card success">
-      <div class="stat-label">Done</div>
-      <div class="stat-value">${done.length}</div>
-      <div class="stat-sub">all time</div>
-    </div>
-    <div class="stat-card danger">
-      <div class="stat-label">Overdue</div>
-      <div class="stat-value">${overdue.length}</div>
-      <div class="stat-sub">need attention</div>
-    </div>`;
+  window._kbStats = { open: open.length, inprogress: inprogress.length, done: done.length, overdue: overdue.length, total: todos.length };
   const notDone = todos.filter(t => !t.done);
   document.getElementById('navCountAll').textContent      = notDone.length;
   document.getElementById('navCountToday').textContent    = notDone.filter(t => dueDiff(t.dueDate) === 0).length;
@@ -2530,10 +2479,11 @@ function renderTasks() {
     return;
   }
   // ── Kanban board ──
+  const kbs = window._kbStats || {};
   const lanes = [
-    { key: 'open',       label: 'Open',        dot: '#6c7aff', tasks: [] },
-    { key: 'inprogress', label: 'In Progress',  dot: '#f59e0b', tasks: [] },
-    { key: 'done',       label: 'Done',         dot: '#10b981', tasks: [] }
+    { key: 'open',       label: 'Open',        dot: '#6c7aff', tasks: [], sub: kbs.overdue ? `<span class="kb-overdue-pill">${kbs.overdue} overdue</span>` : '' },
+    { key: 'inprogress', label: 'In Progress',  dot: '#f59e0b', tasks: [], sub: '' },
+    { key: 'done',       label: 'Done',         dot: '#10b981', tasks: [], sub: kbs.total ? `<span class="kb-pct">${Math.round((kbs.done||0)/kbs.total*100)}%</span>` : '' }
   ];
   visible.forEach(t => {
     const key = t.done ? 'done' : (t.status === 'inprogress' ? 'inprogress' : 'open');
@@ -2594,6 +2544,7 @@ function renderTasks() {
       <div class="kanban-col-header">
         <span class="kanban-col-dot" style="background:${lane.dot}"></span>
         <span class="kanban-col-title">${lane.label}</span>
+        ${lane.sub}
         <span class="kanban-col-count">${lane.tasks.length}</span>
       </div>`;
     const cards = document.createElement('div');
