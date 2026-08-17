@@ -266,9 +266,12 @@ body {
   border-radius: 50%;
   background: var(--text3);
 }
-.sync-dot.online { background: var(--success); }
+.sync-dot.online  { background: var(--success); }
 .sync-dot.syncing { background: var(--warning); animation: pulse 1s infinite; }
+.sync-dot.error   { background: #ef4444; }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.sync-status { cursor: pointer; }
+.sync-status:hover #syncLabel { text-decoration: underline; }
 
 .icon-btn {
   background: none;
@@ -982,7 +985,7 @@ body.has-install-banner #content { padding-bottom: 100px; }
     <button class="icon-btn" id="shortcutsBtn" title="Keyboard shortcuts">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 2l-4 5-4-5"/></svg>
     </button>
-    <div class="sync-status">
+    <div class="sync-status" id="syncStatus" title="Click to retry sync">
       <div class="sync-dot" id="syncDot"></div>
       <span id="syncLabel">–</span>
     </div>
@@ -1437,29 +1440,63 @@ function saveLs() {
   } catch(e) { console.warn('localStorage write failed', e); }
 }
 
-function setSyncStatus(state) {
+let _pendingRetry = false;
+
+function setSyncStatus(state, msg) {
   const dot   = document.getElementById('syncDot');
   const label = document.getElementById('syncLabel');
   dot.className = 'sync-dot ' + state;
-  label.textContent = state === 'online' ? 'Synced' : state === 'syncing' ? 'Saving…' : 'Offline';
+  if (state === 'online')   label.textContent = 'Synced';
+  else if (state === 'syncing') label.textContent = 'Saving…';
+  else if (state === 'error')   label.textContent = msg || 'Sync error – tap to retry';
+  else                          label.textContent = 'Offline';
+}
+
+async function retrySync() {
+  if (_pendingRetry) return;
+  _pendingRetry = true;
+  setSyncStatus('syncing');
+  try {
+    await Promise.all(
+      todos.map(t => setDoc(doc(db, TODOS_COL, String(t.id)), { ...t, _ts: serverTimestamp() }))
+        .concat(goals.map(g => setDoc(doc(db, GOALS_COL, String(g.id)), { ...g, _ts: serverTimestamp() })))
+    );
+    setSyncStatus('online');
+    alert('All tasks synced to cloud successfully!');
+  } catch(e) {
+    console.warn('Retry sync failed:', e.code, e.message);
+    setSyncStatus('error', e.code === 'permission-denied' ? 'Rules expired – see banner' : 'Sync failed – tap to retry');
+    if (e.code === 'permission-denied') showFirestoreBlockedBanner();
+  }
+  _pendingRetry = false;
 }
 
 // ── Firestore helpers ────────────────────────────────
+function handleWriteError(e) {
+  console.warn('Firestore write failed:', e.code, e.message);
+  if (e.code === 'permission-denied') {
+    setSyncStatus('error', 'Rules expired – tap to retry');
+    showFirestoreBlockedBanner();
+  } else {
+    setSyncStatus('error');
+  }
+}
+
 async function fbSaveTask(t) {
-  saveLs(); // always persist locally first
+  saveLs();
   setSyncStatus('syncing');
   try {
     await setDoc(doc(db, TODOS_COL, String(t.id)), { ...t, _ts: serverTimestamp() });
     setSyncStatus('online');
-  } catch(e) { console.warn('Firestore write failed', e); setSyncStatus(''); }
+  } catch(e) { handleWriteError(e); }
 }
 async function fbDeleteTask(id) {
-  saveLs(); // persist deletion locally first
+  saveLs();
   setSyncStatus('syncing');
   try {
     await deleteDoc(doc(db, TODOS_COL, String(id)));
     setSyncStatus('online');
-  } catch(e) { console.warn('Firestore delete failed', e); setSyncStatus(''); }
+  } catch(e) { handleWriteError(e); }
 }
 async function fbSaveGoal(g) {
   saveLs();
@@ -1467,7 +1504,7 @@ async function fbSaveGoal(g) {
   try {
     await setDoc(doc(db, GOALS_COL, String(g.id)), { ...g, _ts: serverTimestamp() });
     setSyncStatus('online');
-  } catch(e) { console.warn('Firestore write failed', e); setSyncStatus(''); }
+  } catch(e) { handleWriteError(e); }
 }
 async function fbDeleteGoal(id) {
   saveLs();
@@ -1475,7 +1512,7 @@ async function fbDeleteGoal(id) {
   try {
     await deleteDoc(doc(db, GOALS_COL, String(id)));
     setSyncStatus('online');
-  } catch(e) { console.warn('Firestore delete failed', e); setSyncStatus(''); }
+  } catch(e) { handleWriteError(e); }
 }
 
 // ── Date helpers ──────────────────────────────────────
@@ -1992,6 +2029,12 @@ function applyTheme(dark) {
 }
 applyTheme(isDark);
 document.getElementById('themeToggle').addEventListener('click', () => { isDark = !isDark; applyTheme(isDark); });
+
+// ── Sync status click → retry ─────────────────────────
+document.getElementById('syncStatus').addEventListener('click', () => {
+  const state = document.getElementById('syncDot').className;
+  if (!state.includes('online') && !state.includes('syncing')) retrySync();
+});
 
 // ── Shortcuts ─────────────────────────────────────────
 const shortcutsPanel = document.getElementById('shortcutsPanel');
