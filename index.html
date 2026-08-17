@@ -567,9 +567,10 @@ body {
 }
 
 /* ── Groups ── */
-.task-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 16px; align-items: start; }
-@media (max-width: 1100px) { .task-cols { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 680px)  { .task-cols { grid-template-columns: 1fr; } }
+.task-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0 16px; align-items: start; }
+@media (max-width: 1200px) { .task-cols { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 860px)  { .task-cols { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px)  { .task-cols { grid-template-columns: 1fr; } }
 .group { margin-bottom: 22px; }
 .group-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 .group-label { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text3); }
@@ -2550,8 +2551,8 @@ function renderTasks() {
   });
   // Distribute groups across 3 columns
   listEl.innerHTML = '';
-  const cols = [document.createElement('div'), document.createElement('div'), document.createElement('div')];
-  grpNodes.forEach((grp, i) => cols[i % 3].appendChild(grp));
+  const cols = [document.createElement('div'), document.createElement('div'), document.createElement('div'), document.createElement('div')];
+  grpNodes.forEach((grp, i) => cols[i % 4].appendChild(grp));
   const wrap = document.createElement('div');
   wrap.className = 'task-cols';
   cols.forEach(c => wrap.appendChild(c));
