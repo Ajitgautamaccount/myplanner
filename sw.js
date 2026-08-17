@@ -1,4 +1,4 @@
-const CACHE = 'ajit-planner-v2';
+const CACHE = 'ajit-planner-v3';
 const OFFLINE_URL = '/myplanner/';
 
 const PRECACHE = [
@@ -9,14 +9,12 @@ const PRECACHE = [
   '/myplanner/icons/icon-512.png',
 ];
 
-// Install: pre-cache shell
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE).then(c => c.addAll(PRECACHE)).then(() => self.skipWaiting())
   );
 });
 
-// Activate: remove old caches
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -25,34 +23,38 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Fetch: network-first for Firebase/CDN, cache-first for app shell
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Skip non-GET and cross-origin Firebase/analytics requests
   if (e.request.method !== 'GET') return;
   if (url.hostname.includes('firestore.googleapis.com')) return;
   if (url.hostname.includes('firebase')) return;
   if (url.hostname.includes('gstatic.com')) return;
   if (url.hostname.includes('google-analytics.com')) return;
 
-  // Network-first for HTML (always get fresh app)
+  // Network-first for HTML — always fetch fresh, cache separately
   if (e.request.destination === 'document') {
     e.respondWith(
-      fetch(e.request)
-        .then(res => { caches.open(CACHE).then(c => c.put(e.request, res.clone())); return res; })
-        .catch(() => caches.match(OFFLINE_URL))
+      fetch(e.request).then(res => {
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+        return res;
+      }).catch(() => caches.match(OFFLINE_URL))
     );
     return;
   }
 
-  // Cache-first for everything else (icons, manifest)
+  // Cache-first for everything else
   e.respondWith(
-    caches.match(e.request).then(cached => cached ||
-      fetch(e.request).then(res => {
-        if (res.ok) caches.open(CACHE).then(c => c.put(e.request, res.clone()));
+    caches.match(e.request).then(cached => {
+      if (cached) return cached;
+      return fetch(e.request).then(res => {
+        if (res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+        }
         return res;
-      })
-    )
+      });
+    })
   );
 });
