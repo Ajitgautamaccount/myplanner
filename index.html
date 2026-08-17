@@ -538,8 +538,8 @@ body {
 }
 
 /* ── Kanban board ── */
-.kanban-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: start; }
-@media (max-width: 860px)  { .kanban-board { grid-template-columns: repeat(2, 1fr); } }
+.kanban-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; align-items: start; }
+@media (max-width: 1100px) { .kanban-board { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px)  { .kanban-board { grid-template-columns: 1fr; } }
 .kanban-col {
   background: var(--surface2);
@@ -1523,8 +1523,10 @@ body.has-install-banner #content { padding-bottom: 100px; }
     <div class="view active" id="viewTasks">
       <div class="filter-bar" id="filterBar">
         <button class="filter-chip active" data-status="all">All</button>
-        <button class="filter-chip" data-status="open">Open</button>
+        <button class="filter-chip" data-status="new">New</button>
         <button class="filter-chip" data-status="inprogress">In Progress</button>
+        <button class="filter-chip" data-status="pending">Pending</button>
+
         <button class="filter-chip" data-status="done">Done</button>
         <span class="filter-sep"></span>
         <button class="filter-chip" data-due="overdue">Overdue</button>
@@ -1759,8 +1761,10 @@ body.has-install-banner #content { padding-bottom: 100px; }
     <div class="field">
       <label for="editStatus">Status</label>
       <select id="editStatus">
-        <option value="open">Open</option>
+        <option value="new">New</option>
         <option value="inprogress">In Progress</option>
+        <option value="pending">Pending</option>
+ 
         <option value="done">Done</option>
       </select>
     </div>
@@ -2400,11 +2404,13 @@ document.querySelectorAll('.nav-item[data-view]').forEach(btn => {
 
 // ── Stats ─────────────────────────────────────────────
 function renderStats() {
-  const open       = todos.filter(t => !t.done && t.status !== 'inprogress');
-  const inprogress = todos.filter(t => t.status === 'inprogress');
+  const open       = todos.filter(t => !t.done && t.status !== 'inprogress' && t.status !== 'pending');
+  const inprogress = todos.filter(t => !t.done && t.status === 'inprogress');
+  const pending    = todos.filter(t => !t.done && t.status === 'pending');
+
   const done       = todos.filter(t => t.done);
   const overdue    = todos.filter(t => !t.done && (function(){ const d = dueDiff(t.dueDate); return d !== null && d < 0; })());
-  window._kbStats = { open: open.length, inprogress: inprogress.length, done: done.length, overdue: overdue.length, total: todos.length };
+  window._kbStats = { open: open.length, inprogress: inprogress.length, pending: pending.length, done: done.length, overdue: overdue.length, total: todos.length };
   const notDone = todos.filter(t => !t.done);
   document.getElementById('navCountAll').textContent      = notDone.length;
   document.getElementById('navCountToday').textContent    = notDone.filter(t => dueDiff(t.dueDate) === 0).length;
@@ -2439,8 +2445,9 @@ function getVisibleTodos() {
   if (filterViewPreset === 'upcoming') list = list.filter(t => { const d = dueDiff(t.dueDate); return !t.done && d !== null && d > 0; });
   if (filterViewPreset === 'done')     list = list.filter(t => t.done);
   if (!filterViewPreset) {
-    if (filterStatus === 'open')       list = list.filter(t => !t.done && t.status !== 'inprogress');
-    if (filterStatus === 'inprogress') list = list.filter(t => t.status === 'inprogress');
+    if (filterStatus === 'new')        list = list.filter(t => !t.done && t.status !== 'inprogress' && t.status !== 'pending');
+    if (filterStatus === 'inprogress') list = list.filter(t => !t.done && t.status === 'inprogress');
+    if (filterStatus === 'pending')    list = list.filter(t => !t.done && t.status === 'pending');
     if (filterStatus === 'done')       list = list.filter(t => t.done);
     if (filterDue === 'overdue') list = list.filter(t => { const d = dueDiff(t.dueDate); return d !== null && d < 0; });
     if (filterDue === 'today')   list = list.filter(t => dueDiff(t.dueDate) === 0);
@@ -2449,13 +2456,14 @@ function getVisibleTodos() {
   }
   if (filterTag) list = list.filter(t => t.tag === filterTag);
   if (searchQ)   list = list.filter(t => (t.title+' '+t.tag+' '+(t.notes||'')).toLowerCase().includes(searchQ));
-  const statusOrder = { inprogress: 0, open: 1, done: 2 };
+  const statusOrder = { inprogress: 0, new: 1, pending: 2, done: 3 };
+  function taskStatus(t) { return t.done ? 'done' : (t.status === 'inprogress' ? 'inprogress' : (t.status === 'pending' ? 'pending' : 'new')); }
   list.sort((a, b) => {
     if (sortMode === 'priority') return (a.priority||4) - (b.priority||4);
     if (sortMode === 'due') { const da = a.dueDate||'9999', db = b.dueDate||'9999'; return da < db ? -1 : da > db ? 1 : 0; }
     if (sortMode === 'status') {
-      const sa = statusOrder[a.done ? 'done' : (a.status === 'inprogress' ? 'inprogress' : 'open')];
-      const sb = statusOrder[b.done ? 'done' : (b.status === 'inprogress' ? 'inprogress' : 'open')];
+      const sa = statusOrder[taskStatus(a)];
+      const sb = statusOrder[taskStatus(b)];
       return sa !== sb ? sa - sb : a.title.localeCompare(b.title);
     }
     if (sortMode === 'alpha') return a.title.localeCompare(b.title);
@@ -2481,12 +2489,13 @@ function renderTasks() {
   // ── Kanban board ──
   const kbs = window._kbStats || {};
   const lanes = [
-    { key: 'open',       label: 'Open',        dot: '#6c7aff', tasks: [], sub: kbs.overdue ? `<span class="kb-overdue-pill">${kbs.overdue} overdue</span>` : '' },
+    { key: 'new',        label: 'New',         dot: '#6c7aff', tasks: [], sub: kbs.overdue ? `<span class="kb-overdue-pill">${kbs.overdue} overdue</span>` : '' },
     { key: 'inprogress', label: 'In Progress',  dot: '#f59e0b', tasks: [], sub: '' },
+    { key: 'pending',    label: 'Pending',      dot: '#a855f7', tasks: [], sub: '' },
     { key: 'done',       label: 'Done',         dot: '#10b981', tasks: [], sub: kbs.total ? `<span class="kb-pct">${Math.round((kbs.done||0)/kbs.total*100)}%</span>` : '' }
   ];
   visible.forEach(t => {
-    const key = t.done ? 'done' : (t.status === 'inprogress' ? 'inprogress' : 'open');
+    const key = t.done ? 'done' : (t.status === 'inprogress' ? 'inprogress' : (t.status === 'pending' ? 'pending' : 'new'));
     lanes.find(l => l.key === key).tasks.push(t);
   });
 
@@ -2564,7 +2573,8 @@ function renderTasks() {
       const targetLane = cards.dataset.lane;
       if (targetLane === 'done') { todo.done = true; todo.status = 'done'; }
       else if (targetLane === 'inprogress') { todo.done = false; todo.status = 'inprogress'; }
-      else { todo.done = false; todo.status = 'open'; }
+      else if (targetLane === 'pending')    { todo.done = false; todo.status = 'pending'; }
+      else { todo.done = false; todo.status = 'new'; }
       fbSaveTask(todo); renderTasks();
     });
 
@@ -2585,7 +2595,7 @@ document.getElementById('list').addEventListener('click', e => {
     if (todo) {
       todo.done = !todo.done;
       if (todo.done) todo.status = 'done';
-      else if (todo.status === 'done') todo.status = 'open';
+      else if (todo.status === 'done') todo.status = 'new';
       fbSaveTask(todo); renderTasks();
     }
   }
@@ -2648,7 +2658,7 @@ document.getElementById('sortSelect').addEventListener('change', e => { sortMode
     (todos || []).forEach(t => {
       const haystack = ((t.title||'') + ' ' + (t.tag||'') + ' ' + (t.notes||'')).toLowerCase();
       if (haystack.includes(ql)) {
-        const statusLabel = t.done ? 'Done' : (t.status === 'inprogress' ? 'In Progress' : 'Open');
+        const statusLabel = t.done ? 'Done' : (t.status === 'inprogress' ? 'In Progress' : (t.status === 'pending' ? 'Pending' : 'New'));
         results.push({ type: 'task', label: t.title||'(no title)', sub: (t.tag ? t.tag + ' · ' : '') + statusLabel + (t.dueDate ? ' · Due ' + t.dueDate : ''), id: t.id });
       }
     });
@@ -2861,7 +2871,7 @@ function openEditModal(id) {
   document.getElementById('editTag').value     = todo.tag   || '';
   document.getElementById('editDate').value    = todo.date;
   document.getElementById('editDueDate').value = todo.dueDate || '';
-  document.getElementById('editStatus').value  = todo.done ? 'done' : (todo.status === 'inprogress' ? 'inprogress' : 'open');
+  document.getElementById('editStatus').value  = todo.done ? 'done' : (todo.status === 'inprogress' ? 'inprogress' : (todo.status === 'pending' ? 'pending' : 'new'));
   initPriority('editPriority', todo.priority || 4);
   editBackdrop.classList.add('open');
   setTimeout(() => document.getElementById('editTitle').focus(), 80);
@@ -2885,7 +2895,7 @@ document.getElementById('editSave').addEventListener('click', () => {
     todo.priority = getPriority('editPriority');
     const statusVal = document.getElementById('editStatus').value;
     todo.done     = statusVal === 'done';
-    todo.status   = statusVal === 'inprogress' ? 'inprogress' : (statusVal === 'done' ? 'done' : 'open');
+    todo.status   = statusVal;
     fbSaveTask(todo); renderTasks();
   }
   closeEditModal();
@@ -3641,7 +3651,7 @@ function downloadCsv(filename, rows) {
 document.getElementById('exportTasksBtn').addEventListener('click', () => {
   const rows = [csvRow(['Title','Status','Priority','Tag','Due Date','Notes'])];
   todos.forEach(t => rows.push(csvRow([
-    t.title, t.done ? 'Done' : (t.status === 'inprogress' ? 'In Progress' : 'Open'), t.priority || '', t.tag || '', t.due || '', t.notes || ''
+    t.title, t.done ? 'Done' : (t.status === 'inprogress' ? 'In Progress' : (t.status === 'pending' ? 'Pending' : 'New')), t.priority || '', t.tag || '', t.due || '', t.notes || ''
   ])));
   downloadCsv('tasks.csv', rows);
 });
