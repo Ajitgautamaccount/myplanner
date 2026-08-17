@@ -2717,12 +2717,12 @@ function renderLinks() {
     </div>`;
     return;
   }
-  const rows = visible.map(item => {
+  const makeLink = item => {
     const href = /^https?:\/\//i.test(item.url) ? item.url : 'https://' + item.url;
     return `<tr>
       <td class="col-desc">${esc(item.desc || '—')}</td>
-      <td class="col-url"><a href="${esc(href)}" target="_blank" rel="noopener noreferrer" title="${esc(item.url)}">${esc(item.url.length > 45 ? item.url.slice(0, 45) + '…' : item.url)}</a></td>
       <td class="col-tag">${item.tag ? `<span class="badge badge-tag">${esc(item.tag)}</span>` : ''}</td>
+      <td class="col-url"><a href="${esc(href)}" target="_blank" rel="noopener noreferrer" title="${esc(item.url)}">${esc(item.url.length > 45 ? item.url.slice(0, 45) + '…' : item.url)}</a></td>
       <td class="col-actions">
         <button class="tbl-action-btn link-edit-btn" data-id="${item.id}" title="Edit" aria-label="Edit">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -2732,11 +2732,15 @@ function renderLinks() {
         </button>
       </td>
     </tr>`;
-  }).join('');
-  listEl.innerHTML = `<div class="qa-table-wrap"><table class="qa-table">
-    <thead><tr><th>Description</th><th>URL</th><th>Tag</th><th></th></tr></thead>
-    <tbody>${rows}</tbody>
-  </table></div>`;
+  };
+  const thead = `<thead><tr><th>Description</th><th>Tag</th><th>URL</th><th></th></tr></thead>`;
+  const half  = Math.ceil(visible.length / 2);
+  const col1  = visible.slice(0, half).map(makeLink).join('');
+  const col2  = visible.slice(half).map(makeLink).join('');
+  listEl.innerHTML = `<div class="mc-grid">
+    <div class="qa-table-wrap"><table class="qa-table compact">${thead}<tbody>${col1}</tbody></table></div>
+    <div class="qa-table-wrap"><table class="qa-table compact">${thead}<tbody>${col2}</tbody></table></div>
+  </div>`;
   listEl.querySelectorAll('.link-edit-btn').forEach(btn =>
     btn.addEventListener('click', () => openEditLinkModal(Number(btn.dataset.id))));
   listEl.querySelectorAll('.link-del-btn').forEach(btn =>
