@@ -624,6 +624,94 @@ body {
 .goal-progress-track { height: 5px; background: var(--surface2); border-radius: 10px; overflow: hidden; }
 .goal-progress-fill { height: 100%; background: var(--accent); border-radius: 10px; transition: width .4s ease; }
 
+/* ── Quick Access views (Links, T-Codes) ── */
+.qview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.qview-title {
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--text3);
+  margin-bottom: 4px;
+}
+.qa-filter-bar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+  align-items: center;
+}
+.link-card, .tcode-card {
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  transition: box-shadow .15s;
+}
+.link-card:hover, .tcode-card:hover { box-shadow: var(--shadow-md); }
+.link-card-icon, .tcode-card-icon {
+  flex-shrink: 0;
+  width: 34px; height: 34px;
+  background: var(--accent-light);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent);
+  margin-top: 1px;
+}
+.link-card-body, .tcode-card-body { flex: 1; min-width: 0; }
+.link-card-url {
+  font-size: .88rem;
+  font-weight: 600;
+  word-break: break-all;
+  margin-bottom: 3px;
+}
+.link-card-url a { color: var(--accent); text-decoration: none; }
+.link-card-url a:hover { text-decoration: underline; }
+.tcode-card-code {
+  font-size: .95rem;
+  font-weight: 700;
+  font-family: monospace;
+  color: var(--text);
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.copy-code-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-size: .7rem;
+  font-family: var(--font);
+  font-weight: 600;
+  color: var(--text2);
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.copy-code-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.link-card-desc, .tcode-card-desc {
+  font-size: .8rem;
+  color: var(--text2);
+  margin-bottom: 5px;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
 /* ── Modals ── */
 .backdrop {
   display: none;
@@ -888,6 +976,7 @@ body.has-install-banner #content { padding-bottom: 100px; }
   /* Bottom padding so FAB doesn't overlap last task */
   #list { padding-bottom: 80px; }
   #goalsList { padding-bottom: 80px; }
+  #linksList, #tcodesList { padding-bottom: 80px; }
   #fab { display: flex; }
   .add-btn { display: none; }
 }
@@ -975,6 +1064,16 @@ body.has-install-banner #content { padding-bottom: 100px; }
     Goals &amp; Targets
   </button>
 
+  <div class="sidebar-section-label">Quick Access</div>
+  <button class="nav-item" data-view="links" id="navLinks">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+    Links
+  </button>
+  <button class="nav-item" data-view="tcodes" id="navTcodes">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+    T-Codes
+  </button>
+
   <div class="sidebar-section-label">Tags</div>
   <div class="sidebar-tags" id="sidebarTags"></div>
 
@@ -1038,6 +1137,38 @@ body.has-install-banner #content { padding-bottom: 100px; }
         </select>
       </div>
       <div id="list"></div>
+    </div>
+
+    <!-- Links view -->
+    <div class="view" id="viewLinks">
+      <div class="qview-header">
+        <div>
+          <div class="qview-title">Links</div>
+          <div style="font-size:.85rem;color:var(--text2)">Your saved URLs &amp; resources</div>
+        </div>
+        <button class="add-btn" id="openAddLinkModal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span class="btn-text">Add Link</span>
+        </button>
+      </div>
+      <div class="qa-filter-bar" id="linksFilterBar"></div>
+      <div id="linksList"></div>
+    </div>
+
+    <!-- T-Codes view -->
+    <div class="view" id="viewTcodes">
+      <div class="qview-header">
+        <div>
+          <div class="qview-title">T-Codes</div>
+          <div style="font-size:.85rem;color:var(--text2)">Your saved transaction codes</div>
+        </div>
+        <button class="add-btn" id="openAddTcodeModal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span class="btn-text">Add T-Code</span>
+        </button>
+      </div>
+      <div class="qa-filter-bar" id="tcodesFilterBar"></div>
+      <div id="tcodesList"></div>
     </div>
 
     <!-- Goals view -->
@@ -1272,6 +1403,116 @@ body.has-install-banner #content { padding-bottom: 100px; }
   </div>
 </div>
 
+<!-- Add Link Modal -->
+<div class="backdrop" id="addLinkBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Add Link">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h2>Add Link</h2>
+      <button class="modal-close" id="addLinkClose" aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="field">
+      <label for="addLinkUrl">URL *</label>
+      <input type="text" id="addLinkUrl" placeholder="https://…" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="addLinkDesc">Description</label>
+      <textarea id="addLinkDesc" placeholder="What is this link for?"></textarea>
+    </div>
+    <div class="field">
+      <label for="addLinkTag">Tag</label>
+      <input type="text" id="addLinkTag" placeholder="Work, Reference…" autocomplete="off">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="addLinkCancel">Cancel</button>
+      <button class="btn btn-primary" id="addLinkSave">Add Link</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Link Modal -->
+<div class="backdrop" id="editLinkBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Edit Link">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h2>Edit Link</h2>
+      <button class="modal-close" id="editLinkClose" aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="field">
+      <label for="editLinkUrl">URL *</label>
+      <input type="text" id="editLinkUrl" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="editLinkDesc">Description</label>
+      <textarea id="editLinkDesc"></textarea>
+    </div>
+    <div class="field">
+      <label for="editLinkTag">Tag</label>
+      <input type="text" id="editLinkTag" autocomplete="off">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="deleteLinkBtn">Delete</button>
+      <button class="btn btn-ghost" id="editLinkCancel">Cancel</button>
+      <button class="btn btn-primary" id="editLinkSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add T-Code Modal -->
+<div class="backdrop" id="addTcodeBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Add T-Code">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h2>Add T-Code</h2>
+      <button class="modal-close" id="addTcodeClose" aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="field">
+      <label for="addTcodeCode">T-Code *</label>
+      <input type="text" id="addTcodeCode" placeholder="e.g. TC-1234" autocomplete="off" style="font-family:monospace">
+    </div>
+    <div class="field">
+      <label for="addTcodeDesc">Description</label>
+      <textarea id="addTcodeDesc" placeholder="What does this code do?"></textarea>
+    </div>
+    <div class="field">
+      <label for="addTcodeTag">Tag</label>
+      <input type="text" id="addTcodeTag" placeholder="Finance, HR…" autocomplete="off">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="addTcodeCancel">Cancel</button>
+      <button class="btn btn-primary" id="addTcodeSave">Add T-Code</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit T-Code Modal -->
+<div class="backdrop" id="editTcodeBackdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Edit T-Code">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h2>Edit T-Code</h2>
+      <button class="modal-close" id="editTcodeClose" aria-label="Close">&#x2715;</button>
+    </div>
+    <div class="field">
+      <label for="editTcodeCode">T-Code *</label>
+      <input type="text" id="editTcodeCode" autocomplete="off" style="font-family:monospace">
+    </div>
+    <div class="field">
+      <label for="editTcodeDesc">Description</label>
+      <textarea id="editTcodeDesc"></textarea>
+    </div>
+    <div class="field">
+      <label for="editTcodeTag">Tag</label>
+      <input type="text" id="editTcodeTag" autocomplete="off">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="deleteTcodeBtn">Delete</button>
+      <button class="btn btn-ghost" id="editTcodeCancel">Cancel</button>
+      <button class="btn btn-primary" id="editTcodeSave">Save</button>
+    </div>
+  </div>
+</div>
+
 <!-- PWA: Service Worker + Install prompt -->
 <script>
 (function () {
@@ -1421,25 +1662,33 @@ const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 getAnalytics(app);
 
-const TODOS_COL = "todos";
-const GOALS_COL = "goals";
-const THEME_KEY = "planner_theme";
-const LS_TODOS  = "ap_todos_v1";
-const LS_GOALS  = "ap_goals_v1";
+const TODOS_COL  = "todos";
+const GOALS_COL  = "goals";
+const LINKS_COL  = "links";
+const TCODES_COL = "tcodes";
+const THEME_KEY  = "planner_theme";
+const LS_TODOS   = "ap_todos_v1";
+const LS_GOALS   = "ap_goals_v1";
+const LS_LINKS   = "ap_links_v1";
+const LS_TCODES  = "ap_tcodes_v1";
 
 // ── In-memory state ──────────────────────────────────
 // Seed immediately from localStorage so data is visible before Firebase loads
 // Filter out any tombstoned IDs so deleted tasks never reappear on reload
 const _lsDeletedTodos = new Set(JSON.parse(localStorage.getItem('ap_deleted_todos_v1') || '[]'));
 const _lsDeletedGoals = new Set(JSON.parse(localStorage.getItem('ap_deleted_goals_v1') || '[]'));
-let todos = JSON.parse(localStorage.getItem(LS_TODOS) || '[]').filter(t => !_lsDeletedTodos.has(String(t.id)));
-let goals = JSON.parse(localStorage.getItem(LS_GOALS) || '[]').filter(g => !_lsDeletedGoals.has(String(g.id)));
+let todos   = JSON.parse(localStorage.getItem(LS_TODOS)   || '[]').filter(t => !_lsDeletedTodos.has(String(t.id)));
+let goals   = JSON.parse(localStorage.getItem(LS_GOALS)   || '[]').filter(g => !_lsDeletedGoals.has(String(g.id)));
+let links   = JSON.parse(localStorage.getItem(LS_LINKS)   || '[]');
+let tcodes  = JSON.parse(localStorage.getItem(LS_TCODES)  || '[]');
 
 // ── localStorage persistence ─────────────────────────
 function saveLs() {
   try {
-    localStorage.setItem(LS_TODOS, JSON.stringify(todos));
-    localStorage.setItem(LS_GOALS, JSON.stringify(goals));
+    localStorage.setItem(LS_TODOS,  JSON.stringify(todos));
+    localStorage.setItem(LS_GOALS,  JSON.stringify(goals));
+    localStorage.setItem(LS_LINKS,  JSON.stringify(links));
+    localStorage.setItem(LS_TCODES, JSON.stringify(tcodes));
   } catch(e) { console.warn('localStorage write failed', e); }
 }
 
@@ -1460,12 +1709,14 @@ async function retrySync() {
   _pendingRetry = true;
   setSyncStatus('syncing');
   try {
-    await Promise.all(
-      todos.map(t => setDoc(doc(db, TODOS_COL, String(t.id)), { ...t, _ts: serverTimestamp() }))
-        .concat(goals.map(g => setDoc(doc(db, GOALS_COL, String(g.id)), { ...g, _ts: serverTimestamp() })))
-    );
+    await Promise.all([
+      ...todos.map(t  => setDoc(doc(db, TODOS_COL,  String(t.id)),  { ...t,  _ts: serverTimestamp() })),
+      ...goals.map(g  => setDoc(doc(db, GOALS_COL,  String(g.id)),  { ...g,  _ts: serverTimestamp() })),
+      ...links.map(l  => setDoc(doc(db, LINKS_COL,  String(l.id)),  { ...l,  _ts: serverTimestamp() })),
+      ...tcodes.map(c => setDoc(doc(db, TCODES_COL, String(c.id)),  { ...c,  _ts: serverTimestamp() }))
+    ]);
     setSyncStatus('online');
-    alert('All tasks synced to cloud successfully!');
+    alert('All data synced to cloud successfully!');
   } catch(e) {
     console.warn('Retry sync failed:', e.code, e.message);
     setSyncStatus('error', e.code === 'permission-denied' ? 'Rules expired – see banner' : 'Sync failed – tap to retry');
@@ -1518,6 +1769,38 @@ async function fbDeleteGoal(id) {
   try {
     await deleteDoc(doc(db, GOALS_COL, String(id)));
     clearDeletedGoal(id);
+    setSyncStatus('online');
+  } catch(e) { handleWriteError(e); }
+}
+async function fbSaveLink(item) {
+  saveLs();
+  setSyncStatus('syncing');
+  try {
+    await setDoc(doc(db, LINKS_COL, String(item.id)), { ...item, _ts: serverTimestamp() });
+    setSyncStatus('online');
+  } catch(e) { handleWriteError(e); }
+}
+async function fbDeleteLink(id) {
+  saveLs();
+  setSyncStatus('syncing');
+  try {
+    await deleteDoc(doc(db, LINKS_COL, String(id)));
+    setSyncStatus('online');
+  } catch(e) { handleWriteError(e); }
+}
+async function fbSaveTcode(item) {
+  saveLs();
+  setSyncStatus('syncing');
+  try {
+    await setDoc(doc(db, TCODES_COL, String(item.id)), { ...item, _ts: serverTimestamp() });
+    setSyncStatus('online');
+  } catch(e) { handleWriteError(e); }
+}
+async function fbDeleteTcode(id) {
+  saveLs();
+  setSyncStatus('syncing');
+  try {
+    await deleteDoc(doc(db, TCODES_COL, String(id)));
     setSyncStatus('online');
   } catch(e) { handleWriteError(e); }
 }
@@ -1588,16 +1871,23 @@ function setView(view, preset) {
   currentView = view;
   filterViewPreset = preset || '';
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById(view === 'goals' ? 'viewGoals' : 'viewTasks').classList.add('active');
+  const viewMap = { goals: 'viewGoals', links: 'viewLinks', tcodes: 'viewTcodes' };
+  document.getElementById(viewMap[view] || 'viewTasks').classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  const map = { '': 'navAll', today: 'navToday', overdue: 'navOverdue', upcoming: 'navUpcoming', done: 'navDone' };
-  const navId = view === 'goals' ? 'navGoals' : (map[preset] || 'navAll');
+  const navPresetMap = { '': 'navAll', today: 'navToday', overdue: 'navOverdue', upcoming: 'navUpcoming', done: 'navDone' };
+  const navId = { goals: 'navGoals', links: 'navLinks', tcodes: 'navTcodes' }[view] || (navPresetMap[preset] || 'navAll');
   const nav = document.getElementById(navId);
   if (nav) nav.classList.add('active');
-  const titles = { '': 'All Tasks', today: 'Today', overdue: 'Overdue', upcoming: 'Upcoming', done: 'Completed' };
-  document.getElementById('viewTitle').textContent = view === 'goals' ? "Goals & Targets" : (titles[preset] || 'All Tasks');
-  if (view === 'tasks') renderTasks();
-  if (view === 'goals') renderGoals();
+  const titleMap = { goals: 'Goals & Targets', links: 'Links', tcodes: 'T-Codes' };
+  const taskTitles = { '': 'All Tasks', today: 'Today', overdue: 'Overdue', upcoming: 'Upcoming', done: 'Completed' };
+  document.getElementById('viewTitle').textContent = titleMap[view] || (taskTitles[preset] || 'All Tasks');
+  // Show/hide topbar add button based on view
+  const addBtn = document.getElementById('openAddModal');
+  addBtn.style.display = (view === 'tasks') ? '' : 'none';
+  if (view === 'tasks')  renderTasks();
+  if (view === 'goals')  renderGoals();
+  if (view === 'links')  renderLinks();
+  if (view === 'tcodes') renderTcodes();
 }
 
 document.querySelectorAll('.nav-item[data-view]').forEach(btn => {
@@ -1810,7 +2100,12 @@ function openAddModal() {
 }
 function closeAddModal() { addBackdrop.classList.remove('open'); }
 document.getElementById('openAddModal').addEventListener('click', openAddModal);
-document.getElementById('fab').addEventListener('click', openAddModal);
+document.getElementById('fab').addEventListener('click', () => {
+  if (currentView === 'links')  { openAddLinkModal();  return; }
+  if (currentView === 'tcodes') { openAddTcodeModal(); return; }
+  if (currentView === 'goals')  { openAddGoalModal();  return; }
+  openAddModal();
+});
 document.getElementById('addCancel').addEventListener('click', closeAddModal);
 document.getElementById('addClose').addEventListener('click', closeAddModal);
 addBackdrop.addEventListener('click', e => { if (e.target === addBackdrop) closeAddModal(); });
@@ -2026,6 +2321,253 @@ document.getElementById('deleteGoalBtn').addEventListener('click', () => {
   fbDeleteGoal(editingGoalId); renderGoals(); closeEditGoalModal();
 });
 
+// ── Links ─────────────────────────────────────────────
+let linksFilterTag = '';
+let editingLinkId  = null;
+
+function renderLinksFilterBar() {
+  const tags = [...new Set(links.map(l => l.tag).filter(Boolean))].sort();
+  const bar  = document.getElementById('linksFilterBar');
+  bar.innerHTML = '';
+  if (!tags.length) return;
+  const allBtn = document.createElement('button');
+  allBtn.className = 'filter-chip' + (!linksFilterTag ? ' active' : '');
+  allBtn.textContent = 'All';
+  allBtn.onclick = () => { linksFilterTag = ''; renderLinks(); };
+  bar.appendChild(allBtn);
+  tags.forEach(tag => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-chip' + (linksFilterTag === tag ? ' active' : '');
+    btn.textContent = tag;
+    btn.onclick = () => { linksFilterTag = linksFilterTag === tag ? '' : tag; renderLinks(); };
+    bar.appendChild(btn);
+  });
+}
+
+function renderLinks() {
+  renderLinksFilterBar();
+  const listEl = document.getElementById('linksList');
+  let visible = linksFilterTag ? links.filter(l => l.tag === linksFilterTag) : [...links];
+  if (!visible.length) {
+    listEl.innerHTML = `<div class="empty-state">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+      <p>No links saved yet.</p>
+      <small>Tap "Add Link" to save your first URL.</small>
+    </div>`;
+    return;
+  }
+  listEl.innerHTML = '';
+  visible.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'link-card';
+    const href = /^https?:\/\//i.test(item.url) ? item.url : 'https://' + item.url;
+    card.innerHTML = `
+      <div class="link-card-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+      </div>
+      <div class="link-card-body">
+        <div class="link-card-url"><a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(item.url)}</a></div>
+        ${item.desc ? `<div class="link-card-desc">${esc(item.desc)}</div>` : ''}
+        <div class="task-meta">${item.tag ? `<span class="badge badge-tag">${esc(item.tag)}</span>` : ''}</div>
+      </div>
+      <div class="task-actions">
+        <button class="task-action-btn link-edit-btn" data-id="${item.id}" aria-label="Edit link">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+      </div>`;
+    listEl.appendChild(card);
+  });
+  listEl.querySelectorAll('.link-edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => openEditLinkModal(Number(btn.dataset.id)));
+  });
+}
+
+const addLinkBackdrop  = document.getElementById('addLinkBackdrop');
+const editLinkBackdrop = document.getElementById('editLinkBackdrop');
+
+function openAddLinkModal() {
+  ['addLinkUrl','addLinkDesc','addLinkTag'].forEach(id => { document.getElementById(id).value = ''; });
+  addLinkBackdrop.classList.add('open');
+  setTimeout(() => document.getElementById('addLinkUrl').focus(), 80);
+}
+function closeAddLinkModal() { addLinkBackdrop.classList.remove('open'); }
+function openEditLinkModal(id) {
+  const item = links.find(l => l.id === id); if (!item) return;
+  editingLinkId = id;
+  document.getElementById('editLinkUrl').value  = item.url;
+  document.getElementById('editLinkDesc').value = item.desc || '';
+  document.getElementById('editLinkTag').value  = item.tag  || '';
+  editLinkBackdrop.classList.add('open');
+  setTimeout(() => document.getElementById('editLinkUrl').focus(), 80);
+}
+function closeEditLinkModal() { editLinkBackdrop.classList.remove('open'); editingLinkId = null; }
+
+document.getElementById('openAddLinkModal').addEventListener('click', openAddLinkModal);
+document.getElementById('addLinkCancel').addEventListener('click', closeAddLinkModal);
+document.getElementById('addLinkClose').addEventListener('click', closeAddLinkModal);
+addLinkBackdrop.addEventListener('click', e => { if (e.target === addLinkBackdrop) closeAddLinkModal(); });
+document.getElementById('addLinkSave').addEventListener('click', () => {
+  const url = document.getElementById('addLinkUrl').value.trim();
+  if (!url) { document.getElementById('addLinkUrl').focus(); return; }
+  const item = {
+    id:   Date.now(),
+    url,
+    desc: document.getElementById('addLinkDesc').value.trim(),
+    tag:  document.getElementById('addLinkTag').value.trim()
+  };
+  links.push(item); fbSaveLink(item); renderLinks(); closeAddLinkModal();
+});
+document.getElementById('editLinkCancel').addEventListener('click', closeEditLinkModal);
+document.getElementById('editLinkClose').addEventListener('click', closeEditLinkModal);
+editLinkBackdrop.addEventListener('click', e => { if (e.target === editLinkBackdrop) closeEditLinkModal(); });
+document.getElementById('editLinkSave').addEventListener('click', () => {
+  if (editingLinkId === null) return;
+  const url = document.getElementById('editLinkUrl').value.trim();
+  if (!url) { document.getElementById('editLinkUrl').focus(); return; }
+  const item = links.find(l => l.id === editingLinkId);
+  if (item) {
+    item.url  = url;
+    item.desc = document.getElementById('editLinkDesc').value.trim();
+    item.tag  = document.getElementById('editLinkTag').value.trim();
+    fbSaveLink(item); renderLinks();
+  }
+  closeEditLinkModal();
+});
+document.getElementById('deleteLinkBtn').addEventListener('click', () => {
+  if (editingLinkId === null) return;
+  links = links.filter(l => l.id !== editingLinkId);
+  fbDeleteLink(editingLinkId); renderLinks(); closeEditLinkModal();
+});
+
+// ── T-Codes ───────────────────────────────────────────
+let tcodesFilterTag = '';
+let editingTcodeId  = null;
+
+function renderTcodesFilterBar() {
+  const tags = [...new Set(tcodes.map(t => t.tag).filter(Boolean))].sort();
+  const bar  = document.getElementById('tcodesFilterBar');
+  bar.innerHTML = '';
+  if (!tags.length) return;
+  const allBtn = document.createElement('button');
+  allBtn.className = 'filter-chip' + (!tcodesFilterTag ? ' active' : '');
+  allBtn.textContent = 'All';
+  allBtn.onclick = () => { tcodesFilterTag = ''; renderTcodes(); };
+  bar.appendChild(allBtn);
+  tags.forEach(tag => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-chip' + (tcodesFilterTag === tag ? ' active' : '');
+    btn.textContent = tag;
+    btn.onclick = () => { tcodesFilterTag = tcodesFilterTag === tag ? '' : tag; renderTcodes(); };
+    bar.appendChild(btn);
+  });
+}
+
+function renderTcodes() {
+  renderTcodesFilterBar();
+  const listEl = document.getElementById('tcodesList');
+  let visible = tcodesFilterTag ? tcodes.filter(t => t.tag === tcodesFilterTag) : [...tcodes];
+  if (!visible.length) {
+    listEl.innerHTML = `<div class="empty-state">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      <p>No T-Codes saved yet.</p>
+      <small>Tap "Add T-Code" to save your first code.</small>
+    </div>`;
+    return;
+  }
+  listEl.innerHTML = '';
+  visible.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'tcode-card';
+    card.innerHTML = `
+      <div class="tcode-card-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      </div>
+      <div class="tcode-card-body">
+        <div class="tcode-card-code">
+          ${esc(item.code)}
+          <button class="copy-code-btn" data-code="${esc(item.code)}" title="Copy to clipboard">Copy</button>
+        </div>
+        ${item.desc ? `<div class="tcode-card-desc">${esc(item.desc)}</div>` : ''}
+        <div class="task-meta">${item.tag ? `<span class="badge badge-tag">${esc(item.tag)}</span>` : ''}</div>
+      </div>
+      <div class="task-actions">
+        <button class="task-action-btn tcode-edit-btn" data-id="${item.id}" aria-label="Edit T-Code">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+      </div>`;
+    listEl.appendChild(card);
+  });
+  listEl.querySelectorAll('.copy-code-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(btn.dataset.code).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = orig; }, 1500);
+      }).catch(() => {});
+    });
+  });
+  listEl.querySelectorAll('.tcode-edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => openEditTcodeModal(Number(btn.dataset.id)));
+  });
+}
+
+const addTcodeBackdrop  = document.getElementById('addTcodeBackdrop');
+const editTcodeBackdrop = document.getElementById('editTcodeBackdrop');
+
+function openAddTcodeModal() {
+  ['addTcodeCode','addTcodeDesc','addTcodeTag'].forEach(id => { document.getElementById(id).value = ''; });
+  addTcodeBackdrop.classList.add('open');
+  setTimeout(() => document.getElementById('addTcodeCode').focus(), 80);
+}
+function closeAddTcodeModal() { addTcodeBackdrop.classList.remove('open'); }
+function openEditTcodeModal(id) {
+  const item = tcodes.find(t => t.id === id); if (!item) return;
+  editingTcodeId = id;
+  document.getElementById('editTcodeCode').value = item.code;
+  document.getElementById('editTcodeDesc').value = item.desc || '';
+  document.getElementById('editTcodeTag').value  = item.tag  || '';
+  editTcodeBackdrop.classList.add('open');
+  setTimeout(() => document.getElementById('editTcodeCode').focus(), 80);
+}
+function closeEditTcodeModal() { editTcodeBackdrop.classList.remove('open'); editingTcodeId = null; }
+
+document.getElementById('openAddTcodeModal').addEventListener('click', openAddTcodeModal);
+document.getElementById('addTcodeCancel').addEventListener('click', closeAddTcodeModal);
+document.getElementById('addTcodeClose').addEventListener('click', closeAddTcodeModal);
+addTcodeBackdrop.addEventListener('click', e => { if (e.target === addTcodeBackdrop) closeAddTcodeModal(); });
+document.getElementById('addTcodeSave').addEventListener('click', () => {
+  const code = document.getElementById('addTcodeCode').value.trim();
+  if (!code) { document.getElementById('addTcodeCode').focus(); return; }
+  const item = {
+    id:   Date.now(),
+    code,
+    desc: document.getElementById('addTcodeDesc').value.trim(),
+    tag:  document.getElementById('addTcodeTag').value.trim()
+  };
+  tcodes.push(item); fbSaveTcode(item); renderTcodes(); closeAddTcodeModal();
+});
+document.getElementById('editTcodeCancel').addEventListener('click', closeEditTcodeModal);
+document.getElementById('editTcodeClose').addEventListener('click', closeEditTcodeModal);
+editTcodeBackdrop.addEventListener('click', e => { if (e.target === editTcodeBackdrop) closeEditTcodeModal(); });
+document.getElementById('editTcodeSave').addEventListener('click', () => {
+  if (editingTcodeId === null) return;
+  const code = document.getElementById('editTcodeCode').value.trim();
+  if (!code) { document.getElementById('editTcodeCode').focus(); return; }
+  const item = tcodes.find(t => t.id === editingTcodeId);
+  if (item) {
+    item.code = code;
+    item.desc = document.getElementById('editTcodeDesc').value.trim();
+    item.tag  = document.getElementById('editTcodeTag').value.trim();
+    fbSaveTcode(item); renderTcodes();
+  }
+  closeEditTcodeModal();
+});
+document.getElementById('deleteTcodeBtn').addEventListener('click', () => {
+  if (editingTcodeId === null) return;
+  tcodes = tcodes.filter(t => t.id !== editingTcodeId);
+  fbDeleteTcode(editingTcodeId); renderTcodes(); closeEditTcodeModal();
+});
+
 // ── Dark mode ─────────────────────────────────────────
 const savedTheme = localStorage.getItem(THEME_KEY);
 let isDark = savedTheme ? savedTheme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -2049,10 +2591,10 @@ document.getElementById('shortcutsBtn').addEventListener('click', () => shortcut
 document.addEventListener('keydown', e => {
   const tag = document.activeElement.tagName;
   if (['INPUT','TEXTAREA','SELECT'].includes(tag)) {
-    if (e.key === 'Escape') { closeAddModal(); closeEditModal(); closeAddGoalModal(); closeEditGoalModal(); }
+    if (e.key === 'Escape') { closeAddModal(); closeEditModal(); closeAddGoalModal(); closeEditGoalModal(); closeAddLinkModal(); closeEditLinkModal(); closeAddTcodeModal(); closeEditTcodeModal(); }
     return;
   }
-  if (e.key === 'Escape') { closeAddModal(); closeEditModal(); closeAddGoalModal(); closeEditGoalModal(); shortcutsPanel.classList.remove('visible'); closeSidebar(); }
+  if (e.key === 'Escape') { closeAddModal(); closeEditModal(); closeAddGoalModal(); closeEditGoalModal(); closeAddLinkModal(); closeEditLinkModal(); closeAddTcodeModal(); closeEditTcodeModal(); shortcutsPanel.classList.remove('visible'); closeSidebar(); }
   if (e.key === 'n' || e.key === 'N') { e.preventDefault(); openAddModal(); }
   if (e.key === 'g' || e.key === 'G') { e.preventDefault(); setView('goals'); }
   if (e.key === '/')  { e.preventDefault(); document.getElementById('searchInput').focus(); }
@@ -2170,22 +2712,39 @@ setSyncStatus('syncing');
 Promise.all([
   getDocsFromServer(collection(db, TODOS_COL)).then(snap => {
     const fbTodos = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
-    console.log('[server] todos:', fbTodos.length, fbTodos.map(t => t.title));
+    console.log('[server] todos:', fbTodos.length);
     mergeFirestoreTodos(fbTodos);
   }),
   getDocsFromServer(collection(db, GOALS_COL)).then(snap => {
     const fbGoals = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
     console.log('[server] goals:', fbGoals.length);
     mergeFirestoreGoals(fbGoals);
+  }),
+  getDocsFromServer(collection(db, LINKS_COL)).then(snap => {
+    const fbLinks = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
+    console.log('[server] links:', fbLinks.length);
+    if (fbLinks.length > 0) { links = fbLinks; saveLs(); }
+    else if (links.length > 0) {
+      links.forEach(l => setDoc(doc(db, LINKS_COL, String(l.id)), { ...l, _ts: serverTimestamp() }).catch(() => {}));
+    }
+  }),
+  getDocsFromServer(collection(db, TCODES_COL)).then(snap => {
+    const fbTcodes = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
+    console.log('[server] tcodes:', fbTcodes.length);
+    if (fbTcodes.length > 0) { tcodes = fbTcodes; saveLs(); }
+    else if (tcodes.length > 0) {
+      tcodes.forEach(c => setDoc(doc(db, TCODES_COL, String(c.id)), { ...c, _ts: serverTimestamp() }).catch(() => {}));
+    }
   })
 ]).then(() => {
-  console.log('[server] fetch complete — todos in memory:', todos.length);
   setSyncStatus('online');
   todosLoaded = true;
   goalsLoaded = true;
   checkLoaded();
-  if (currentView === 'tasks') renderTasks();
-  if (currentView === 'goals') renderGoals();
+  if (currentView === 'tasks')  renderTasks();
+  if (currentView === 'goals')  renderGoals();
+  if (currentView === 'links')  renderLinks();
+  if (currentView === 'tcodes') renderTcodes();
 }).catch(e => {
   console.warn('[server] fetch failed:', e.code, e.message);
   if (e.code === 'permission-denied') {
@@ -2226,6 +2785,22 @@ onSnapshot(collection(db, GOALS_COL), snap => {
   console.warn('[onSnapshot] goals error:', err.code, err.message);
   goalsLoaded = true;
   checkLoaded();
+});
+
+onSnapshot(collection(db, LINKS_COL), snap => {
+  const fbLinks = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
+  if (fbLinks.length > 0) { links = fbLinks; saveLs(); }
+  if (currentView === 'links') renderLinks();
+}, err => {
+  console.warn('[onSnapshot] links error:', err.code, err.message);
+});
+
+onSnapshot(collection(db, TCODES_COL), snap => {
+  const fbTcodes = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
+  if (fbTcodes.length > 0) { tcodes = fbTcodes; saveLs(); }
+  if (currentView === 'tcodes') renderTcodes();
+}, err => {
+  console.warn('[onSnapshot] tcodes error:', err.code, err.message);
 });
 
 // Fallback: hide loading after 6s if Firestore is slow — localStorage data already shown
