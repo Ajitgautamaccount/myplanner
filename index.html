@@ -1403,7 +1403,7 @@ body.has-install-banner #content { padding-bottom: 100px; }
 <!-- Firebase + App -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, serverTimestamp }
+import { getFirestore, collection, doc, getDocs, getDocsFromServer, setDoc, deleteDoc, onSnapshot, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 
@@ -2093,14 +2093,23 @@ function showFirestoreBlockedBanner() {
 }
 
 // ── Merge helpers ─────────────────────────────────────
+let _todosUploaded = false;
+let _goalsUploaded = false;
+
 function mergeFirestoreTodos(fbTodos) {
-  if (fbTodos.length === 0 && todos.length > 0) {
-    console.log('[Firestore] todos collection empty; re-uploading', todos.length, 'local tasks');
-    Promise.all(todos.map(t =>
-      setDoc(doc(db, TODOS_COL, String(t.id)), { ...t, _ts: serverTimestamp() })
-        .catch(e => console.warn('Re-upload task failed', e))
-    ));
+  if (fbTodos.length === 0 && todos.length > 0 && !_todosUploaded) {
+    _todosUploaded = true;
+    console.log('[merge] Firestore todos empty — uploading', todos.length, 'local tasks to cloud');
+    setSyncStatus('syncing');
+    Promise.all(
+      todos.map(t => setDoc(doc(db, TODOS_COL, String(t.id)), { ...t, _ts: serverTimestamp() })
+        .catch(e => { console.warn('Upload task failed:', e.code); handleWriteError(e); }))
+    ).then(() => {
+      console.log('[merge] upload complete');
+      setSyncStatus('online');
+    });
   } else if (fbTodos.length > 0) {
+    console.log('[merge] got', fbTodos.length, 'todos from Firestore');
     const fbIds = new Set(fbTodos.map(t => String(t.id)));
     const localOnly = todos.filter(t => !fbIds.has(String(t.id)));
     todos = [...fbTodos, ...localOnly];
@@ -2109,12 +2118,13 @@ function mergeFirestoreTodos(fbTodos) {
 }
 
 function mergeFirestoreGoals(fbGoals) {
-  if (fbGoals.length === 0 && goals.length > 0) {
-    console.log('[Firestore] goals collection empty; re-uploading', goals.length, 'local goals');
-    Promise.all(goals.map(g =>
-      setDoc(doc(db, GOALS_COL, String(g.id)), { ...g, _ts: serverTimestamp() })
-        .catch(e => console.warn('Re-upload goal failed', e))
-    ));
+  if (fbGoals.length === 0 && goals.length > 0 && !_goalsUploaded) {
+    _goalsUploaded = true;
+    console.log('[merge] Firestore goals empty — uploading', goals.length, 'local goals to cloud');
+    Promise.all(
+      goals.map(g => setDoc(doc(db, GOALS_COL, String(g.id)), { ...g, _ts: serverTimestamp() })
+        .catch(e => console.warn('Upload goal failed:', e.code)))
+    );
   } else if (fbGoals.length > 0) {
     const fbIds = new Set(fbGoals.map(g => String(g.id)));
     const localOnly = goals.filter(g => !fbIds.has(String(g.id)));
@@ -2123,31 +2133,35 @@ function mergeFirestoreGoals(fbGoals) {
   }
 }
 
-// ── One-time fetch on startup (works even if rules block real-time listener) ──
+// ── Startup fetch — bypass all caches, hit Firestore server directly ──────────
+setSyncStatus('syncing');
 Promise.all([
-  getDocs(collection(db, TODOS_COL)).then(snap => {
+  getDocsFromServer(collection(db, TODOS_COL)).then(snap => {
     const fbTodos = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
-    console.log('[getDocs] fetched', fbTodos.length, 'todos');
+    console.log('[server] todos:', fbTodos.length, fbTodos.map(t => t.title));
     mergeFirestoreTodos(fbTodos);
-    setSyncStatus('online');
   }),
-  getDocs(collection(db, GOALS_COL)).then(snap => {
+  getDocsFromServer(collection(db, GOALS_COL)).then(snap => {
     const fbGoals = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
-    console.log('[getDocs] fetched', fbGoals.length, 'goals');
+    console.log('[server] goals:', fbGoals.length);
     mergeFirestoreGoals(fbGoals);
   })
 ]).then(() => {
-  // getDocs resolved — ensure loading screen hides even if onSnapshot is slow
+  console.log('[server] fetch complete — todos in memory:', todos.length);
+  setSyncStatus('online');
   todosLoaded = true;
   goalsLoaded = true;
   checkLoaded();
   if (currentView === 'tasks') renderTasks();
   if (currentView === 'goals') renderGoals();
 }).catch(e => {
-  console.warn('[getDocs] failed:', e.code, e.message);
-  if (e.code === 'permission-denied') showFirestoreBlockedBanner();
-  setSyncStatus('');
-  // Still hide loading — show localStorage data
+  console.warn('[server] fetch failed:', e.code, e.message);
+  if (e.code === 'permission-denied') {
+    showFirestoreBlockedBanner();
+    setSyncStatus('error', 'Rules expired – tap to retry');
+  } else {
+    setSyncStatus('error');
+  }
   todosLoaded = true;
   goalsLoaded = true;
   checkLoaded();
