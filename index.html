@@ -358,23 +358,54 @@ body {
   -webkit-appearance: none;
 }
 #searchInput:focus { border-color: var(--accent); }
+/* ── 3D Button base ── */
 .add-btn {
-  background: var(--accent);
   color: #fff;
   border: none;
   border-radius: var(--radius-sm);
   padding: 9px 16px;
   font-size: .88rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: background .15s;
   white-space: nowrap;
   min-height: 40px;
+  position: relative;
+  font-family: var(--font);
+  letter-spacing: .01em;
+  transition: transform .1s, box-shadow .1s;
+  /* Default: Add Task — indigo */
+  background: linear-gradient(180deg, #6c7aff 0%, #4a57e8 100%);
+  box-shadow: 0 4px 0 #2e39c0, 0 6px 10px rgba(74,87,232,.35);
 }
-.add-btn:hover, .add-btn:active { background: var(--accent-hover); }
+.add-btn:hover  { transform: translateY(-1px); box-shadow: 0 5px 0 #2e39c0, 0 8px 14px rgba(74,87,232,.4); }
+.add-btn:active { transform: translateY(3px);  box-shadow: 0 1px 0 #2e39c0, 0 2px 4px rgba(74,87,232,.3); }
+
+/* Add Link — teal */
+.add-btn.btn-link {
+  background: linear-gradient(180deg, #2ddcbe 0%, #0fb89d 100%);
+  box-shadow: 0 4px 0 #088a74, 0 6px 10px rgba(15,184,157,.35);
+}
+.add-btn.btn-link:hover  { box-shadow: 0 5px 0 #088a74, 0 8px 14px rgba(15,184,157,.4); }
+.add-btn.btn-link:active { box-shadow: 0 1px 0 #088a74, 0 2px 4px rgba(15,184,157,.3); }
+
+/* Add T-Code — amber */
+.add-btn.btn-tcode {
+  background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
+  box-shadow: 0 4px 0 #b45309, 0 6px 10px rgba(217,119,6,.35);
+}
+.add-btn.btn-tcode:hover  { box-shadow: 0 5px 0 #b45309, 0 8px 14px rgba(217,119,6,.4); }
+.add-btn.btn-tcode:active { box-shadow: 0 1px 0 #b45309, 0 2px 4px rgba(217,119,6,.3); }
+
+/* Add Goal — rose */
+.add-btn.btn-goal {
+  background: linear-gradient(180deg, #f472b6 0%, #db2777 100%);
+  box-shadow: 0 4px 0 #9d174d, 0 6px 10px rgba(219,39,119,.35);
+}
+.add-btn.btn-goal:hover  { box-shadow: 0 5px 0 #9d174d, 0 8px 14px rgba(219,39,119,.4); }
+.add-btn.btn-goal:active { box-shadow: 0 1px 0 #9d174d, 0 2px 4px rgba(219,39,119,.3); }
 
 /* ── Content ── */
 #content { padding: 24px; flex: 1; }
@@ -726,26 +757,69 @@ body {
 .date-item-meta  { font-size: .75rem; color: var(--text2); }
 .date-item-meta.urgent { color: var(--warning); font-weight: 700; }
 .date-item-meta.overdue { color: var(--danger); font-weight: 700; }
-/* ── Topbar quick-add buttons ── */
+/* ── Topbar quick-add buttons (3D) ── */
 .topbar-quick-btn {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 11px;
+  padding: 6px 12px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--surface2);
-  color: var(--text2);
+  border: none;
+  color: #fff;
   font-size: .75rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: background .12s, color .12s, border-color .12s;
   white-space: nowrap;
   position: relative;
   font-family: var(--font);
+  letter-spacing: .01em;
+  transition: transform .1s, box-shadow .1s;
+  min-height: 34px;
 }
-.topbar-quick-btn:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
-.topbar-dates-btn.has-upcoming { border-color: var(--warning); color: var(--warning); background: var(--warning-light); }
+.topbar-quick-btn:hover  { transform: translateY(-1px); }
+.topbar-quick-btn:active { transform: translateY(2px); }
+
+/* Add Task topbar — indigo */
+.topbar-task-btn {
+  background: linear-gradient(180deg, #6c7aff 0%, #4a57e8 100%);
+  box-shadow: 0 3px 0 #2e39c0, 0 5px 8px rgba(74,87,232,.35);
+}
+.topbar-task-btn:hover  { box-shadow: 0 4px 0 #2e39c0, 0 7px 12px rgba(74,87,232,.4); }
+.topbar-task-btn:active { box-shadow: 0 1px 0 #2e39c0, 0 2px 4px rgba(74,87,232,.3); }
+
+/* Add Link topbar — teal */
+.topbar-link-btn {
+  background: linear-gradient(180deg, #2ddcbe 0%, #0fb89d 100%);
+  box-shadow: 0 3px 0 #088a74, 0 5px 8px rgba(15,184,157,.35);
+}
+.topbar-link-btn:hover  { box-shadow: 0 4px 0 #088a74, 0 7px 12px rgba(15,184,157,.4); }
+.topbar-link-btn:active { box-shadow: 0 1px 0 #088a74, 0 2px 4px rgba(15,184,157,.3); }
+
+/* Add T-Code topbar — amber */
+.topbar-tcode-btn {
+  background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
+  box-shadow: 0 3px 0 #b45309, 0 5px 8px rgba(217,119,6,.35);
+  color: #1a1a1a;
+}
+.topbar-tcode-btn:hover  { box-shadow: 0 4px 0 #b45309, 0 7px 12px rgba(217,119,6,.4); }
+.topbar-tcode-btn:active { box-shadow: 0 1px 0 #b45309, 0 2px 4px rgba(217,119,6,.3); }
+
+/* Important Dates topbar — orange-red */
+.topbar-dates-btn {
+  background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%);
+  box-shadow: 0 3px 0 #c2410c, 0 5px 8px rgba(234,88,12,.35);
+}
+.topbar-dates-btn:hover  { box-shadow: 0 4px 0 #c2410c, 0 7px 12px rgba(234,88,12,.4); }
+.topbar-dates-btn:active { box-shadow: 0 1px 0 #c2410c, 0 2px 4px rgba(234,88,12,.3); }
+.topbar-dates-btn.has-upcoming { background: linear-gradient(180deg, #f97316 0%, #c2410c 100%); }
+
+/* Add Goal topbar — rose */
+.topbar-goal-btn {
+  background: linear-gradient(180deg, #f472b6 0%, #db2777 100%);
+  box-shadow: 0 3px 0 #9d174d, 0 5px 8px rgba(219,39,119,.35);
+}
+.topbar-goal-btn:hover  { box-shadow: 0 4px 0 #9d174d, 0 7px 12px rgba(219,39,119,.4); }
+.topbar-goal-btn:active { box-shadow: 0 1px 0 #9d174d, 0 2px 4px rgba(219,39,119,.3); }
 .dates-badge {
   position: absolute;
   top: -5px; right: -5px;
@@ -1025,8 +1099,6 @@ body.has-install-banner #content { padding-bottom: 100px; }
   #topbar { padding: 0 14px; gap: 10px; }
   #topbar h2 { display: none; }
   .search-wrap { max-width: none; }
-  .add-btn .btn-text { display: none; }
-  .add-btn { padding: 9px 12px; border-radius: 50%; width: 40px; height: 40px; }
   .topbar-quick-btn .btn-text { display: none; }
   .topbar-quick-btn { padding: 8px; border-radius: 50%; width: 36px; height: 36px; justify-content: center; }
   #content { padding: 16px 14px; }
@@ -1177,26 +1249,30 @@ body.has-install-banner #content { padding-bottom: 100px; }
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" id="searchInput" placeholder="Search tasks… (/)">
     </div>
-    <button class="topbar-quick-btn" id="topbarAddLinkBtn" aria-label="Add Link" title="Add Link">
+    <button class="topbar-quick-btn topbar-task-btn" id="openAddModal" aria-label="Add Task" title="Add Task">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span class="btn-text">Add Task</span>
+    </button>
+    <button class="topbar-quick-btn topbar-link-btn" id="topbarAddLinkBtn" aria-label="Add Link" title="Add Link">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
       <span class="btn-text">Add Link</span>
     </button>
-    <button class="topbar-quick-btn" id="topbarAddTcodeBtn" aria-label="Add T-Code" title="Add T-Code">
+    <button class="topbar-quick-btn topbar-tcode-btn" id="topbarAddTcodeBtn" aria-label="Add T-Code" title="Add T-Code">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
       <span class="btn-text">Add T-Code</span>
     </button>
     <button class="topbar-quick-btn topbar-dates-btn" id="topbarDatesBtn" aria-label="Important Dates" title="Important Dates">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <span class="btn-text">Dates</span>
+      <span class="btn-text">Important Dates</span>
       <span class="dates-badge" id="datesBadge" style="display:none"></span>
+    </button>
+    <button class="topbar-quick-btn topbar-goal-btn" id="topbarAddGoalBtn" aria-label="Add Goal" title="Add Goal">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      <span class="btn-text">Add Goal</span>
     </button>
     <button class="export-btn" id="exportTasksBtn" style="margin-left:4px">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Export
-    </button>
-    <button class="add-btn" id="openAddModal" aria-label="Add task">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      <span class="btn-text">Add Task</span>
     </button>
   </header>
 
@@ -1235,7 +1311,7 @@ body.has-install-banner #content { padding-bottom: 100px; }
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Export
           </button>
-          <button class="add-btn" id="openAddLinkModal">
+          <button class="add-btn btn-link" id="openAddLinkModal">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             <span class="btn-text">Add Link</span>
           </button>
@@ -1257,7 +1333,7 @@ body.has-install-banner #content { padding-bottom: 100px; }
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Export
           </button>
-          <button class="add-btn" id="openAddTcodeModal">
+          <button class="add-btn btn-tcode" id="openAddTcodeModal">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             <span class="btn-text">Add T-Code</span>
           </button>
@@ -1278,7 +1354,7 @@ body.has-install-banner #content { padding-bottom: 100px; }
             <button id="goalNextBtn">&#8594;</button>
           </div>
         </div>
-        <button class="add-btn" id="openAddGoalModal">
+        <button class="add-btn btn-goal" id="openAddGoalModal">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span class="btn-text">Add Goal</span>
         </button>
@@ -2839,6 +2915,7 @@ document.getElementById('dateAddBtn').addEventListener('click', () => {
 
 document.getElementById('topbarAddLinkBtn').addEventListener('click', openAddLinkModal);
 document.getElementById('topbarAddTcodeBtn').addEventListener('click', openAddTcodeModal);
+document.getElementById('topbarAddGoalBtn').addEventListener('click', openAddGoalModal);
 
 // Show badge immediately from localStorage data, then notify if needed
 updateDatesBadge();
