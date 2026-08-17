@@ -2720,7 +2720,7 @@ function renderLinks() {
   const makeLink = item => {
     const href = /^https?:\/\//i.test(item.url) ? item.url : 'https://' + item.url;
     return `<tr>
-      <td class="col-desc">${esc(item.desc || '—')}</td>
+      <td class="col-desc" style="font-weight:700;color:var(--text)">${esc(item.desc || '—')}</td>
       <td class="col-tag">${item.tag ? `<span class="badge badge-tag">${esc(item.tag)}</span>` : ''}</td>
       <td class="col-url"><a href="${esc(href)}" target="_blank" rel="noopener noreferrer" title="${esc(item.url)}">${esc(item.url.length > 45 ? item.url.slice(0, 45) + '…' : item.url)}</a></td>
       <td class="col-actions">
