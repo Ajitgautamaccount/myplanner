@@ -9,6 +9,91 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Ajit's Planner</title>
 <style>
+/* ── Password gate ── */
+#pwGate {
+  position: fixed; inset: 0;
+  background: #0f1117;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+#pwGate.hidden { display: none; }
+.pw-box {
+  background: #1a1d27;
+  border: 1px solid #2d3148;
+  border-radius: 16px;
+  padding: 40px 36px 32px;
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+}
+.pw-logo {
+  color: #5b6af7;
+  font-size: 1.15rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  letter-spacing: -.02em;
+}
+.pw-sub {
+  color: #5c6180;
+  font-size: .8rem;
+  margin-top: -10px;
+}
+.pw-input-wrap { position: relative; width: 100%; }
+#pwInput {
+  width: 100%;
+  padding: 13px 44px 13px 14px;
+  border: 1px solid #2d3148;
+  border-radius: 10px;
+  background: #222536;
+  color: #e8eaf6;
+  font-size: 1rem;
+  outline: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  transition: border .15s;
+  -webkit-appearance: none;
+}
+#pwInput:focus { border-color: #5b6af7; }
+#pwInput.error { border-color: #ef4444; animation: shake .3s ease; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+.pw-eye {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: #5c6180; padding: 4px;
+  display: flex; align-items: center;
+}
+.pw-eye:hover { color: #9398b5; }
+#pwError {
+  color: #ef4444;
+  font-size: .78rem;
+  margin-top: -10px;
+  text-align: center;
+  min-height: 18px;
+}
+#pwSubmit {
+  width: 100%;
+  padding: 13px;
+  background: #5b6af7;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: .95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s;
+  -webkit-appearance: none;
+}
+#pwSubmit:hover, #pwSubmit:active { background: #4755e8; }
+.pw-hint { color: #3a3e57; font-size: .7rem; text-align: center; }
+</style>
+<style>
 :root {
   --bg: #f0f2f5;
   --surface: #ffffff;
@@ -753,6 +838,26 @@ body {
 </head>
 <body>
 
+<!-- Password gate -->
+<div id="pwGate">
+  <div class="pw-box">
+    <div class="pw-logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Ajit's Planner
+    </div>
+    <div class="pw-sub">Enter your password to continue</div>
+    <div class="pw-input-wrap">
+      <input type="password" id="pwInput" placeholder="Password" autocomplete="current-password" autofocus>
+      <button class="pw-eye" id="pwEye" type="button" aria-label="Show password">
+        <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+    <div id="pwError"></div>
+    <button id="pwSubmit">Unlock</button>
+    <div class="pw-hint">Private planner &mdash; authorised access only</div>
+  </div>
+</div>
+
 <!-- Loading -->
 <div id="loadingOverlay">
   <div class="spinner"></div>
@@ -1085,6 +1190,72 @@ body {
     </div>
   </div>
 </div>
+
+<!-- Password gate logic -->
+<script>
+(function () {
+  const HASH_KEY = 'ap_auth';
+  const CORRECT  = 'b4ab4c7c7bf4e8e1a04c1ad7f3e5f1c8e2a3d9f6b0c5e2a7d1f3b8c4e9a2d5f7';
+
+  function hashStr(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) {
+      h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+    }
+    return Math.abs(h).toString(16).padStart(8,'0');
+  }
+
+  const SESSION_TOKEN = 'ap_sess_ok';
+
+  function isUnlocked() {
+    return sessionStorage.getItem(SESSION_TOKEN) === '1';
+  }
+
+  function attemptUnlock(pw) {
+    if (pw === 'Print@111') {
+      sessionStorage.setItem(SESSION_TOKEN, '1');
+      return true;
+    }
+    return false;
+  }
+
+  const gate = document.getElementById('pwGate');
+
+  if (isUnlocked()) { gate.classList.add('hidden'); return; }
+
+  const input  = document.getElementById('pwInput');
+  const submit = document.getElementById('pwSubmit');
+  const errEl  = document.getElementById('pwError');
+  const eyeBtn = document.getElementById('pwEye');
+
+  eyeBtn.addEventListener('click', () => {
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    document.getElementById('eyeIcon').innerHTML = show
+      ? '<line x1="1" y1="1" x2="23" y2="23"/><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>'
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  });
+
+  function tryUnlock() {
+    const pw = input.value;
+    if (!pw) { input.focus(); return; }
+    if (attemptUnlock(pw)) {
+      gate.style.transition = 'opacity .3s';
+      gate.style.opacity = '0';
+      setTimeout(() => gate.classList.add('hidden'), 300);
+    } else {
+      errEl.textContent = 'Incorrect password. Please try again.';
+      input.classList.add('error');
+      input.value = '';
+      setTimeout(() => input.classList.remove('error'), 400);
+      input.focus();
+    }
+  }
+
+  submit.addEventListener('click', tryUnlock);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+})();
+</script>
 
 <!-- Firebase + App -->
 <script type="module">
