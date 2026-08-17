@@ -566,11 +566,35 @@ body {
   appearance: none;
 }
 
+/* ── Kanban board ── */
+.kanban-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; align-items: start; }
+@media (max-width: 860px)  { .kanban-board { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px)  { .kanban-board { grid-template-columns: 1fr; } }
+.kanban-col {
+  background: var(--surface2);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  min-height: 120px;
+}
+.kanban-col-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0;
+  background: var(--surface2);
+  border-radius: var(--radius) var(--radius) 0 0;
+  z-index: 1;
+}
+.kanban-col-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.kanban-col-title { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; flex: 1; }
+.kanban-col-count { font-size: .7rem; font-weight: 700; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 1px 8px; color: var(--text3); }
+.kanban-cards { padding: 10px 8px; display: flex; flex-direction: column; gap: 7px; min-height: 60px; }
+.kanban-cards.drag-over { background: var(--accent-light); border-radius: 0 0 var(--radius) var(--radius); outline: 2px dashed var(--accent); outline-offset: -4px; }
+.task { cursor: grab; }
+.task.dragging { opacity: .4; cursor: grabbing; }
+
 /* ── Groups ── */
-.task-cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0 16px; align-items: start; }
-@media (max-width: 1200px) { .task-cols { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 860px)  { .task-cols { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px)  { .task-cols { grid-template-columns: 1fr; } }
 .group { margin-bottom: 22px; }
 .group-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 .group-label { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text3); }
@@ -2505,58 +2529,98 @@ function renderTasks() {
     </div>`;
     return;
   }
-  const groups = {};
-  visible.forEach(t => { if (!groups[t.date]) groups[t.date] = []; groups[t.date].push(t); });
-  const sortedDates = Object.keys(groups).sort();
-  // Build group DOM nodes
-  const grpNodes = sortedDates.map(date => {
-    const grp = document.createElement('div');
-    grp.className = 'group';
-    grp.innerHTML = `<div class="group-header"><span class="group-label">${esc(formatGroupDate(date))}</span><span class="group-count">${groups[date].length}</span></div>`;
-    groups[date].forEach(todo => {
-      const due  = dueBadge(todo.dueDate);
-      const diff = dueDiff(todo.dueDate);
-      let borderCls = '';
-      if (!todo.done) {
-        if (diff !== null && diff < 0) borderCls = ' border-overdue';
-        else if (diff === 0)           borderCls = ' border-today';
-        else                           borderCls = ` border-p${todo.priority||4}`;
-      }
-      const el = document.createElement('div');
-      const isIP = todo.status === 'inprogress';
-      el.className = 'task' + (todo.done ? ' done' : '') + (isIP ? ' inprogress' : '') + borderCls;
-      el.innerHTML = `
-        <div class="task-check${todo.done?' checked':(isIP?' inprogress':'')}" data-id="${todo.id}" role="checkbox" aria-checked="${todo.done}" tabindex="0"></div>
-        <div class="task-body">
-          <div class="task-title">${esc(todo.title)}</div>
-          ${todo.notes ? `<div class="task-notes">${esc(todo.notes)}</div>` : ''}
-          <div class="task-meta">
-            ${todo.tag ? `<span class="badge badge-tag">${esc(todo.tag)}</span>` : ''}
-            <span class="badge badge-p${todo.priority||4}">P${todo.priority||4}</span>
-            ${isIP ? `<span class="badge" style="background:#fef3c7;color:#92400e;border:1px solid #f59e0b">In Progress</span>` : ''}
-            <span class="badge ${due.cls}">${due.label}</span>
-          </div>
-        </div>
-        <div class="task-actions">
-          <button class="task-action-btn edit-btn" data-id="${todo.id}" aria-label="Edit task">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="task-action-btn del delete-btn" data-id="${todo.id}" aria-label="Delete task">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-          </button>
-        </div>`;
-      grp.appendChild(el);
-    });
-    return grp;
+  // ── Kanban board ──
+  const lanes = [
+    { key: 'open',       label: 'Open',        dot: '#6c7aff', tasks: [] },
+    { key: 'inprogress', label: 'In Progress',  dot: '#f59e0b', tasks: [] },
+    { key: 'done',       label: 'Done',         dot: '#10b981', tasks: [] }
+  ];
+  visible.forEach(t => {
+    const key = t.done ? 'done' : (t.status === 'inprogress' ? 'inprogress' : 'open');
+    lanes.find(l => l.key === key).tasks.push(t);
   });
-  // Distribute groups across 3 columns
+
+  function makeTaskCard(todo) {
+    const due  = dueBadge(todo.dueDate);
+    const diff = dueDiff(todo.dueDate);
+    let borderCls = '';
+    if (!todo.done) {
+      if (diff !== null && diff < 0) borderCls = ' border-overdue';
+      else if (diff === 0)           borderCls = ' border-today';
+      else                           borderCls = ` border-p${todo.priority||4}`;
+    }
+    const isIP = todo.status === 'inprogress';
+    const el = document.createElement('div');
+    el.className = 'task' + (todo.done ? ' done' : '') + (isIP ? ' inprogress' : '') + borderCls;
+    el.setAttribute('draggable', 'true');
+    el.dataset.id = todo.id;
+    el.innerHTML = `
+      <div class="task-check${todo.done?' checked':(isIP?' inprogress':'')}" data-id="${todo.id}" role="checkbox" aria-checked="${todo.done}" tabindex="0"></div>
+      <div class="task-body">
+        <div class="task-title">${esc(todo.title)}</div>
+        ${todo.notes ? `<div class="task-notes">${esc(todo.notes)}</div>` : ''}
+        <div class="task-meta">
+          ${todo.tag ? `<span class="badge badge-tag">${esc(todo.tag)}</span>` : ''}
+          <span class="badge badge-p${todo.priority||4}">P${todo.priority||4}</span>
+          ${isIP ? `<span class="badge" style="background:#fef3c7;color:#92400e;border:1px solid #f59e0b">In Progress</span>` : ''}
+          <span class="badge ${due.cls}">${due.label}</span>
+        </div>
+      </div>
+      <div class="task-actions">
+        <button class="task-action-btn edit-btn" data-id="${todo.id}" aria-label="Edit task">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button class="task-action-btn del delete-btn" data-id="${todo.id}" aria-label="Delete task">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+      </div>`;
+    // drag events
+    el.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', todo.id);
+      setTimeout(() => el.classList.add('dragging'), 0);
+    });
+    el.addEventListener('dragend', () => el.classList.remove('dragging'));
+    return el;
+  }
+
   listEl.innerHTML = '';
-  const cols = [document.createElement('div'), document.createElement('div'), document.createElement('div'), document.createElement('div')];
-  grpNodes.forEach((grp, i) => cols[i % 4].appendChild(grp));
-  const wrap = document.createElement('div');
-  wrap.className = 'task-cols';
-  cols.forEach(c => wrap.appendChild(c));
-  listEl.appendChild(wrap);
+  const board = document.createElement('div');
+  board.className = 'kanban-board';
+
+  lanes.forEach(lane => {
+    const col = document.createElement('div');
+    col.className = 'kanban-col';
+    col.innerHTML = `
+      <div class="kanban-col-header">
+        <span class="kanban-col-dot" style="background:${lane.dot}"></span>
+        <span class="kanban-col-title">${lane.label}</span>
+        <span class="kanban-col-count">${lane.tasks.length}</span>
+      </div>`;
+    const cards = document.createElement('div');
+    cards.className = 'kanban-cards';
+    cards.dataset.lane = lane.key;
+    lane.tasks.forEach(t => cards.appendChild(makeTaskCard(t)));
+
+    // drop zone events
+    cards.addEventListener('dragover', e => { e.preventDefault(); cards.classList.add('drag-over'); });
+    cards.addEventListener('dragleave', () => cards.classList.remove('drag-over'));
+    cards.addEventListener('drop', e => {
+      e.preventDefault();
+      cards.classList.remove('drag-over');
+      const id   = Number(e.dataTransfer.getData('text/plain'));
+      const todo = todos.find(t => t.id === id);
+      if (!todo) return;
+      const targetLane = cards.dataset.lane;
+      if (targetLane === 'done') { todo.done = true; todo.status = 'done'; }
+      else if (targetLane === 'inprogress') { todo.done = false; todo.status = 'inprogress'; }
+      else { todo.done = false; todo.status = 'open'; }
+      fbSaveTask(todo); renderTasks();
+    });
+
+    col.appendChild(cards);
+    board.appendChild(col);
+  });
+  listEl.appendChild(board);
 }
 
 // ── Task interactions ─────────────────────────────────
