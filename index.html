@@ -1421,11 +1421,21 @@ getAnalytics(app);
 const TODOS_COL = "todos";
 const GOALS_COL = "goals";
 const THEME_KEY = "planner_theme";
+const LS_TODOS  = "ap_todos_v1";
+const LS_GOALS  = "ap_goals_v1";
 
 // ── In-memory state ──────────────────────────────────
-let todos = [];
-let goals = [];
-let isSynced = false;
+// Seed immediately from localStorage so data is visible before Firebase loads
+let todos = JSON.parse(localStorage.getItem(LS_TODOS) || '[]');
+let goals = JSON.parse(localStorage.getItem(LS_GOALS) || '[]');
+
+// ── localStorage persistence ─────────────────────────
+function saveLs() {
+  try {
+    localStorage.setItem(LS_TODOS, JSON.stringify(todos));
+    localStorage.setItem(LS_GOALS, JSON.stringify(goals));
+  } catch(e) { console.warn('localStorage write failed', e); }
+}
 
 function setSyncStatus(state) {
   const dot   = document.getElementById('syncDot');
@@ -1436,6 +1446,7 @@ function setSyncStatus(state) {
 
 // ── Firestore helpers ────────────────────────────────
 async function fbSaveTask(t) {
+  saveLs(); // always persist locally first
   setSyncStatus('syncing');
   try {
     await setDoc(doc(db, TODOS_COL, String(t.id)), { ...t, _ts: serverTimestamp() });
@@ -1443,6 +1454,7 @@ async function fbSaveTask(t) {
   } catch(e) { console.warn('Firestore write failed', e); setSyncStatus(''); }
 }
 async function fbDeleteTask(id) {
+  saveLs(); // persist deletion locally first
   setSyncStatus('syncing');
   try {
     await deleteDoc(doc(db, TODOS_COL, String(id)));
@@ -1450,6 +1462,7 @@ async function fbDeleteTask(id) {
   } catch(e) { console.warn('Firestore delete failed', e); setSyncStatus(''); }
 }
 async function fbSaveGoal(g) {
+  saveLs();
   setSyncStatus('syncing');
   try {
     await setDoc(doc(db, GOALS_COL, String(g.id)), { ...g, _ts: serverTimestamp() });
@@ -1457,6 +1470,7 @@ async function fbSaveGoal(g) {
   } catch(e) { console.warn('Firestore write failed', e); setSyncStatus(''); }
 }
 async function fbDeleteGoal(id) {
+  saveLs();
   setSyncStatus('syncing');
   try {
     await deleteDoc(doc(db, GOALS_COL, String(id)));
@@ -2016,21 +2030,53 @@ function checkLoaded() {
 }
 
 onSnapshot(collection(db, TODOS_COL), snap => {
-  todos = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
+  const fbTodos = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
+
+  if (fbTodos.length === 0 && todos.length > 0) {
+    // Firestore is empty but we have local data — upload it to Firestore
+    console.log('Firestore todos empty; uploading', todos.length, 'local tasks');
+    todos.forEach(t => {
+      setDoc(doc(db, TODOS_COL, String(t.id)), { ...t, _ts: serverTimestamp() })
+        .catch(e => console.warn('Re-upload task failed', e));
+    });
+    // Keep the local todos in memory — don't wipe them
+  } else {
+    // Merge: Firestore is the source of truth when it has data
+    // But preserve any local-only tasks that Firestore doesn't know about yet
+    const fbIds = new Set(fbTodos.map(t => String(t.id)));
+    const localOnly = todos.filter(t => !fbIds.has(String(t.id)));
+    todos = [...fbTodos, ...localOnly];
+    saveLs();
+  }
+
   todosLoaded = true;
   setSyncStatus('online');
-  isSynced = true;
   checkLoaded();
   if (currentView === 'tasks') renderTasks();
 }, err => {
   console.warn('Firestore todos listener error', err);
   setSyncStatus('');
   todosLoaded = true;
+  // Keep whatever we loaded from localStorage — don't wipe it
   checkLoaded();
 });
 
 onSnapshot(collection(db, GOALS_COL), snap => {
-  goals = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
+  const fbGoals = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
+
+  if (fbGoals.length === 0 && goals.length > 0) {
+    console.log('Firestore goals empty; uploading', goals.length, 'local goals');
+    goals.forEach(g => {
+      setDoc(doc(db, GOALS_COL, String(g.id)), { ...g, _ts: serverTimestamp() })
+        .catch(e => console.warn('Re-upload goal failed', e));
+    });
+  } else {
+    const fbIds = new Set(fbGoals.map(g => String(g.id)));
+    const localOnly = goals.filter(g => !fbIds.has(String(g.id)));
+    goals = [...fbGoals, ...localOnly];
+    saveLs();
+  }
+
   goalsLoaded = true;
   checkLoaded();
   if (currentView === 'goals') renderGoals();
@@ -2040,7 +2086,7 @@ onSnapshot(collection(db, GOALS_COL), snap => {
   checkLoaded();
 });
 
-// Fallback: hide loading after 6s if Firestore is slow
+// Fallback: hide loading after 6s if Firestore is slow — localStorage data already shown
 setTimeout(() => { if (!todosLoaded) { todosLoaded = true; goalsLoaded = true; hideLoading(); renderTasks(); } }, 6000);
 </script>
 </body>
