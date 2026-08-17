@@ -2691,7 +2691,7 @@ function renderLinks() {
     const href = /^https?:\/\//i.test(item.url) ? item.url : 'https://' + item.url;
     return `<tr>
       <td class="col-desc">${esc(item.desc || '—')}</td>
-      <td class="col-url"><a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(item.url)}</a></td>
+      <td class="col-url"><a href="${esc(href)}" target="_blank" rel="noopener noreferrer" title="${esc(item.url)}">${esc(item.url.length > 45 ? item.url.slice(0, 45) + '…' : item.url)}</a></td>
       <td class="col-tag">${item.tag ? `<span class="badge badge-tag">${esc(item.tag)}</span>` : ''}</td>
       <td class="col-actions">
         <button class="tbl-action-btn link-edit-btn" data-id="${item.id}" title="Edit" aria-label="Edit">
