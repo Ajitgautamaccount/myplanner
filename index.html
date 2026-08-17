@@ -1195,6 +1195,71 @@ body.has-install-banner #content { padding-bottom: 100px; }
 #dateQuickPopup .dqp-row button { flex: 1; padding: 6px; border: none; border-radius: 6px; cursor: pointer; font-size: .78rem; font-weight: 700; font-family: var(--font); }
 #dateQuickPopup #dqpSaveBtn { background: var(--accent); color: #fff; }
 #dateQuickPopup #dqpCancelBtn { background: var(--surface2); color: var(--text2); }
+
+/* ── Right-side narrow panel mode ─────────────────────── */
+html {
+  height: 100%;
+}
+body {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: calc(100vw / 6);
+  min-width: 240px;
+  height: 100vh;
+  overflow: hidden;
+  flex-direction: column;
+  border-left: 2px solid var(--border);
+  box-shadow: -6px 0 32px rgba(0,0,0,.18);
+  z-index: 9999;
+}
+/* Hide sidebar — no room at this width */
+#sidebar, #sidebarOverlay { display: none !important; }
+/* Main fills the full panel */
+#main { margin-left: 0 !important; width: 100%; min-width: 0; display: flex; flex-direction: column; height: 100vh; }
+/* Topbar — compact icon-only row */
+#topbar { padding: 0 8px; height: auto; min-height: 46px; flex-wrap: wrap; gap: 4px; row-gap: 4px; }
+#menuToggle { display: none !important; }
+#topbar h2 { font-size: .75rem; }
+.search-wrap { display: none; }
+.topbar-quick-btn { padding: 6px; border-radius: 8px; width: 30px; height: 30px; justify-content: center; min-width: 0; }
+.topbar-quick-btn .btn-text { display: none; }
+.export-btn { padding: 5px 7px; font-size: .68rem; }
+/* Scrollable content area */
+#content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 10px 8px !important; }
+/* Stats — 2-col instead of 4 */
+.stats-grid { grid-template-columns: 1fr 1fr !important; gap: 8px; margin-bottom: 12px; }
+.stat-card { padding: 10px 10px 8px; }
+.stat-value { font-size: 1.3rem; }
+.stat-label { font-size: .65rem; }
+.stat-sub { font-size: .62rem; }
+/* Filter chips — smaller, wrapping */
+.filter-bar { gap: 4px; flex-wrap: wrap; }
+.filter-chip { font-size: .68rem; padding: 3px 8px; }
+/* Task cards */
+.task-item { padding: 8px 10px; }
+.task-title { font-size: .82rem; }
+/* View headers — stack vertically */
+.qview-header { flex-direction: column; align-items: flex-start; gap: 6px; margin-bottom: 10px; }
+.qview-header-left { flex-wrap: wrap; gap: 5px; }
+.qview-title { font-size: 1rem; }
+.add-btn { padding: 5px 9px; font-size: .7rem; gap: 4px; }
+.add-btn .btn-text { display: none; }
+/* Tables — 1 col at this width */
+.mc-grid { grid-template-columns: 1fr !important; }
+.qa-table.compact td, .qa-table.compact th { padding: 3px 5px; font-size: .72rem; }
+/* Goals */
+.goals-header { flex-direction: column; gap: 8px; }
+.goal-card { flex-wrap: wrap; }
+/* Modals — full-width in panel */
+.backdrop { padding: 0; align-items: flex-end; }
+.modal { max-width: 100% !important; width: 100%; border-radius: 16px 16px 0 0; max-height: 90vh; }
+/* Date popup — stay within panel */
+#dateQuickPopup { min-width: 0; width: calc(100vw/6 - 16px); min-width: 220px; left: 8px !important; }
+/* FAB always visible */
+#fab { display: flex; }
+/* Shortcuts hidden */
+#shortcutsPanel { display: none !important; }
 </style>
 </head>
 <body>
