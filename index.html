@@ -414,7 +414,7 @@ body {
 .add-btn.btn-dates:active { box-shadow: 0 1px 0 #c2410c, 0 2px 4px rgba(234,88,12,.3); }
 
 /* ── Content ── */
-#content { padding: 24px; padding-right: 88px; flex: 1; }
+#content { padding: 24px; flex: 1; }
 
 .view { display: none; }
 .view.active { display: block; }
@@ -1144,7 +1144,7 @@ body.has-install-banner #content { padding-bottom: 100px; }
   .search-wrap { max-width: none; }
   .topbar-quick-btn .btn-text { display: none; }
   .topbar-quick-btn { padding: 8px; border-radius: 50%; width: 36px; height: 36px; justify-content: center; }
-  #content { padding: 16px 72px 16px 14px; }
+  #content { padding: 16px 14px; }
   .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
   .stat-value { font-size: 1.5rem; }
   .field-row, .field-row3 { grid-template-columns: 1fr; }
@@ -1174,53 +1174,27 @@ body.has-install-banner #content { padding-bottom: 100px; }
   @keyframes popIn { from { transform: scale(.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 }
 
-/* ── Quick Panel (right-side floating) ── */
-#quickPanel {
-  position: fixed;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 900;
+/* ── Date quick-add popup ── */
+#dateQuickPopup {
+  position: absolute;
+  z-index: 950;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-right: none;
-  border-radius: 14px 0 0 14px;
-  box-shadow: -4px 0 24px rgba(0,0,0,.13);
-  padding: 10px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  width: 68px;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  padding: 14px 16px 12px;
+  min-width: 300px;
+  display: none;
 }
-.qp-section { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; }
-.qp-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  width: 52px;
-  padding: 7px 4px;
-  border: none;
-  border-radius: 8px;
-  color: #fff;
-  font-size: .62rem;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: var(--font);
-  letter-spacing: .01em;
-  transition: transform .1s, box-shadow .1s;
-}
-.qp-btn:hover  { transform: translateX(-2px); }
-.qp-btn:active { transform: translateX(1px); filter: brightness(.92); }
-.qp-task  { background: linear-gradient(180deg, #6c7aff 0%, #4a57e8 100%); box-shadow: 3px 0 0 #2e39c0 inset; }
-.qp-link  { background: linear-gradient(180deg, #2ddcbe 0%, #0fb89d 100%); box-shadow: 3px 0 0 #088a74 inset; }
-.qp-tcode { background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%); color: #1a1a1a; box-shadow: 3px 0 0 #b45309 inset; }
-.qp-goal  { background: linear-gradient(180deg, #f472b6 0%, #db2777 100%); box-shadow: 3px 0 0 #9d174d inset; }
-@media (max-width: 600px) {
-  #quickPanel { width: 58px; padding: 8px 4px; }
-  .qp-btn, .qp-stat { width: 46px; }
-}
+#dateQuickPopup.open { display: block; }
+#dateQuickPopup .dqp-title { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text3); margin-bottom: 10px; }
+#dateQuickPopup .field { margin-bottom: 8px; }
+#dateQuickPopup label { font-size: .72rem; color: var(--text2); display: block; margin-bottom: 3px; }
+#dateQuickPopup input { width: 100%; box-sizing: border-box; padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: .82rem; font-family: var(--font); }
+#dateQuickPopup .dqp-row { display: flex; gap: 8px; margin-top: 4px; }
+#dateQuickPopup .dqp-row button { flex: 1; padding: 6px; border: none; border-radius: 6px; cursor: pointer; font-size: .78rem; font-weight: 700; font-family: var(--font); }
+#dateQuickPopup #dqpSaveBtn { background: var(--accent); color: #fff; }
+#dateQuickPopup #dqpCancelBtn { background: var(--surface2); color: var(--text2); }
 </style>
 </head>
 <body>
@@ -1823,25 +1797,20 @@ body.has-install-banner #content { padding-bottom: 100px; }
 </div>
 
 <!-- Important Dates Modal -->
-<!-- Floating right-side quick panel -->
-<div id="quickPanel">
-  <div class="qp-section qp-buttons">
-    <button class="qp-btn qp-task" id="qpAddTask" title="Add Task">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Task
-    </button>
-    <button class="qp-btn qp-link" id="qpAddLink" title="Add Link">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Link
-    </button>
-    <button class="qp-btn qp-tcode" id="qpAddTcode" title="Add T-Code">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      T-Code
-    </button>
-    <button class="qp-btn qp-goal" id="qpAddGoal" title="Add Goal">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Goal
-    </button>
+<!-- Date quick-add popup (anchored to topbar Dates button) -->
+<div id="dateQuickPopup" role="dialog" aria-label="Add Important Date">
+  <div class="dqp-title">Add Important Date</div>
+  <div class="field">
+    <label for="dqpLabel">Label *</label>
+    <input type="text" id="dqpLabel" placeholder="e.g. Annual review, Birthday…" autocomplete="off">
+  </div>
+  <div class="field">
+    <label for="dqpDate">Date *</label>
+    <input type="date" id="dqpDate">
+  </div>
+  <div class="dqp-row">
+    <button id="dqpSaveBtn">Save</button>
+    <button id="dqpCancelBtn">Cancel</button>
   </div>
 </div>
 
@@ -3115,7 +3084,7 @@ function openDatesModal() {
 }
 function closeDatesModal() { datesBackdrop.classList.remove('open'); }
 
-document.getElementById('topbarDatesBtn').addEventListener('click', () => setView('dates'));
+document.getElementById('topbarDatesBtn').addEventListener('click', openDateQuickPopup);
 document.getElementById('datesClose').addEventListener('click', closeDatesModal);
 datesBackdrop.addEventListener('click', e => { if (e.target === datesBackdrop) closeDatesModal(); });
 
@@ -3144,8 +3113,8 @@ document.getElementById('addTaskFromLinksBtn').addEventListener('click', openAdd
 document.getElementById('addTaskFromTcodesBtn').addEventListener('click', openAddModal);
 document.getElementById('addTaskFromDatesBtn').addEventListener('click', openAddModal);
 
-// Add Date button in viewDates opens dates modal
-document.getElementById('openAddDateBtn').addEventListener('click', openDatesModal);
+// Add Date button in viewDates opens quick popup
+document.getElementById('openAddDateBtn').addEventListener('click', openDateQuickPopup);
 
 // Inline dates add form
 document.getElementById('dateAddInlineBtn').addEventListener('click', () => {
@@ -3161,11 +3130,47 @@ document.getElementById('dateAddInlineBtn').addEventListener('click', () => {
   renderDatesInlineList();
 });
 
-// Quick panel buttons
-document.getElementById('qpAddTask').addEventListener('click', openAddModal);
-document.getElementById('qpAddLink').addEventListener('click', openAddLinkModal);
-document.getElementById('qpAddTcode').addEventListener('click', openAddTcodeModal);
-document.getElementById('qpAddGoal').addEventListener('click', openAddGoalModal);
+// ── Date quick-add popup ──────────────────────────────
+const dateQuickPopup = document.getElementById('dateQuickPopup');
+const topbarDatesBtnEl = document.getElementById('topbarDatesBtn');
+
+function openDateQuickPopup() {
+  document.getElementById('dqpLabel').value = '';
+  document.getElementById('dqpDate').value  = '';
+  // Position popup below the topbar button
+  const rect = topbarDatesBtnEl.getBoundingClientRect();
+  dateQuickPopup.style.top  = (rect.bottom + 6) + 'px';
+  dateQuickPopup.style.left = Math.max(8, rect.left - 120 + rect.width / 2) + 'px';
+  dateQuickPopup.classList.add('open');
+  document.getElementById('dqpLabel').focus();
+}
+function closeDateQuickPopup() { dateQuickPopup.classList.remove('open'); }
+
+document.getElementById('dqpSaveBtn').addEventListener('click', () => {
+  const label = document.getElementById('dqpLabel').value.trim();
+  const date  = document.getElementById('dqpDate').value;
+  if (!label || !date) { document.getElementById('dqpLabel').focus(); return; }
+  const item = { id: Date.now(), label, date };
+  importantDates.push(item); saveLs(); fbSaveDate(item);
+  closeDateQuickPopup();
+  renderDatesInlineList(); renderDatesList(); updateDatesBadge(); updateNavDatesBadge();
+});
+document.getElementById('dqpCancelBtn').addEventListener('click', closeDateQuickPopup);
+
+// Close popup when clicking outside
+document.addEventListener('click', e => {
+  if (dateQuickPopup.classList.contains('open') &&
+      !dateQuickPopup.contains(e.target) &&
+      e.target !== topbarDatesBtnEl &&
+      !topbarDatesBtnEl.contains(e.target)) {
+    closeDateQuickPopup();
+  }
+});
+
+// Close on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && dateQuickPopup.classList.contains('open')) closeDateQuickPopup();
+});
 
 // Show badge immediately from localStorage data, then notify if needed
 updateDatesBadge();
