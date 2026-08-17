@@ -745,6 +745,43 @@ body {
 .tbl-action-btn:hover { background: var(--surface2); color: var(--text); }
 .tbl-action-btn.del { color: var(--danger); opacity: .7; }
 .tbl-action-btn.del:hover { background: var(--danger-light); color: var(--danger); opacity: 1; }
+
+/* ── Compact multi-column table grid (T-Codes, Dates) ── */
+.mc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0 16px;
+  align-items: start;
+}
+.mc-grid .qa-table-wrap {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+/* Compact row height for dense display */
+.qa-table.compact td,
+.qa-table.compact th {
+  padding: 4px 8px;
+  font-size: .78rem;
+}
+.qa-table.compact th {
+  font-size: .65rem;
+  padding: 5px 8px;
+}
+.qa-table.compact td.col-actions { padding: 2px 4px; }
+.qa-table.compact .tbl-action-btn { padding: 2px 4px; }
+.qa-table.compact td.col-code { font-size: .8rem; }
+.qa-table.compact .copy-code-btn { padding: 0 5px; font-size: .62rem; }
+/* Date status badges */
+.date-status { font-size: .7rem; font-weight: 700; white-space: nowrap; }
+.date-status.ds-today   { color: #059669; }
+.date-status.ds-soon    { color: var(--warning); }
+.date-status.ds-overdue { color: var(--danger); }
+.date-status.ds-future  { color: var(--text3); }
+@media (max-width: 900px) {
+  .mc-grid { grid-template-columns: 1fr; }
+}
+
 /* ── Important Dates list ── */
 .date-item {
   display: flex;
@@ -1149,15 +1186,14 @@ body.has-install-banner #content { padding-bottom: 100px; }
   border-right: none;
   border-radius: 14px 0 0 14px;
   box-shadow: -4px 0 24px rgba(0,0,0,.13);
-  padding: 12px 8px;
+  padding: 10px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0;
+  gap: 6px;
   width: 68px;
 }
 .qp-section { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; }
-.qp-divider { width: 80%; height: 1px; background: var(--border); margin: 10px 0; }
 .qp-btn {
   display: flex;
   flex-direction: column;
@@ -1181,25 +1217,6 @@ body.has-install-banner #content { padding-bottom: 100px; }
 .qp-link  { background: linear-gradient(180deg, #2ddcbe 0%, #0fb89d 100%); box-shadow: 3px 0 0 #088a74 inset; }
 .qp-tcode { background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%); color: #1a1a1a; box-shadow: 3px 0 0 #b45309 inset; }
 .qp-goal  { background: linear-gradient(180deg, #f472b6 0%, #db2777 100%); box-shadow: 3px 0 0 #9d174d inset; }
-.qp-stats { gap: 4px; }
-.qp-stat {
-  width: 52px;
-  padding: 6px 4px;
-  border-radius: 8px;
-  text-align: center;
-  background: var(--surface2);
-}
-.qp-stat-val {
-  font-size: .95rem;
-  font-weight: 800;
-  line-height: 1;
-  margin-bottom: 2px;
-}
-.qp-stat-lbl { font-size: .57rem; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text3); }
-.qp-stat-open    .qp-stat-val { color: var(--accent); }
-.qp-stat-done    .qp-stat-val { color: var(--success); }
-.qp-stat-overdue .qp-stat-val { color: var(--danger); }
-.qp-stat-pct     .qp-stat-val { color: var(--text2); }
 @media (max-width: 600px) {
   #quickPanel { width: 58px; padding: 8px 4px; }
   .qp-btn, .qp-stat { width: 46px; }
@@ -1826,25 +1843,6 @@ body.has-install-banner #content { padding-bottom: 100px; }
       Goal
     </button>
   </div>
-  <div class="qp-divider"></div>
-  <div class="qp-section qp-stats">
-    <div class="qp-stat qp-stat-open">
-      <div class="qp-stat-val" id="qpStatOpen">0</div>
-      <div class="qp-stat-lbl">Open</div>
-    </div>
-    <div class="qp-stat qp-stat-done">
-      <div class="qp-stat-val" id="qpStatDone">0</div>
-      <div class="qp-stat-lbl">Done</div>
-    </div>
-    <div class="qp-stat qp-stat-overdue">
-      <div class="qp-stat-val" id="qpStatOverdue">0</div>
-      <div class="qp-stat-lbl">Overdue</div>
-    </div>
-    <div class="qp-stat qp-stat-pct">
-      <div class="qp-stat-val" id="qpStatPct">0%</div>
-      <div class="qp-stat-lbl">Done %</div>
-    </div>
-  </div>
 </div>
 
 <div class="backdrop" id="datesBackdrop">
@@ -2290,15 +2288,6 @@ function renderStats() {
   document.getElementById('navCountOverdue').textContent  = overdue.length;
   document.getElementById('navCountUpcoming').textContent = open.filter(t => { const d = dueDiff(t.dueDate); return d !== null && d > 0 && d <= 7; }).length;
   document.getElementById('navCountDone').textContent     = done.length;
-  // Update quick panel stats
-  const qpOpen    = document.getElementById('qpStatOpen');
-  const qpDone    = document.getElementById('qpStatDone');
-  const qpOverdue = document.getElementById('qpStatOverdue');
-  const qpPct     = document.getElementById('qpStatPct');
-  if (qpOpen)    qpOpen.textContent    = open.length;
-  if (qpDone)    qpDone.textContent    = done.length;
-  if (qpOverdue) qpOverdue.textContent = overdue.length;
-  if (qpPct)     qpPct.textContent     = pct + '%';
 }
 
 // ── Sidebar tags ──────────────────────────────────────
@@ -2851,7 +2840,7 @@ function renderTcodes() {
     </div>`;
     return;
   }
-  const rows = visible.map(item => `<tr>
+  const makeRow = item => `<tr>
     <td class="col-desc">${esc(item.desc || '—')}</td>
     <td class="col-code">
       ${esc(item.code)}
@@ -2866,11 +2855,15 @@ function renderTcodes() {
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
       </button>
     </td>
-  </tr>`).join('');
-  listEl.innerHTML = `<div class="qa-table-wrap"><table class="qa-table">
-    <thead><tr><th>Description</th><th>T-Code</th><th>Tag</th><th></th></tr></thead>
-    <tbody>${rows}</tbody>
-  </table></div>`;
+  </tr>`;
+  const thead = `<thead><tr><th>Description</th><th>T-Code</th><th>Tag</th><th></th></tr></thead>`;
+  const half  = Math.ceil(visible.length / 2);
+  const col1  = visible.slice(0, half).map(makeRow).join('');
+  const col2  = visible.slice(half).map(makeRow).join('');
+  listEl.innerHTML = `<div class="mc-grid">
+    <div class="qa-table-wrap"><table class="qa-table compact">${thead}<tbody>${col1}</tbody></table></div>
+    <div class="qa-table-wrap"><table class="qa-table compact">${thead}<tbody>${col2}</tbody></table></div>
+  </div>`;
   listEl.querySelectorAll('.copy-code-btn').forEach(btn =>
     btn.addEventListener('click', () => {
       navigator.clipboard.writeText(btn.dataset.code).then(() => {
@@ -3020,29 +3013,33 @@ function renderDatesInlineList() {
     return;
   }
   const sorted = [...importantDates].sort((a, b) => a.date.localeCompare(b.date));
-  el.innerHTML = sorted.map(item => {
+  const makeRow = item => {
     const diff = dateDiffDays(item.date);
-    let cls = '', metaCls = '', metaText = '';
-    const fmt = parseDate(item.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-    if (diff < 0) {
-      cls = 'overdue'; metaCls = 'overdue'; metaText = `${fmt} · ${-diff} day${diff < -1 ? 's' : ''} ago`;
-    } else if (diff === 0) {
-      cls = 'upcoming'; metaCls = 'urgent'; metaText = `Today! · ${fmt}`;
-    } else if (diff <= 7) {
-      cls = 'upcoming'; metaCls = 'urgent'; metaText = `In ${diff} day${diff > 1 ? 's' : ''} · ${fmt}`;
-    } else {
-      metaText = `In ${diff} days · ${fmt}`;
-    }
-    return `<div class="date-item ${cls}" data-id="${item.id}">
-      <div class="date-item-info">
-        <div class="date-item-label">${esc(item.label)}</div>
-        <div class="date-item-meta ${metaCls}">${metaText}</div>
-      </div>
-      <button class="tbl-action-btn del date-del-inline-btn" data-id="${item.id}" title="Delete" aria-label="Delete">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-      </button>
-    </div>`;
-  }).join('');
+    const fmt  = parseDate(item.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    let statusCls, statusTxt;
+    if (diff < 0)      { statusCls = 'ds-overdue'; statusTxt = `${-diff}d ago`; }
+    else if (diff === 0){ statusCls = 'ds-today';   statusTxt = 'Today!'; }
+    else if (diff <= 7) { statusCls = 'ds-soon';    statusTxt = `In ${diff}d`; }
+    else                { statusCls = 'ds-future';  statusTxt = `In ${diff}d`; }
+    return `<tr>
+      <td class="col-desc">${esc(item.label)}</td>
+      <td style="white-space:nowrap;font-size:.78rem">${fmt}</td>
+      <td><span class="date-status ${statusCls}">${statusTxt}</span></td>
+      <td class="col-actions">
+        <button class="tbl-action-btn del date-del-inline-btn" data-id="${item.id}" title="Delete" aria-label="Delete">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+      </td>
+    </tr>`;
+  };
+  const thead = `<thead><tr><th>Label</th><th>Date</th><th>Status</th><th></th></tr></thead>`;
+  const half  = Math.ceil(sorted.length / 2);
+  const col1  = sorted.slice(0, half).map(makeRow).join('');
+  const col2  = sorted.slice(half).map(makeRow).join('');
+  el.innerHTML = `<div class="mc-grid">
+    <div class="qa-table-wrap"><table class="qa-table compact">${thead}<tbody>${col1}</tbody></table></div>
+    <div class="qa-table-wrap"><table class="qa-table compact">${thead}<tbody>${col2}</tbody></table></div>
+  </div>`;
   el.querySelectorAll('.date-del-inline-btn').forEach(btn =>
     btn.addEventListener('click', () => {
       const id = Number(btn.dataset.id);
