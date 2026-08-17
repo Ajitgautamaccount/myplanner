@@ -1293,6 +1293,25 @@ body.has-install-banner #content { padding-bottom: 100px; }
 }
 #shortcutsPanel.visible { display: block; }
 
+/* ── PWA standalone (launched from taskbar pin) ── */
+@media (display-mode: standalone) {
+  #sidebar { transform: translateX(-100%); box-shadow: none; }
+  #sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+  #sidebarOverlay.open { display: block; }
+  #main { margin-left: 0; }
+  #menuToggle { display: flex; align-items: center; justify-content: center; }
+  #topbar h2 { display: none; }
+  .search-wrap { max-width: none; }
+  .add-menu-btn span { display: none; }
+  .add-menu-btn { padding: 8px; border-radius: 50%; width: 36px; height: 36px; justify-content: center; }
+  .add-menu-caret { display: none; }
+  .add-menu-dropdown { right: 0; left: auto; min-width: 180px; }
+  #content { padding: 16px 14px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+  .field-row, .field-row3 { grid-template-columns: 1fr; }
+  #shortcutsPanel { display: none !important; }
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   :root { --sidebar-w: 240px; }
