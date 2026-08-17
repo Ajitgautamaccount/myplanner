@@ -2029,59 +2029,112 @@ function checkLoaded() {
   if (todosLoaded && goalsLoaded) { hideLoading(); renderTasks(); }
 }
 
-onSnapshot(collection(db, TODOS_COL), snap => {
-  const fbTodos = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
+// ── Firestore rules banner ────────────────────────────
+function showFirestoreBlockedBanner() {
+  if (document.getElementById('fsBanner')) return;
+  const b = document.createElement('div');
+  b.id = 'fsBanner';
+  b.style.cssText = [
+    'position:fixed;top:0;left:0;right:0;z-index:9998',
+    'background:#dc2626;color:#fff;padding:10px 16px',
+    'font-size:13px;line-height:1.5;text-align:center',
+    'display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap'
+  ].join(';');
+  b.innerHTML = `
+    <strong>⚠ Cloud sync is blocked</strong>
+    <span>Your Firebase security rules have expired. Tasks only saved on <em>this</em> device.</span>
+    <a href="https://console.firebase.google.com/project/planner-bdf27/firestore/rules" target="_blank"
+       style="color:#fef08a;text-decoration:underline;white-space:nowrap">Fix rules →</a>
+    <button onclick="this.closest('#fsBanner').remove()" style="background:rgba(255,255,255,.25);border:none;color:#fff;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:13px">✕</button>`;
+  document.body.prepend(b);
+}
 
+// ── Merge helpers ─────────────────────────────────────
+function mergeFirestoreTodos(fbTodos) {
   if (fbTodos.length === 0 && todos.length > 0) {
-    // Firestore is empty but we have local data — upload it to Firestore
-    console.log('Firestore todos empty; uploading', todos.length, 'local tasks');
-    todos.forEach(t => {
+    console.log('[Firestore] todos collection empty; re-uploading', todos.length, 'local tasks');
+    Promise.all(todos.map(t =>
       setDoc(doc(db, TODOS_COL, String(t.id)), { ...t, _ts: serverTimestamp() })
-        .catch(e => console.warn('Re-upload task failed', e));
-    });
-    // Keep the local todos in memory — don't wipe them
-  } else {
-    // Merge: Firestore is the source of truth when it has data
-    // But preserve any local-only tasks that Firestore doesn't know about yet
+        .catch(e => console.warn('Re-upload task failed', e))
+    ));
+  } else if (fbTodos.length > 0) {
     const fbIds = new Set(fbTodos.map(t => String(t.id)));
     const localOnly = todos.filter(t => !fbIds.has(String(t.id)));
     todos = [...fbTodos, ...localOnly];
     saveLs();
   }
+}
 
-  todosLoaded = true;
-  setSyncStatus('online');
-  checkLoaded();
-  if (currentView === 'tasks') renderTasks();
-}, err => {
-  console.warn('Firestore todos listener error', err);
-  setSyncStatus('');
-  todosLoaded = true;
-  // Keep whatever we loaded from localStorage — don't wipe it
-  checkLoaded();
-});
-
-onSnapshot(collection(db, GOALS_COL), snap => {
-  const fbGoals = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
-
+function mergeFirestoreGoals(fbGoals) {
   if (fbGoals.length === 0 && goals.length > 0) {
-    console.log('Firestore goals empty; uploading', goals.length, 'local goals');
-    goals.forEach(g => {
+    console.log('[Firestore] goals collection empty; re-uploading', goals.length, 'local goals');
+    Promise.all(goals.map(g =>
       setDoc(doc(db, GOALS_COL, String(g.id)), { ...g, _ts: serverTimestamp() })
-        .catch(e => console.warn('Re-upload goal failed', e));
-    });
-  } else {
+        .catch(e => console.warn('Re-upload goal failed', e))
+    ));
+  } else if (fbGoals.length > 0) {
     const fbIds = new Set(fbGoals.map(g => String(g.id)));
     const localOnly = goals.filter(g => !fbIds.has(String(g.id)));
     goals = [...fbGoals, ...localOnly];
     saveLs();
   }
+}
 
+// ── One-time fetch on startup (works even if rules block real-time listener) ──
+Promise.all([
+  getDocs(collection(db, TODOS_COL)).then(snap => {
+    const fbTodos = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
+    console.log('[getDocs] fetched', fbTodos.length, 'todos');
+    mergeFirestoreTodos(fbTodos);
+    setSyncStatus('online');
+  }),
+  getDocs(collection(db, GOALS_COL)).then(snap => {
+    const fbGoals = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
+    console.log('[getDocs] fetched', fbGoals.length, 'goals');
+    mergeFirestoreGoals(fbGoals);
+  })
+]).then(() => {
+  // getDocs resolved — ensure loading screen hides even if onSnapshot is slow
+  todosLoaded = true;
+  goalsLoaded = true;
+  checkLoaded();
+  if (currentView === 'tasks') renderTasks();
+  if (currentView === 'goals') renderGoals();
+}).catch(e => {
+  console.warn('[getDocs] failed:', e.code, e.message);
+  if (e.code === 'permission-denied') showFirestoreBlockedBanner();
+  setSyncStatus('');
+  // Still hide loading — show localStorage data
+  todosLoaded = true;
+  goalsLoaded = true;
+  checkLoaded();
+  if (currentView === 'tasks') renderTasks();
+});
+
+// ── Real-time listeners (for live cross-device updates) ───
+onSnapshot(collection(db, TODOS_COL), snap => {
+  const fbTodos = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
+  mergeFirestoreTodos(fbTodos);
+  todosLoaded = true;
+  setSyncStatus('online');
+  checkLoaded();
+  if (currentView === 'tasks') renderTasks();
+}, err => {
+  console.warn('[onSnapshot] todos error:', err.code, err.message);
+  if (err.code === 'permission-denied') showFirestoreBlockedBanner();
+  setSyncStatus('');
+  todosLoaded = true;
+  checkLoaded();
+});
+
+onSnapshot(collection(db, GOALS_COL), snap => {
+  const fbGoals = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
+  mergeFirestoreGoals(fbGoals);
   goalsLoaded = true;
   checkLoaded();
   if (currentView === 'goals') renderGoals();
 }, err => {
-  console.warn('Firestore goals listener error', err);
+  console.warn('[onSnapshot] goals error:', err.code, err.message);
   goalsLoaded = true;
   checkLoaded();
 });
