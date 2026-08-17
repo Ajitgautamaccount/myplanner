@@ -633,6 +633,7 @@ body {
   margin-bottom: 18px;
   flex-wrap: wrap;
 }
+.qview-header-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .qview-title {
   font-size: .7rem;
   font-weight: 700;
@@ -645,52 +646,42 @@ body {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
   align-items: center;
 }
-.link-card, .tcode-card {
-  background: var(--surface);
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--accent);
-  transition: box-shadow .15s;
+/* ── Data table ── */
+.qa-table-wrap { overflow-x: auto; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+.qa-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .83rem;
 }
-.link-card:hover, .tcode-card:hover { box-shadow: var(--shadow-md); }
-.link-card-icon, .tcode-card-icon {
-  flex-shrink: 0;
-  width: 34px; height: 34px;
-  background: var(--accent-light);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--accent);
-  margin-top: 1px;
-}
-.link-card-body, .tcode-card-body { flex: 1; min-width: 0; }
-.link-card-url {
-  font-size: .88rem;
-  font-weight: 600;
-  word-break: break-all;
-  margin-bottom: 3px;
-}
-.link-card-url a { color: var(--accent); text-decoration: none; }
-.link-card-url a:hover { text-decoration: underline; }
-.tcode-card-code {
-  font-size: .95rem;
+.qa-table thead tr { background: var(--surface2); }
+.qa-table th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: .7rem;
   font-weight: 700;
-  font-family: monospace;
-  color: var(--text);
-  margin-bottom: 3px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text3);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
 }
+.qa-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  color: var(--text);
+}
+.qa-table tbody tr:last-child td { border-bottom: none; }
+.qa-table tbody tr:hover { background: var(--surface2); }
+.qa-table td.col-desc { color: var(--text2); max-width: 260px; word-break: break-word; line-height: 1.4; }
+.qa-table td.col-url a { color: var(--accent); text-decoration: none; word-break: break-all; }
+.qa-table td.col-url a:hover { text-decoration: underline; }
+.qa-table td.col-code { font-family: monospace; font-weight: 700; font-size: .88rem; white-space: nowrap; }
+.qa-table td.col-tag .badge { margin: 0; }
+.qa-table td.col-actions { white-space: nowrap; text-align: right; }
 .copy-code-btn {
   background: var(--surface2);
   border: 1px solid var(--border);
@@ -704,13 +695,34 @@ body {
   transition: background .12s, color .12s;
 }
 .copy-code-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
-.link-card-desc, .tcode-card-desc {
-  font-size: .8rem;
-  color: var(--text2);
-  margin-bottom: 5px;
-  word-break: break-word;
-  line-height: 1.4;
+.tbl-action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  color: var(--text3);
+  transition: background .12s, color .12s;
 }
+.tbl-action-btn:hover { background: var(--surface2); color: var(--text); }
+.tbl-action-btn.del:hover { background: var(--danger-light); color: var(--danger); }
+/* export button */
+.export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text2);
+  font-size: .75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .12s, color .12s, border-color .12s;
+  white-space: nowrap;
+}
+.export-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 
 /* ── Modals ── */
 .backdrop {
@@ -1110,6 +1122,10 @@ body.has-install-banner #content { padding-bottom: 100px; }
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" id="searchInput" placeholder="Search tasks… (/)">
     </div>
+    <button class="export-btn" id="exportTasksBtn" style="margin-left:4px">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export
+    </button>
     <button class="add-btn" id="openAddModal" aria-label="Add task">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       <span class="btn-text">Add Task</span>
@@ -1146,10 +1162,16 @@ body.has-install-banner #content { padding-bottom: 100px; }
           <div class="qview-title">Links</div>
           <div style="font-size:.85rem;color:var(--text2)">Your saved URLs &amp; resources</div>
         </div>
-        <button class="add-btn" id="openAddLinkModal">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span class="btn-text">Add Link</span>
-        </button>
+        <div class="qview-header-left">
+          <button class="export-btn" id="exportLinksBtn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+          </button>
+          <button class="add-btn" id="openAddLinkModal">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span class="btn-text">Add Link</span>
+          </button>
+        </div>
       </div>
       <div class="qa-filter-bar" id="linksFilterBar"></div>
       <div id="linksList"></div>
@@ -1162,10 +1184,16 @@ body.has-install-banner #content { padding-bottom: 100px; }
           <div class="qview-title">T-Codes</div>
           <div style="font-size:.85rem;color:var(--text2)">Your saved transaction codes</div>
         </div>
-        <button class="add-btn" id="openAddTcodeModal">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span class="btn-text">Add T-Code</span>
-        </button>
+        <div class="qview-header-left">
+          <button class="export-btn" id="exportTcodesBtn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+          </button>
+          <button class="add-btn" id="openAddTcodeModal">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span class="btn-text">Add T-Code</span>
+          </button>
+        </div>
       </div>
       <div class="qa-filter-bar" id="tcodesFilterBar"></div>
       <div id="tcodesList"></div>
@@ -1881,9 +1909,10 @@ function setView(view, preset) {
   const titleMap = { goals: 'Goals & Targets', links: 'Links', tcodes: 'T-Codes' };
   const taskTitles = { '': 'All Tasks', today: 'Today', overdue: 'Overdue', upcoming: 'Upcoming', done: 'Completed' };
   document.getElementById('viewTitle').textContent = titleMap[view] || (taskTitles[preset] || 'All Tasks');
-  // Show/hide topbar add button based on view
-  const addBtn = document.getElementById('openAddModal');
-  addBtn.style.display = (view === 'tasks') ? '' : 'none';
+  // Show/hide topbar task buttons based on view
+  const isTask = view === 'tasks';
+  document.getElementById('openAddModal').style.display   = isTask ? '' : 'none';
+  document.getElementById('exportTasksBtn').style.display = isTask ? '' : 'none';
   if (view === 'tasks')  renderTasks();
   if (view === 'goals')  renderGoals();
   if (view === 'links')  renderLinks();
@@ -2347,7 +2376,7 @@ function renderLinksFilterBar() {
 function renderLinks() {
   renderLinksFilterBar();
   const listEl = document.getElementById('linksList');
-  let visible = linksFilterTag ? links.filter(l => l.tag === linksFilterTag) : [...links];
+  const visible = linksFilterTag ? links.filter(l => l.tag === linksFilterTag) : [...links];
   if (!visible.length) {
     listEl.innerHTML = `<div class="empty-state">
       <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
@@ -2356,30 +2385,34 @@ function renderLinks() {
     </div>`;
     return;
   }
-  listEl.innerHTML = '';
-  visible.forEach(item => {
-    const card = document.createElement('div');
-    card.className = 'link-card';
+  const rows = visible.map(item => {
     const href = /^https?:\/\//i.test(item.url) ? item.url : 'https://' + item.url;
-    card.innerHTML = `
-      <div class="link-card-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-      </div>
-      <div class="link-card-body">
-        <div class="link-card-url"><a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(item.url)}</a></div>
-        ${item.desc ? `<div class="link-card-desc">${esc(item.desc)}</div>` : ''}
-        <div class="task-meta">${item.tag ? `<span class="badge badge-tag">${esc(item.tag)}</span>` : ''}</div>
-      </div>
-      <div class="task-actions">
-        <button class="task-action-btn link-edit-btn" data-id="${item.id}" aria-label="Edit link">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    return `<tr>
+      <td class="col-desc">${esc(item.desc || '—')}</td>
+      <td class="col-url"><a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(item.url)}</a></td>
+      <td class="col-tag">${item.tag ? `<span class="badge badge-tag">${esc(item.tag)}</span>` : ''}</td>
+      <td class="col-actions">
+        <button class="tbl-action-btn link-edit-btn" data-id="${item.id}" title="Edit" aria-label="Edit">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
-      </div>`;
-    listEl.appendChild(card);
-  });
-  listEl.querySelectorAll('.link-edit-btn').forEach(btn => {
-    btn.addEventListener('click', () => openEditLinkModal(Number(btn.dataset.id)));
-  });
+        <button class="tbl-action-btn del link-del-btn" data-id="${item.id}" title="Delete" aria-label="Delete">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+  listEl.innerHTML = `<div class="qa-table-wrap"><table class="qa-table">
+    <thead><tr><th>Description</th><th>URL</th><th>Tag</th><th></th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+  listEl.querySelectorAll('.link-edit-btn').forEach(btn =>
+    btn.addEventListener('click', () => openEditLinkModal(Number(btn.dataset.id))));
+  listEl.querySelectorAll('.link-del-btn').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const id = Number(btn.dataset.id);
+      links = links.filter(l => l.id !== id);
+      fbDeleteLink(id); renderLinks();
+    }));
 }
 
 const addLinkBackdrop  = document.getElementById('addLinkBackdrop');
@@ -2465,7 +2498,7 @@ function renderTcodesFilterBar() {
 function renderTcodes() {
   renderTcodesFilterBar();
   const listEl = document.getElementById('tcodesList');
-  let visible = tcodesFilterTag ? tcodes.filter(t => t.tag === tcodesFilterTag) : [...tcodes];
+  const visible = tcodesFilterTag ? tcodes.filter(t => t.tag === tcodesFilterTag) : [...tcodes];
   if (!visible.length) {
     listEl.innerHTML = `<div class="empty-state">
       <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
@@ -2474,41 +2507,41 @@ function renderTcodes() {
     </div>`;
     return;
   }
-  listEl.innerHTML = '';
-  visible.forEach(item => {
-    const card = document.createElement('div');
-    card.className = 'tcode-card';
-    card.innerHTML = `
-      <div class="tcode-card-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-      </div>
-      <div class="tcode-card-body">
-        <div class="tcode-card-code">
-          ${esc(item.code)}
-          <button class="copy-code-btn" data-code="${esc(item.code)}" title="Copy to clipboard">Copy</button>
-        </div>
-        ${item.desc ? `<div class="tcode-card-desc">${esc(item.desc)}</div>` : ''}
-        <div class="task-meta">${item.tag ? `<span class="badge badge-tag">${esc(item.tag)}</span>` : ''}</div>
-      </div>
-      <div class="task-actions">
-        <button class="task-action-btn tcode-edit-btn" data-id="${item.id}" aria-label="Edit T-Code">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
-      </div>`;
-    listEl.appendChild(card);
-  });
-  listEl.querySelectorAll('.copy-code-btn').forEach(btn => {
+  const rows = visible.map(item => `<tr>
+    <td class="col-desc">${esc(item.desc || '—')}</td>
+    <td class="col-code">
+      ${esc(item.code)}
+      <button class="copy-code-btn" data-code="${esc(item.code)}" title="Copy">Copy</button>
+    </td>
+    <td class="col-tag">${item.tag ? `<span class="badge badge-tag">${esc(item.tag)}</span>` : ''}</td>
+    <td class="col-actions">
+      <button class="tbl-action-btn tcode-edit-btn" data-id="${item.id}" title="Edit" aria-label="Edit">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
+      <button class="tbl-action-btn del tcode-del-btn" data-id="${item.id}" title="Delete" aria-label="Delete">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </button>
+    </td>
+  </tr>`).join('');
+  listEl.innerHTML = `<div class="qa-table-wrap"><table class="qa-table">
+    <thead><tr><th>Description</th><th>T-Code</th><th>Tag</th><th></th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+  listEl.querySelectorAll('.copy-code-btn').forEach(btn =>
     btn.addEventListener('click', () => {
       navigator.clipboard.writeText(btn.dataset.code).then(() => {
-        const orig = btn.textContent;
-        btn.textContent = 'Copied!';
+        const orig = btn.textContent; btn.textContent = 'Copied!';
         setTimeout(() => { btn.textContent = orig; }, 1500);
       }).catch(() => {});
-    });
-  });
-  listEl.querySelectorAll('.tcode-edit-btn').forEach(btn => {
-    btn.addEventListener('click', () => openEditTcodeModal(Number(btn.dataset.id)));
-  });
+    }));
+  listEl.querySelectorAll('.tcode-edit-btn').forEach(btn =>
+    btn.addEventListener('click', () => openEditTcodeModal(Number(btn.dataset.id))));
+  listEl.querySelectorAll('.tcode-del-btn').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const id = Number(btn.dataset.id);
+      tcodes = tcodes.filter(t => t.id !== id);
+      fbDeleteTcode(id); renderTcodes();
+    }));
 }
 
 const addTcodeBackdrop  = document.getElementById('addTcodeBackdrop');
@@ -2566,6 +2599,41 @@ document.getElementById('deleteTcodeBtn').addEventListener('click', () => {
   if (editingTcodeId === null) return;
   tcodes = tcodes.filter(t => t.id !== editingTcodeId);
   fbDeleteTcode(editingTcodeId); renderTcodes(); closeEditTcodeModal();
+});
+
+// ── CSV Export ────────────────────────────────────────
+function csvEscape(v) {
+  const s = String(v === null || v === undefined ? '' : v).replace(/"/g, '""');
+  return /[",\n\r]/.test(s) ? `"${s}"` : s;
+}
+function csvRow(cells) { return cells.map(csvEscape).join(','); }
+function downloadCsv(filename, rows) {
+  const blob = new Blob([rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+
+document.getElementById('exportTasksBtn').addEventListener('click', () => {
+  const rows = [csvRow(['Title','Status','Priority','Tag','Due Date','Notes'])];
+  todos.forEach(t => rows.push(csvRow([
+    t.title, t.done ? 'Done' : 'Open', t.priority || '', t.tag || '', t.due || '', t.notes || ''
+  ])));
+  downloadCsv('tasks.csv', rows);
+});
+
+document.getElementById('exportLinksBtn').addEventListener('click', () => {
+  const rows = [csvRow(['Description','URL','Tag'])];
+  links.forEach(l => rows.push(csvRow([l.desc || '', l.url, l.tag || ''])));
+  downloadCsv('links.csv', rows);
+});
+
+document.getElementById('exportTcodesBtn').addEventListener('click', () => {
+  const rows = [csvRow(['Description','T-Code','Tag'])];
+  tcodes.forEach(c => rows.push(csvRow([c.desc || '', c.code, c.tag || ''])));
+  downloadCsv('tcodes.csv', rows);
 });
 
 // ── Dark mode ─────────────────────────────────────────
