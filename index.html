@@ -403,6 +403,10 @@ body {
 .gs-sep { border: none; border-top: 1px solid var(--border); margin: 4px 0; }
 @keyframes taskFlash { 0%,100% { box-shadow: none; } 25%,75% { box-shadow: 0 0 0 3px var(--accent); } }
 .task-highlight { animation: taskFlash 1.8s ease; }
+@keyframes devFlash {
+  0%,100% { opacity:1; box-shadow:0 2px 10px rgba(99,102,241,.4); }
+  50%      { opacity:.3; box-shadow:0 2px 18px rgba(139,92,246,.75); }
+}
 /* ── 3D Button base ── */
 .add-btn {
   color: #fff;
@@ -1403,6 +1407,19 @@ body.has-install-banner #content { padding-bottom: 100px; }
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Export
     </button>
+    <span id="devBadge" style="
+      display:inline-flex;align-items:center;gap:5px;
+      margin-left:10px;
+      background:linear-gradient(90deg,#6366f1,#8b5cf6);
+      color:#fff;
+      font-size:.62rem;font-weight:800;
+      letter-spacing:.1em;text-transform:uppercase;
+      padding:5px 12px;border-radius:20px;
+      white-space:nowrap;flex-shrink:0;
+      box-shadow:0 2px 10px rgba(99,102,241,.4);
+      animation:devFlash 2s ease-in-out infinite;
+      pointer-events:none;
+    ">&#9733; Developed by Ajit Gautam</span>
   </header>
 
   <div id="content">
@@ -3731,31 +3748,5 @@ onSnapshot(collection(db, TCODES_COL), snap => {
 // Fallback: hide loading after 6s if Firestore is slow — localStorage data already shown
 setTimeout(() => { if (!todosLoaded) { todosLoaded = true; goalsLoaded = true; hideLoading(); renderTasks(); } }, 6000);
 </script>
-<div id="devBadge" style="
-  position: fixed;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%) rotate(90deg);
-  transform-origin: right center;
-  background: linear-gradient(90deg, #6366f1, #8b5cf6);
-  color: #fff;
-  font-size: .65rem;
-  font-weight: 800;
-  letter-spacing: .13em;
-  text-transform: uppercase;
-  padding: 5px 16px;
-  border-radius: 8px 8px 0 0;
-  z-index: 9999;
-  pointer-events: none;
-  white-space: nowrap;
-  animation: devFlash 2s ease-in-out infinite;
-  box-shadow: 0 -2px 12px rgba(99,102,241,.45);
-">&#9654; Developed by Ajit Gautam</div>
-<style>
-@keyframes devFlash {
-  0%,100% { opacity: 1; box-shadow: 0 -2px 12px rgba(99,102,241,.45); }
-  50%      { opacity: .35; box-shadow: 0 -2px 22px rgba(139,92,246,.8); }
-}
-</style>
 </body>
 </html>
