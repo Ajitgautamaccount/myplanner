@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head><title>Icon Generator</title></head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const sizes = [72,96,128,144,152,192,384,512];
+const c = document.getElementById('c');
+const ctx = c.getContext('2d');
+
+function drawIcon(size) {
+  c.width = size; c.height = size;
+  const r = size * 0.18;
+
+  // Background gradient
+  const grad = ctx.createLinearGradient(0, 0, size, size);
+  grad.addColorStop(0, '#5b6af7');
+  grad.addColorStop(1, '#7c3aed');
+  ctx.fillStyle = grad;
+  roundRect(ctx, 0, 0, size, size, r);
+  ctx.fill();
+
+  // Checkmark icon
+  const s = size * 0.55;
+  const ox = (size - s) / 2;
+  const oy = (size - s) / 2;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = size * 0.07;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  // Draw clipboard outline
+  ctx.beginPath();
+  ctx.moveTo(ox + s*0.35, oy);
+  ctx.lineTo(ox + s*0.65, oy);
+  ctx.arc(ox + s*0.65, oy + s*0.07, s*0.07, -Math.PI/2, Math.PI/2);
+  ctx.lineTo(ox + s*0.85, oy + s*0.14);
+  ctx.lineTo(ox + s*0.85, oy + s);
+  ctx.lineTo(ox + s*0.15, oy + s);
+  ctx.lineTo(ox + s*0.15, oy + s*0.14);
+  ctx.arc(ox + s*0.35, oy + s*0.07, s*0.07, Math.PI/2, -Math.PI/2);
+  ctx.closePath();
+  ctx.stroke();
+
+  // Checkmark
+  ctx.beginPath();
+  ctx.moveTo(ox + s*0.3, oy + s*0.55);
+  ctx.lineTo(ox + s*0.45, oy + s*0.72);
+  ctx.lineTo(ox + s*0.7, oy + s*0.4);
+  ctx.stroke();
+
+  return c.toDataURL('image/png');
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y);
+  ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+  ctx.lineTo(x+w, y+h-r);
+  ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+  ctx.lineTo(x+r, y+h);
+  ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+  ctx.lineTo(x, y+r);
+  ctx.quadraticCurveTo(x, y, x+r, y);
+  ctx.closePath();
+}
+
+const out = document.createElement('div');
+out.style.cssText = 'display:flex;flex-wrap:wrap;gap:12px;padding:12px;font-family:sans-serif;';
+sizes.forEach(size => {
+  const dataUrl = drawIcon(size);
+  const a = document.createElement('a');
+  a.href = dataUrl;
+  a.download = `icon-${size}.png`;
+  a.innerHTML = `<img src="${dataUrl}" width="${Math.min(size,96)}" height="${Math.min(size,96)}" style="border-radius:8px"><br><small>icon-${size}.png</small>`;
+  a.style.cssText = 'text-align:center;text-decoration:none;color:#333;display:inline-block';
+  out.appendChild(a);
+});
+
+const dlAll = document.createElement('button');
+dlAll.textContent = '⬇ Download All Icons';
+dlAll.style.cssText = 'display:block;margin:16px;padding:12px 24px;background:#5b6af7;color:#fff;border:none;border-radius:8px;font-size:1rem;cursor:pointer';
+dlAll.onclick = () => {
+  out.querySelectorAll('a').forEach((a,i) => setTimeout(() => a.click(), i*200));
+};
+document.body.appendChild(dlAll);
+document.body.appendChild(out);
+</script>
+</body>
+</html>

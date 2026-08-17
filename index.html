@@ -6,8 +6,21 @@
 <meta name="theme-color" content="#5b6af7">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AjitPlanner">
 <title>Ajit's Planner</title>
+
+<!-- PWA manifest -->
+<link rel="manifest" href="manifest.json">
+
+<!-- Apple touch icons -->
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32"   href="icons/icon-96.png">
 <style>
 /* ── Password gate ── */
 #pwGate {
@@ -745,6 +758,58 @@ body {
 }
 #fab:active { transform: scale(.92); }
 
+/* ── PWA Install banner ── */
+#installBanner {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 14px 18px;
+  z-index: 50;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,.12);
+}
+#installBanner.show { display: flex; }
+.install-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.install-icon img { width: 100%; height: 100%; }
+.install-text { flex: 1; min-width: 0; }
+.install-text strong { display: block; font-size: .9rem; font-weight: 700; }
+.install-text span { font-size: .78rem; color: var(--text2); }
+.install-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: .85rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-height: 40px;
+}
+.install-dismiss {
+  background: none;
+  border: none;
+  color: var(--text3);
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 4px 6px;
+  flex-shrink: 0;
+  min-width: 32px; min-height: 32px;
+  display: flex; align-items: center; justify-content: center;
+}
+/* Bump content above banner when visible */
+body.has-install-banner #content { padding-bottom: 100px; }
+
 /* ── Loading overlay ── */
 #loadingOverlay {
   position: fixed; inset: 0;
@@ -1000,6 +1065,19 @@ body {
 <!-- FAB (mobile) -->
 <button id="fab" aria-label="Add task">+</button>
 
+<!-- PWA Install banner -->
+<div id="installBanner" role="complementary" aria-label="Install app">
+  <div class="install-icon">
+    <img src="icons/icon-192.png" alt="App icon">
+  </div>
+  <div class="install-text">
+    <strong>Install Ajit's Planner</strong>
+    <span>Add to Home Screen for the full app experience</span>
+  </div>
+  <button class="install-btn" id="installBtn">Install</button>
+  <button class="install-dismiss" id="installDismiss" aria-label="Dismiss">&#x2715;</button>
+</div>
+
 <!-- Add Task Modal -->
 <div class="backdrop" id="addBackdrop">
   <div class="modal" role="dialog" aria-modal="true" aria-label="New Task">
@@ -1190,6 +1268,68 @@ body {
     </div>
   </div>
 </div>
+
+<!-- PWA: Service Worker + Install prompt -->
+<script>
+(function () {
+  // Register service worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/myplanner/sw.js', { scope: '/myplanner/' })
+        .then(reg => console.log('SW registered, scope:', reg.scope))
+        .catch(err => console.warn('SW registration failed:', err));
+    });
+  }
+
+  // Install prompt
+  let deferredPrompt = null;
+  const banner    = document.getElementById('installBanner');
+  const installBtn = document.getElementById('installBtn');
+  const dismissBtn = document.getElementById('installDismiss');
+
+  // Don't show if already dismissed this session
+  if (sessionStorage.getItem('pwa_dismissed')) return;
+
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    setTimeout(() => {
+      banner.classList.add('show');
+      document.body.classList.add('has-install-banner');
+    }, 2000);
+  });
+
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    banner.classList.remove('show');
+    document.body.classList.remove('has-install-banner');
+    if (outcome === 'accepted') console.log('PWA installed');
+  });
+
+  dismissBtn.addEventListener('click', () => {
+    banner.classList.remove('show');
+    document.body.classList.remove('has-install-banner');
+    sessionStorage.setItem('pwa_dismissed', '1');
+  });
+
+  // Hide banner once app is installed
+  window.addEventListener('appinstalled', () => {
+    banner.classList.remove('show');
+    document.body.classList.remove('has-install-banner');
+  });
+
+  // Handle URL shortcuts (?action=add / ?action=goals)
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(location.search);
+    const action = params.get('action');
+    if (action === 'add')   window.__pwaAction = 'add';
+    if (action === 'goals') window.__pwaAction = 'goals';
+  });
+})();
+</script>
 
 <!-- Password gate logic -->
 <script>
@@ -1858,6 +1998,10 @@ document.addEventListener('keydown', e => {
   if (e.key === '3') setView('tasks','upcoming');
   if (e.key === '4') setView('tasks','done');
 });
+
+// ── PWA shortcut actions ──────────────────────────────
+if (window.__pwaAction === 'add')   setTimeout(openAddModal, 800);
+if (window.__pwaAction === 'goals') setTimeout(() => setView('goals'), 800);
 
 // ── Real-time Firestore listeners ─────────────────────
 function hideLoading() {
