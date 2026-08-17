@@ -3115,7 +3115,7 @@ function openDatesModal() {
 }
 function closeDatesModal() { datesBackdrop.classList.remove('open'); }
 
-document.getElementById('topbarDatesBtn').addEventListener('click', openDatesModal);
+document.getElementById('topbarDatesBtn').addEventListener('click', () => setView('dates'));
 document.getElementById('datesClose').addEventListener('click', closeDatesModal);
 datesBackdrop.addEventListener('click', e => { if (e.target === datesBackdrop) closeDatesModal(); });
 
