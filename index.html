@@ -505,6 +505,15 @@ body {
 .task:hover { box-shadow: var(--shadow-md); }
 .task.done { opacity: .55; }
 .task.done .task-title { text-decoration: line-through; color: var(--text3); }
+.task.inprogress { border-left-color: #f59e0b !important; }
+.task-check.inprogress { background: #f59e0b; border-color: #f59e0b; }
+.task-check.inprogress::after {
+  content: '';
+  width: 8px; height: 2px;
+  background: #fff;
+  border-radius: 1px;
+  display: block;
+}
 .task.border-p1 { border-left-color: var(--p1); }
 .task.border-p2 { border-left-color: var(--p2); }
 .task.border-p3 { border-left-color: var(--p3); }
@@ -1354,6 +1363,7 @@ body.has-install-banner #content { padding-bottom: 100px; }
       <div class="filter-bar" id="filterBar">
         <button class="filter-chip active" data-status="all">All</button>
         <button class="filter-chip" data-status="open">Open</button>
+        <button class="filter-chip" data-status="inprogress">In Progress</button>
         <button class="filter-chip" data-status="done">Done</button>
         <span class="filter-sep"></span>
         <button class="filter-chip" data-due="overdue">Overdue</button>
@@ -1588,6 +1598,7 @@ body.has-install-banner #content { padding-bottom: 100px; }
       <label for="editStatus">Status</label>
       <select id="editStatus">
         <option value="open">Open</option>
+        <option value="inprogress">In Progress</option>
         <option value="done">Done</option>
       </select>
     </div>
@@ -2227,15 +2238,21 @@ document.querySelectorAll('.nav-item[data-view]').forEach(btn => {
 
 // ── Stats ─────────────────────────────────────────────
 function renderStats() {
-  const open    = todos.filter(t => !t.done);
-  const done    = todos.filter(t => t.done);
-  const overdue = open.filter(t => { const d = dueDiff(t.dueDate); return d !== null && d < 0; });
-  const pct     = todos.length ? Math.round(done.length / todos.length * 100) : 0;
+  const open       = todos.filter(t => !t.done && t.status !== 'inprogress');
+  const inprogress = todos.filter(t => t.status === 'inprogress');
+  const done       = todos.filter(t => t.done);
+  const overdue    = todos.filter(t => !t.done && (function(){ const d = dueDiff(t.dueDate); return d !== null && d < 0; })());
+  const pct        = todos.length ? Math.round(done.length / todos.length * 100) : 0;
   document.getElementById('statsGrid').innerHTML = `
     <div class="stat-card accent">
       <div class="stat-label">Open</div>
       <div class="stat-value">${open.length}</div>
       <div class="stat-sub">remaining</div>
+    </div>
+    <div class="stat-card" style="border-top:3px solid #f59e0b">
+      <div class="stat-label">In Progress</div>
+      <div class="stat-value">${inprogress.length}</div>
+      <div class="stat-sub">active</div>
     </div>
     <div class="stat-card success">
       <div class="stat-label">Done</div>
@@ -2246,16 +2263,12 @@ function renderStats() {
       <div class="stat-label">Overdue</div>
       <div class="stat-value">${overdue.length}</div>
       <div class="stat-sub">need attention</div>
-    </div>
-    <div class="stat-card warning">
-      <div class="stat-label">Progress</div>
-      <div class="stat-value">${pct}%</div>
-      <div class="progress-bar-track"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
     </div>`;
-  document.getElementById('navCountAll').textContent      = open.length;
-  document.getElementById('navCountToday').textContent    = open.filter(t => dueDiff(t.dueDate) === 0).length;
+  const notDone = todos.filter(t => !t.done);
+  document.getElementById('navCountAll').textContent      = notDone.length;
+  document.getElementById('navCountToday').textContent    = notDone.filter(t => dueDiff(t.dueDate) === 0).length;
   document.getElementById('navCountOverdue').textContent  = overdue.length;
-  document.getElementById('navCountUpcoming').textContent = open.filter(t => { const d = dueDiff(t.dueDate); return d !== null && d > 0 && d <= 7; }).length;
+  document.getElementById('navCountUpcoming').textContent = notDone.filter(t => { const d = dueDiff(t.dueDate); return d !== null && d > 0 && d <= 7; }).length;
   document.getElementById('navCountDone').textContent     = done.length;
 }
 
@@ -2285,8 +2298,9 @@ function getVisibleTodos() {
   if (filterViewPreset === 'upcoming') list = list.filter(t => { const d = dueDiff(t.dueDate); return !t.done && d !== null && d > 0; });
   if (filterViewPreset === 'done')     list = list.filter(t => t.done);
   if (!filterViewPreset) {
-    if (filterStatus === 'open') list = list.filter(t => !t.done);
-    if (filterStatus === 'done') list = list.filter(t => t.done);
+    if (filterStatus === 'open')       list = list.filter(t => !t.done && t.status !== 'inprogress');
+    if (filterStatus === 'inprogress') list = list.filter(t => t.status === 'inprogress');
+    if (filterStatus === 'done')       list = list.filter(t => t.done);
     if (filterDue === 'overdue') list = list.filter(t => { const d = dueDiff(t.dueDate); return d !== null && d < 0; });
     if (filterDue === 'today')   list = list.filter(t => dueDiff(t.dueDate) === 0);
     if (filterDue === 'week')    list = list.filter(t => { const d = dueDiff(t.dueDate); return d !== null && d >= 0 && d <= 7; });
@@ -2334,15 +2348,17 @@ function renderTasks() {
         else                           borderCls = ` border-p${todo.priority||4}`;
       }
       const el = document.createElement('div');
-      el.className = 'task' + (todo.done ? ' done' : '') + borderCls;
+      const isIP = todo.status === 'inprogress';
+      el.className = 'task' + (todo.done ? ' done' : '') + (isIP ? ' inprogress' : '') + borderCls;
       el.innerHTML = `
-        <div class="task-check${todo.done?' checked':''}" data-id="${todo.id}" role="checkbox" aria-checked="${todo.done}" tabindex="0"></div>
+        <div class="task-check${todo.done?' checked':(isIP?' inprogress':'')}" data-id="${todo.id}" role="checkbox" aria-checked="${todo.done}" tabindex="0"></div>
         <div class="task-body">
           <div class="task-title">${esc(todo.title)}</div>
           ${todo.notes ? `<div class="task-notes">${esc(todo.notes)}</div>` : ''}
           <div class="task-meta">
             ${todo.tag ? `<span class="badge badge-tag">${esc(todo.tag)}</span>` : ''}
             <span class="badge badge-p${todo.priority||4}">P${todo.priority||4}</span>
+            ${isIP ? `<span class="badge" style="background:#fef3c7;color:#92400e;border:1px solid #f59e0b">In Progress</span>` : ''}
             <span class="badge ${due.cls}">${due.label}</span>
           </div>
         </div>
@@ -2368,7 +2384,12 @@ document.getElementById('list').addEventListener('click', e => {
   if (check) {
     const id   = Number(check.dataset.id);
     const todo = todos.find(t => t.id === id);
-    if (todo) { todo.done = !todo.done; fbSaveTask(todo); renderTasks(); }
+    if (todo) {
+      todo.done = !todo.done;
+      if (todo.done) todo.status = 'done';
+      else if (todo.status === 'done') todo.status = 'open';
+      fbSaveTask(todo); renderTasks();
+    }
   }
   if (editBtn) openEditModal(Number(editBtn.dataset.id));
   if (delBtn)  { const id = Number(delBtn.dataset.id); todos = todos.filter(t => t.id !== id); fbDeleteTask(id); renderTasks(); }
@@ -2470,7 +2491,7 @@ function openEditModal(id) {
   document.getElementById('editTag').value     = todo.tag   || '';
   document.getElementById('editDate').value    = todo.date;
   document.getElementById('editDueDate').value = todo.dueDate || '';
-  document.getElementById('editStatus').value  = todo.done ? 'done' : 'open';
+  document.getElementById('editStatus').value  = todo.done ? 'done' : (todo.status === 'inprogress' ? 'inprogress' : 'open');
   initPriority('editPriority', todo.priority || 4);
   editBackdrop.classList.add('open');
   setTimeout(() => document.getElementById('editTitle').focus(), 80);
@@ -2492,7 +2513,9 @@ document.getElementById('editSave').addEventListener('click', () => {
     todo.date     = date;
     todo.dueDate  = document.getElementById('editDueDate').value;
     todo.priority = getPriority('editPriority');
-    todo.done     = document.getElementById('editStatus').value === 'done';
+    const statusVal = document.getElementById('editStatus').value;
+    todo.done     = statusVal === 'done';
+    todo.status   = statusVal === 'inprogress' ? 'inprogress' : (statusVal === 'done' ? 'done' : 'open');
     fbSaveTask(todo); renderTasks();
   }
   closeEditModal();
@@ -3210,7 +3233,7 @@ function downloadCsv(filename, rows) {
 document.getElementById('exportTasksBtn').addEventListener('click', () => {
   const rows = [csvRow(['Title','Status','Priority','Tag','Due Date','Notes'])];
   todos.forEach(t => rows.push(csvRow([
-    t.title, t.done ? 'Done' : 'Open', t.priority || '', t.tag || '', t.due || '', t.notes || ''
+    t.title, t.done ? 'Done' : (t.status === 'inprogress' ? 'In Progress' : 'Open'), t.priority || '', t.tag || '', t.due || '', t.notes || ''
   ])));
   downloadCsv('tasks.csv', rows);
 });
