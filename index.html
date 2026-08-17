@@ -2231,7 +2231,7 @@ function setView(view, preset) {
   currentView = view;
   filterViewPreset = preset || '';
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  const viewMap = { goals: 'viewGoals', links: 'viewLinks', tcodes: 'viewTcodes' };
+  const viewMap = { goals: 'viewGoals', links: 'viewLinks', tcodes: 'viewTcodes', dates: 'viewDates' };
   document.getElementById(viewMap[view] || 'viewTasks').classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const navPresetMap = { '': 'navAll', today: 'navToday', overdue: 'navOverdue', upcoming: 'navUpcoming', done: 'navDone' };
@@ -2242,7 +2242,7 @@ function setView(view, preset) {
   const taskTitles = { '': 'All Tasks', today: 'Today', overdue: 'Overdue', upcoming: 'Upcoming', done: 'Completed' };
   document.getElementById('viewTitle').textContent = titleMap[view] || (taskTitles[preset] || 'All Tasks');
   // Show/hide topbar task buttons based on view
-  const isTask = view === 'tasks';
+  const isTask = !view || view === '';
   document.getElementById('openAddModal').style.display   = isTask ? '' : 'none';
   document.getElementById('exportTasksBtn').style.display = isTask ? '' : 'none';
   if (view === 'tasks')  renderTasks();
