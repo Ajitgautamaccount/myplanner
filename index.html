@@ -352,7 +352,10 @@ body {
 }
 #menuToggle:hover { background: var(--surface2); }
 #topbar h2 { font-size: .95rem; font-weight: 700; flex-shrink: 0; }
-.dev-credit { font-size: .7rem; color: #f97316; white-space: nowrap; margin-left: auto; margin-right: 16px; flex-shrink: 0; font-weight: 600; animation: devBlink 4s ease-in-out infinite; }
+.daily-quote { display: flex; flex-direction: column; align-items: flex-end; margin-left: auto; flex-shrink: 1; min-width: 0; overflow: hidden; animation: devBlink 4s ease-in-out infinite; }
+.daily-quote-text { font-size: .65rem; font-style: italic; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px; }
+.daily-quote-author { font-size: .6rem; font-weight: 700; color: var(--accent); white-space: nowrap; }
+.dev-credit { font-size: .7rem; color: #f97316; white-space: nowrap; margin-left: 14px; margin-right: 16px; flex-shrink: 0; font-weight: 600; animation: devBlink 4s ease-in-out infinite; }
 @keyframes devBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
 .search-wrap {
   position: relative;
@@ -1506,6 +1509,10 @@ body.has-install-banner #content { padding-bottom: 100px; }
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Export
     </button>
+    <div class="daily-quote" id="dailyQuote">
+      <span class="daily-quote-text" id="dailyQuoteText"></span>
+      <span class="daily-quote-author" id="dailyQuoteAuthor"></span>
+    </div>
     <span class="dev-credit">Developed by Ajit Gautam</span>
   </header>
 
@@ -3896,6 +3903,9 @@ onSnapshot(collection(db, TCODES_COL), snap => {
 
 // Fallback: hide loading after 6s if Firestore is slow — localStorage data already shown
 setTimeout(() => { if (!todosLoaded) { todosLoaded = true; goalsLoaded = true; hideLoading(); renderTasks(); } }, 6000);
+</script>
+<script>
+(function(){var Q=[{t:"The secret of getting ahead is getting started.",a:"Mark Twain"},{t:"It always seems impossible until it's done.",a:"Nelson Mandela"},{t:"Don't watch the clock; do what it does. Keep going.",a:"Sam Levenson"},{t:"The future depends on what you do today.",a:"Mahatma Gandhi"},{t:"Believe you can and you're halfway there.",a:"Theodore Roosevelt"},{t:"Act as if what you do makes a difference. It does.",a:"William James"},{t:"Start where you are. Use what you have. Do what you can.",a:"Arthur Ashe"},{t:"Well done is better than well said.",a:"Benjamin Franklin"},{t:"Opportunities don't happen. You create them.",a:"Chris Grosser"},{t:"Dream big and dare to fail.",a:"Norman Vaughan"},{t:"Hard work beats talent when talent doesn't work hard.",a:"Tim Notke"},{t:"Success usually comes to those too busy to be looking for it.",a:"Henry David Thoreau"},{t:"Do something today that your future self will thank you for.",a:"Sean Patrick Flanery"},{t:"Consistency is the key to achieving and maintaining momentum.",a:"Darren Hardy"},{t:"Either you run the day, or the day runs you.",a:"Jim Rohn"},{t:"The only way to do great work is to love what you do.",a:"Steve Jobs"},{t:"You are never too old to set another goal or dream a new dream.",a:"C.S. Lewis"},{t:"Don't stop when you're tired. Stop when you're done.",a:"Anonymous"},{t:"Wake up with determination. Go to bed with satisfaction.",a:"Anonymous"},{t:"Do what you can with all you have, wherever you are.",a:"Theodore Roosevelt"},{t:"In the middle of every difficulty lies opportunity.",a:"Albert Einstein"},{t:"Strive not to be a success, but rather to be of value.",a:"Albert Einstein"},{t:"It does not matter how slowly you go as long as you do not stop.",a:"Confucius"},{t:"Our greatest glory is not in never falling, but in rising every time we fall.",a:"Confucius"},{t:"You miss 100% of the shots you don't take.",a:"Wayne Gretzky"},{t:"Don't limit your challenges. Challenge your limits.",a:"Jerry Dunn"},{t:"Push yourself, because no one else is going to do it for you.",a:"Anonymous"},{t:"Great things never come from comfort zones.",a:"Anonymous"},{t:"Success is not final, failure is not fatal: courage to continue counts.",a:"Winston Churchill"},{t:"The man who moves a mountain begins by carrying away small stones.",a:"Confucius"}];var now=new Date();var day=Math.floor((now-new Date(now.getFullYear(),0,0))/864e5);var q=Q[day%Q.length];var te=document.getElementById('dailyQuoteText');var ae=document.getElementById('dailyQuoteAuthor');if(te)te.textContent='"'+q.t+'"';if(ae)ae.textContent='— '+q.a;})();
 </script>
 </body>
 </html>
