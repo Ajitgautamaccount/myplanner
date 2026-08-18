@@ -533,7 +533,7 @@ body {
 /* ── Kanban board ── */
 .kanban-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; align-items: start; }
 @media (max-width: 1100px) { .kanban-board { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 560px)  { .kanban-board { grid-template-columns: 1fr; } }
+@media (max-width: 767px)  { .kanban-board { grid-template-columns: 1fr; } }
 .kanban-col {
   background: var(--surface2);
   border-radius: var(--radius);
@@ -1294,17 +1294,20 @@ body.has-install-banner #content { padding-bottom: 100px; }
   #sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
   #main { margin-left: 0; }
   #menuToggle { display: flex; align-items: center; justify-content: center; }
-  #topbar { padding: 0 14px; gap: 10px; }
+  #topbar { padding: 0 14px; gap: 8px; }
   #topbar h2 { display: none; }
-  .search-wrap { max-width: none; }
+  .search-wrap { max-width: none; flex: 1; }
   .topbar-quick-btn .btn-text { display: none; }
   .topbar-quick-btn { padding: 8px; border-radius: 50%; width: 36px; height: 36px; justify-content: center; }
   .add-menu-btn span { display: none; }
   .add-menu-btn { padding: 8px; border-radius: 50%; width: 36px; height: 36px; justify-content: center; }
   .add-menu-caret { display: none; }
   .add-menu-dropdown { right: 0; left: auto; min-width: 180px; }
+  .export-btn { display: none; }
+  .daily-quote { display: none; }
+  .dev-credit { display: none; }
   #content { padding: 16px 14px; }
-.field-row, .field-row3 { grid-template-columns: 1fr; }
+  .field-row, .field-row3 { grid-template-columns: 1fr; }
   .filter-bar { gap: 5px; }
   .filter-sep { display: none; }
   .sort-select { width: 100%; margin-left: 0; }
@@ -1318,6 +1321,11 @@ body.has-install-banner #content { padding-bottom: 100px; }
   #linksList, #tcodesList { padding-bottom: 80px; }
   #fab { display: flex; }
   .add-btn { display: none; }
+  /* Date popup: prevent overflow on narrow screens */
+  #dateQuickPopup { min-width: 0; width: calc(100vw - 28px); right: 14px; left: auto; }
+}
+@media (max-width: 560px) {
+  .daily-quote-text { max-width: calc(100vw - 32px); }
 }
 
 @media (min-width: 769px) {
