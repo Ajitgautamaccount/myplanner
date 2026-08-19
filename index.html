@@ -669,69 +669,77 @@ body {
 .empty-state small { font-size: .78rem; }
 
 /* ── Goals view ── */
+:root {
+  --goal-daily:   #22c55e;
+  --goal-weekly:  #3b82f6;
+  --goal-monthly: #a855f7;
+  --goal-yearly:  #f97316;
+  --goal-longterm:#eab308;
+}
 .goals-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
   flex-wrap: wrap;
 }
-.goals-period-nav {
+.goals-filter-bar {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: .9rem;
-  font-weight: 700;
-}
-.goals-period-nav button {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 5px 10px;
-  cursor: pointer;
-  color: var(--text);
-  font-size: .85rem;
-  min-height: 34px;
-  min-width: 34px;
-  transition: background .12s;
-}
-.goals-period-nav button:hover { background: var(--border); }
-.goals-tabs {
-  display: flex;
-  gap: 4px;
-  background: var(--surface2);
-  border-radius: var(--radius-sm);
-  padding: 4px;
+  gap: 6px;
+  flex-wrap: wrap;
   margin-bottom: 18px;
-  width: fit-content;
 }
-.goals-tab {
-  padding: 7px 18px;
-  border-radius: 6px;
-  border: none;
-  background: none;
+.goals-filter-chip {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background: var(--surface2);
   cursor: pointer;
-  font-size: .85rem;
+  font-size: .8rem;
   font-weight: 600;
   color: var(--text2);
   transition: all .15s;
-  min-height: 36px;
+  min-height: 32px;
 }
-.goals-tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+.goals-filter-chip:hover { color: var(--text); background: var(--border); }
+.goals-filter-chip.active[data-period="all"]     { background: var(--accent); color: #fff; border-color: var(--accent); }
+.goals-filter-chip.active[data-period="daily"]   { background: var(--goal-daily); color: #fff; border-color: var(--goal-daily); }
+.goals-filter-chip.active[data-period="weekly"]  { background: var(--goal-weekly); color: #fff; border-color: var(--goal-weekly); }
+.goals-filter-chip.active[data-period="monthly"] { background: var(--goal-monthly); color: #fff; border-color: var(--goal-monthly); }
+.goals-filter-chip.active[data-period="yearly"]  { background: var(--goal-yearly); color: #fff; border-color: var(--goal-yearly); }
+.goals-filter-chip.active[data-period="longterm"]{ background: var(--goal-longterm); color: #000; border-color: var(--goal-longterm); }
+.goals-section-title {
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text3);
+  margin: 22px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
 .goal-card {
   background: var(--surface);
   border-radius: var(--radius);
-  padding: 18px 20px;
-  margin-bottom: 12px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
   box-shadow: var(--shadow);
-  border: 1px solid var(--border);
+  border-left: 4px solid var(--goal-monthly);
+  border-top: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
   display: flex;
-  align-items: center;
-  gap: 16px;
+  align-items: flex-start;
+  gap: 14px;
 }
+.goal-card[data-period="daily"]   { border-left-color: var(--goal-daily); }
+.goal-card[data-period="weekly"]  { border-left-color: var(--goal-weekly); }
+.goal-card[data-period="monthly"] { border-left-color: var(--goal-monthly); }
+.goal-card[data-period="yearly"]  { border-left-color: var(--goal-yearly); }
+.goal-card[data-period="longterm"]{ border-left-color: var(--goal-longterm); }
 .goal-ring {
-  width: 60px; height: 60px;
+  width: 56px; height: 56px;
   flex-shrink: 0;
   position: relative;
 }
@@ -741,13 +749,48 @@ body {
 .goal-ring-label {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: .7rem; font-weight: 800; color: var(--text);
+  font-size: .68rem; font-weight: 800; color: var(--text);
 }
 .goal-body { flex: 1; min-width: 0; }
-.goal-title { font-size: .95rem; font-weight: 600; margin-bottom: 2px; word-break: break-word; }
-.goal-sub { font-size: .78rem; color: var(--text2); margin-bottom: 8px; }
+.goal-top-row { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; flex-wrap: wrap; }
+.goal-title { font-size: .93rem; font-weight: 600; word-break: break-word; }
+.goal-type-badge {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: 2px 7px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.goal-type-badge.daily   { background: rgba(34,197,94,.18);  color: var(--goal-daily); }
+.goal-type-badge.weekly  { background: rgba(59,130,246,.18); color: var(--goal-weekly); }
+.goal-type-badge.monthly { background: rgba(168,85,247,.18); color: var(--goal-monthly); }
+.goal-type-badge.yearly  { background: rgba(249,115,22,.18); color: var(--goal-yearly); }
+.goal-type-badge.longterm{ background: rgba(234,179,8,.18);  color: var(--goal-longterm); }
+.goal-date-badge { font-size: .72rem; color: var(--text3); }
+.goal-sub { font-size: .77rem; color: var(--text2); margin-bottom: 8px; }
 .goal-progress-track { height: 5px; background: var(--surface2); border-radius: 10px; overflow: hidden; }
 .goal-progress-fill { height: 100%; background: var(--accent); border-radius: 10px; transition: width .4s ease; }
+.goal-checklist { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
+.goal-checklist-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: .82rem; color: var(--text2);
+  cursor: pointer;
+  user-select: none;
+}
+.goal-checklist-item input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--goal-daily); }
+.goal-checklist-item.checked { color: var(--text3); text-decoration: line-through; }
+.goal-longterm-icon { font-size: 1.6rem; flex-shrink: 0; width: 40px; text-align: center; line-height: 1; margin-top: 2px; }
+/* hide ring on longterm goals */
+.goal-card[data-period="longterm"] .goal-ring { display: none; }
+.goal-card[data-period="longterm"] .goal-progress-track { display: none; }
+/* Add checklist item row in modal */
+.checklist-add-row { display: flex; gap: 6px; margin-top: 6px; }
+.checklist-add-row input { flex: 1; }
+.checklist-items-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+.checklist-edit-item { display: flex; align-items: center; gap: 6px; font-size: .83rem; color: var(--text2); }
+.checklist-edit-item button { background: none; border: none; cursor: pointer; color: var(--danger); font-size: .9rem; padding: 2px 4px; }
 
 /* ── Quick Access views (Links, T-Codes) ── */
 .qview-header {
@@ -1606,21 +1649,21 @@ body.has-install-banner #content { padding-bottom: 100px; }
     <div class="view" id="viewGoals">
       <div class="goals-header">
         <div>
-          <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:8px">Goals &amp; Targets</div>
-          <div class="goals-period-nav">
-            <button id="goalPrevBtn">&#8592;</button>
-            <span id="goalPeriodLabel" style="min-width:160px;text-align:center"></span>
-            <button id="goalNextBtn">&#8594;</button>
-          </div>
+          <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:4px">Goals &amp; Targets</div>
+          <div style="font-size:.85rem;color:var(--text2)">All goals sorted by target date</div>
         </div>
         <button class="add-btn btn-goal" id="openAddGoalModal">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span class="btn-text">Add Goal</span>
         </button>
       </div>
-      <div class="goals-tabs" id="goalsTabs">
-        <button class="goals-tab active" data-period="month">Monthly</button>
-        <button class="goals-tab" data-period="year">Yearly</button>
+      <div class="goals-filter-bar" id="goalsFilterBar">
+        <button class="goals-filter-chip active" data-period="all">All</button>
+        <button class="goals-filter-chip" data-period="daily">Daily</button>
+        <button class="goals-filter-chip" data-period="weekly">Weekly</button>
+        <button class="goals-filter-chip" data-period="monthly">Monthly</button>
+        <button class="goals-filter-chip" data-period="yearly">Yearly</button>
+        <button class="goals-filter-chip" data-period="longterm">Long Term</button>
       </div>
       <div id="goalsList"></div>
     </div>
@@ -1809,19 +1852,34 @@ body.has-install-banner #content { padding-bottom: 100px; }
       <div class="field">
         <label for="goalPeriodType">Period</label>
         <select id="goalPeriodType">
-          <option value="month">Month</option>
-          <option value="year">Year</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly" selected>Monthly</option>
+          <option value="yearly">Yearly</option>
+          <option value="longterm">Long Term</option>
         </select>
       </div>
     </div>
-    <div class="field-row">
-      <div class="field">
-        <label for="goalMonth">Month</label>
-        <select id="goalMonth"></select>
+    <div id="goalDateFields">
+      <div class="field-row">
+        <div class="field">
+          <label for="goalMonth">Month</label>
+          <select id="goalMonth"></select>
+        </div>
+        <div class="field">
+          <label for="goalYear">Year</label>
+          <select id="goalYear"></select>
+        </div>
       </div>
+    </div>
+    <div id="goalChecklistSection" style="display:none">
       <div class="field">
-        <label for="goalYear">Year</label>
-        <select id="goalYear"></select>
+        <label>Daily Checklist Items</label>
+        <div class="checklist-items-list" id="addChecklistItems"></div>
+        <div class="checklist-add-row">
+          <input type="text" id="addChecklistInput" placeholder="Add checklist item…" autocomplete="off">
+          <button class="btn btn-ghost" id="addChecklistBtn" style="flex-shrink:0">+ Add</button>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -1859,6 +1917,35 @@ body.has-install-banner #content { padding-bottom: 100px; }
       <div class="field">
         <label for="eGoalUnit">Unit</label>
         <input type="text" id="eGoalUnit" autocomplete="off">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="eGoalPeriodType">Period</label>
+        <select id="eGoalPeriodType">
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+          <option value="longterm">Long Term</option>
+        </select>
+      </div>
+      <div class="field" id="eGoalDateWrap">
+        <label for="eGoalMonth">Month / Year</label>
+        <div style="display:flex;gap:6px">
+          <select id="eGoalMonth" style="flex:1"></select>
+          <select id="eGoalYear" style="flex:1"></select>
+        </div>
+      </div>
+    </div>
+    <div id="eGoalChecklistSection" style="display:none">
+      <div class="field">
+        <label>Daily Checklist Items</label>
+        <div class="checklist-items-list" id="editChecklistItems"></div>
+        <div class="checklist-add-row">
+          <input type="text" id="editChecklistInput" placeholder="Add checklist item…" autocomplete="off">
+          <button class="btn btn-ghost" id="editChecklistBtn" style="flex-shrink:0">+ Add</button>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -2359,9 +2446,8 @@ let filterDue        = '';
 let filterTag        = '';
 let sortMode         = 'date';
 let searchQ          = '';
-let goalPeriod       = 'month';
-let goalYear         = new Date().getFullYear();
-let goalMonth        = new Date().getMonth();
+let goalsActiveFilters = new Set(['all']);
+let editingGoalChecklist = [];
 let editingTaskId    = null;
 let editingGoalId    = null;
 
@@ -2908,99 +2994,218 @@ document.getElementById('editSave').addEventListener('click', () => {
 });
 
 // ── Goals ─────────────────────────────────────────────
+const PERIOD_LABEL = { daily:'Daily', weekly:'Weekly', monthly:'Monthly', yearly:'Yearly', longterm:'Long Term' };
+const LONGTERM_ICONS = { default:'🎯', fir:'🏠', car:'🚗', home:'🏡', travel:'✈️', education:'📚', health:'💪', money:'💰', business:'💼' };
+
+function goalSortKey(g) {
+  if (g.period === 'longterm') return '9999-12';
+  if (g.period === 'yearly')   return `${g.year||9999}-12`;
+  if (g.period === 'monthly')  return `${g.year||9999}-${String((g.month||0)+1).padStart(2,'0')}`;
+  if (g.period === 'weekly')   return `${g.year||9999}-${String((g.month||0)+1).padStart(2,'0')}-W`;
+  return `${g.year||9999}-${String((g.month||0)+1).padStart(2,'0')}-D`;
+}
+
+function goalDateLabel(g) {
+  if (g.period === 'daily')   return `Daily · ${MONTHS[g.month||0]} ${g.year||''}`;
+  if (g.period === 'weekly')  return `Weekly · ${MONTHS[g.month||0]} ${g.year||''}`;
+  if (g.period === 'monthly') return `${MONTHS[g.month||0]} ${g.year||''}`;
+  if (g.period === 'yearly')  return String(g.year||'');
+  return 'Long Term';
+}
+
 function renderGoals() {
-  document.getElementById('goalPeriodLabel').textContent =
-    goalPeriod === 'month' ? `${MONTHS[goalMonth]} ${goalYear}` : String(goalYear);
+  const listEl = document.getElementById('goalsList');
+  const all = goalsActiveFilters.has('all');
+  const filtered = all ? [...goals] : goals.filter(g => goalsActiveFilters.has(g.period || 'monthly'));
+  const sorted = [...filtered].sort((a,b) => goalSortKey(a).localeCompare(goalSortKey(b)));
 
-  const listEl   = document.getElementById('goalsList');
-  const filtered = goals.filter(g =>
-    g.period === goalPeriod &&
-    g.year === goalYear &&
-    (goalPeriod === 'year' || g.month === goalMonth)
-  );
-
-  if (!filtered.length) {
+  if (!sorted.length) {
     listEl.innerHTML = `<div class="empty-state">
       <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-      <p>No goals for this period.</p>
+      <p>No goals yet.</p>
       <small>Tap "Add Goal" to set a target.</small>
     </div>`;
     return;
   }
 
   listEl.innerHTML = '';
-  filtered.forEach(g => {
-    const target   = Math.max(Number(g.target)||1, 1);
-    const progress = Math.min(Number(g.progress)||0, target);
-    const pct      = Math.round(progress / target * 100);
-    const circ     = 2 * Math.PI * 22;
-    const offset   = circ * (1 - pct/100);
+  const longterm = sorted.filter(g => g.period === 'longterm');
+  const regular  = sorted.filter(g => g.period !== 'longterm');
 
-    const card = document.createElement('div');
-    card.className = 'goal-card';
-    card.innerHTML = `
-      <div class="goal-ring">
-        <svg width="60" height="60" viewBox="0 0 60 60">
-          <circle class="goal-ring-bg" cx="30" cy="30" r="22"/>
-          <circle class="goal-ring-fill" cx="30" cy="30" r="22"
-            stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"
-            ${pct>=100?'stroke="#10b981"':''}/>
-        </svg>
-        <div class="goal-ring-label">${pct}%</div>
-      </div>
-      <div class="goal-body">
-        <div class="goal-title">${esc(g.title)}</div>
-        <div class="goal-sub">${esc(g.desc||'')}${g.desc?' · ':''}${progress} / ${target} ${esc(g.unit||'')}</div>
-        <div class="goal-progress-track">
-          <div class="goal-progress-fill" style="width:${pct}%;${pct>=100?'background:var(--success)':''}"></div>
-        </div>
-      </div>
-      <div class="goal-actions">
-        <button class="task-action-btn" data-goal-id="${g.id}" aria-label="Edit goal">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </button>
-      </div>`;
-    listEl.appendChild(card);
-  });
+  if (regular.length) {
+    if (!all && !goalsActiveFilters.has('longterm')) {} // no section header when filtered to one type
+    regular.forEach(g => listEl.appendChild(buildGoalCard(g)));
+  }
+
+  if (longterm.length) {
+    const sec = document.createElement('div');
+    sec.className = 'goals-section-title';
+    sec.textContent = 'Long Term Goals';
+    listEl.appendChild(sec);
+    longterm.forEach(g => listEl.appendChild(buildGoalCard(g)));
+  }
+
   listEl.querySelectorAll('[data-goal-id]').forEach(btn => {
     btn.addEventListener('click', () => openEditGoalModal(Number(btn.dataset.goalId)));
   });
+  listEl.querySelectorAll('.goal-checklist-item input').forEach(chk => {
+    chk.addEventListener('change', () => {
+      const gId  = Number(chk.closest('[data-card-id]').dataset.cardId);
+      const idx  = Number(chk.dataset.idx);
+      const goal = goals.find(x => x.id === gId);
+      if (!goal || !goal.checklist) return;
+      goal.checklist[idx].done = chk.checked;
+      goal.progress = goal.checklist.filter(c => c.done).length;
+      fbSaveGoal(goal);
+      saveLs();
+      renderGoals();
+    });
+  });
 }
 
-document.getElementById('goalPrevBtn').addEventListener('click', () => {
-  if (goalPeriod === 'month') { goalMonth--; if (goalMonth < 0) { goalMonth = 11; goalYear--; } }
-  else goalYear--;
-  renderGoals();
-});
-document.getElementById('goalNextBtn').addEventListener('click', () => {
-  if (goalPeriod === 'month') { goalMonth++; if (goalMonth > 11) { goalMonth = 0; goalYear++; } }
-  else goalYear++;
-  renderGoals();
-});
-document.querySelectorAll('.goals-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    goalPeriod = tab.dataset.period;
-    document.querySelectorAll('.goals-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active'); renderGoals();
+function buildGoalCard(g) {
+  const period  = g.period || 'monthly';
+  const target   = Math.max(Number(g.target)||1, 1);
+  const progress = Math.min(Number(g.progress)||0, target);
+  const pct      = Math.round(progress / target * 100);
+  const circ     = 2 * Math.PI * 20;
+  const offset   = circ * (1 - pct/100);
+  const ringColor = period === 'daily' ? 'var(--goal-daily)' :
+                    period === 'weekly' ? 'var(--goal-weekly)' :
+                    period === 'monthly' ? 'var(--goal-monthly)' :
+                    period === 'yearly' ? 'var(--goal-yearly)' : 'var(--goal-longterm)';
+
+  const card = document.createElement('div');
+  card.className = 'goal-card';
+  card.dataset.period  = period;
+  card.dataset.cardId  = g.id;
+
+  let ringHtml = '';
+  if (period !== 'longterm') {
+    ringHtml = `<div class="goal-ring">
+      <svg width="56" height="56" viewBox="0 0 56 56">
+        <circle class="goal-ring-bg" cx="28" cy="28" r="20"/>
+        <circle class="goal-ring-fill" cx="28" cy="28" r="20"
+          stroke="${pct>=100?'#10b981':ringColor}"
+          stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"/>
+      </svg>
+      <div class="goal-ring-label">${pct}%</div>
+    </div>`;
+  } else {
+    const iconKey = Object.keys(LONGTERM_ICONS).find(k => g.title.toLowerCase().includes(k)) || 'default';
+    ringHtml = `<div class="goal-longterm-icon">${LONGTERM_ICONS[iconKey]}</div>`;
+  }
+
+  let checklistHtml = '';
+  if (period === 'daily' && g.checklist && g.checklist.length) {
+    checklistHtml = `<div class="goal-checklist">` +
+      g.checklist.map((item, i) =>
+        `<label class="goal-checklist-item${item.done?' checked':''}">
+          <input type="checkbox" data-idx="${i}"${item.done?' checked':''}>
+          <span>${esc(item.text)}</span>
+        </label>`
+      ).join('') + `</div>`;
+  }
+
+  const subText = period !== 'longterm'
+    ? `${progress} / ${target} ${esc(g.unit||'')}${g.desc ? ' · ' + esc(g.desc) : ''}`
+    : esc(g.desc||'');
+
+  card.innerHTML = ringHtml + `
+    <div class="goal-body">
+      <div class="goal-top-row">
+        <div class="goal-title">${esc(g.title)}</div>
+        <span class="goal-type-badge ${period}">${PERIOD_LABEL[period]||period}</span>
+        <span class="goal-date-badge">${goalDateLabel(g)}</span>
+      </div>
+      ${subText ? `<div class="goal-sub">${subText}</div>` : ''}
+      ${period !== 'longterm' ? `<div class="goal-progress-track"><div class="goal-progress-fill" style="width:${pct}%;${pct>=100?'background:#10b981':'background:'+ringColor}"></div></div>` : ''}
+      ${checklistHtml}
+    </div>
+    <div class="goal-actions">
+      <button class="task-action-btn" data-goal-id="${g.id}" aria-label="Edit goal">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
+    </div>`;
+  return card;
+}
+
+// Filter chips
+document.querySelectorAll('.goals-filter-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const p = chip.dataset.period;
+    if (p === 'all') {
+      goalsActiveFilters = new Set(['all']);
+    } else {
+      goalsActiveFilters.delete('all');
+      if (goalsActiveFilters.has(p)) {
+        goalsActiveFilters.delete(p);
+        if (!goalsActiveFilters.size) goalsActiveFilters.add('all');
+      } else {
+        goalsActiveFilters.add(p);
+      }
+    }
+    document.querySelectorAll('.goals-filter-chip').forEach(c => {
+      c.classList.toggle('active', goalsActiveFilters.has(c.dataset.period));
+    });
+    renderGoals();
   });
 });
 
-function populateGoalSelects() {
-  const mSel = document.getElementById('goalMonth');
-  const ySel = document.getElementById('goalYear');
-  mSel.innerHTML = MONTHS.map((m,i) => `<option value="${i}"${i===goalMonth?' selected':''}>${m}</option>`).join('');
-  const yr = new Date().getFullYear();
+function populateGoalSelects(mSelId, ySelId, selMonth, selYear) {
+  const mSel = document.getElementById(mSelId);
+  const ySel = document.getElementById(ySelId);
+  const now  = new Date();
+  mSel.innerHTML = MONTHS.map((m,i) => `<option value="${i}"${i===(selMonth??now.getMonth())?' selected':''}>${m}</option>`).join('');
   ySel.innerHTML = '';
-  for (let y = yr-2; y <= yr+5; y++)
-    ySel.innerHTML += `<option value="${y}"${y===goalYear?' selected':''}>${y}</option>`;
+  for (let y = now.getFullYear()-1; y <= now.getFullYear()+6; y++)
+    ySel.innerHTML += `<option value="${y}"${y===(selYear??now.getFullYear())?' selected':''}>${y}</option>`;
 }
 
-// Add goal
+function toggleGoalDateFields(periodSelId, dateWrapId, checklistId) {
+  const p = document.getElementById(periodSelId).value;
+  const dw = document.getElementById(dateWrapId);
+  const cl = document.getElementById(checklistId);
+  dw.style.display = (p === 'longterm') ? 'none' : '';
+  if (cl) cl.style.display = (p === 'daily') ? '' : 'none';
+}
+
+// ── Add Goal ───────────────────────────────────────────
+let addChecklistItems = [];
 const addGoalBackdrop = document.getElementById('addGoalBackdrop');
+
+function renderAddChecklist() {
+  const el = document.getElementById('addChecklistItems');
+  el.innerHTML = addChecklistItems.map((item, i) =>
+    `<div class="checklist-edit-item">
+      <span style="flex:1">${esc(item)}</span>
+      <button data-idx="${i}">&#x2715;</button>
+    </div>`
+  ).join('');
+  el.querySelectorAll('button[data-idx]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      addChecklistItems.splice(Number(btn.dataset.idx), 1);
+      renderAddChecklist();
+    });
+  });
+}
+
+document.getElementById('addChecklistBtn').addEventListener('click', () => {
+  const inp = document.getElementById('addChecklistInput');
+  const val = inp.value.trim();
+  if (val) { addChecklistItems.push(val); inp.value = ''; renderAddChecklist(); }
+});
+document.getElementById('addChecklistInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('addChecklistBtn').click(); }
+});
+
 function openAddGoalModal() {
-  populateGoalSelects();
+  addChecklistItems = [];
+  renderAddChecklist();
+  populateGoalSelects('goalMonth', 'goalYear');
   ['goalTitle','goalDesc','goalTarget','goalUnit'].forEach(id => { document.getElementById(id).value = ''; });
-  document.getElementById('goalPeriodType').value = goalPeriod;
+  document.getElementById('goalPeriodType').value = 'monthly';
+  toggleGoalDateFields('goalPeriodType', 'goalDateFields', 'goalChecklistSection');
   addGoalBackdrop.classList.add('open');
   setTimeout(() => document.getElementById('goalTitle').focus(), 80);
 }
@@ -3009,32 +3214,44 @@ document.getElementById('openAddGoalModal').addEventListener('click', openAddGoa
 document.getElementById('addGoalCancel').addEventListener('click', closeAddGoalModal);
 document.getElementById('addGoalClose').addEventListener('click', closeAddGoalModal);
 addGoalBackdrop.addEventListener('click', e => { if (e.target === addGoalBackdrop) closeAddGoalModal(); });
+document.getElementById('goalPeriodType').addEventListener('change', () =>
+  toggleGoalDateFields('goalPeriodType', 'goalDateFields', 'goalChecklistSection'));
 document.getElementById('addGoalSave').addEventListener('click', () => {
   const title = document.getElementById('goalTitle').value.trim();
   if (!title) { document.getElementById('goalTitle').focus(); return; }
+  const period = document.getElementById('goalPeriodType').value;
   const g = {
     id: Date.now(), title,
-    desc:     document.getElementById('goalDesc').value.trim(),
-    target:   Number(document.getElementById('goalTarget').value)||1,
-    unit:     document.getElementById('goalUnit').value.trim(),
-    progress: 0,
-    period:   document.getElementById('goalPeriodType').value,
-    month:    Number(document.getElementById('goalMonth').value),
-    year:     Number(document.getElementById('goalYear').value)
+    desc:      document.getElementById('goalDesc').value.trim(),
+    target:    period === 'daily' && addChecklistItems.length
+               ? addChecklistItems.length
+               : (Number(document.getElementById('goalTarget').value)||1),
+    unit:      document.getElementById('goalUnit').value.trim(),
+    progress:  0,
+    period,
+    month:     Number(document.getElementById('goalMonth').value),
+    year:      Number(document.getElementById('goalYear').value)
   };
-  goals.push(g); fbSaveGoal(g); renderGoals(); closeAddGoalModal();
+  if (period === 'daily' && addChecklistItems.length)
+    g.checklist = addChecklistItems.map(text => ({ text, done: false }));
+  goals.push(g); fbSaveGoal(g); saveLs(); renderGoals(); closeAddGoalModal();
 });
 
-// Edit goal
+// ── Edit Goal ──────────────────────────────────────────
 const editGoalBackdrop = document.getElementById('editGoalBackdrop');
 function openEditGoalModal(id) {
   const g = goals.find(x => x.id === id); if (!g) return;
   editingGoalId = id;
+  editingGoalChecklist = (g.checklist || []).map(c => ({ ...c }));
   document.getElementById('eGoalTitle').value    = g.title;
   document.getElementById('eGoalDesc').value     = g.desc||'';
   document.getElementById('eGoalTarget').value   = g.target;
   document.getElementById('eGoalProgress').value = g.progress||0;
   document.getElementById('eGoalUnit').value     = g.unit||'';
+  document.getElementById('eGoalPeriodType').value = g.period||'monthly';
+  populateGoalSelects('eGoalMonth', 'eGoalYear', g.month, g.year);
+  toggleGoalDateFields('eGoalPeriodType', 'eGoalDateWrap', 'eGoalChecklistSection');
+  renderEditChecklist();
   editGoalBackdrop.classList.add('open');
   setTimeout(() => document.getElementById('eGoalTitle').focus(), 80);
 }
@@ -3042,6 +3259,37 @@ function closeEditGoalModal() { editGoalBackdrop.classList.remove('open'); editi
 document.getElementById('editGoalCancel').addEventListener('click', closeEditGoalModal);
 document.getElementById('editGoalClose').addEventListener('click', closeEditGoalModal);
 editGoalBackdrop.addEventListener('click', e => { if (e.target === editGoalBackdrop) closeEditGoalModal(); });
+document.getElementById('eGoalPeriodType').addEventListener('change', () =>
+  toggleGoalDateFields('eGoalPeriodType', 'eGoalDateWrap', 'eGoalChecklistSection'));
+
+function renderEditChecklist() {
+  const el = document.getElementById('editChecklistItems');
+  el.innerHTML = editingGoalChecklist.map((item, i) =>
+    `<div class="checklist-edit-item">
+      <input type="checkbox"${item.done?' checked':''} data-idx="${i}" style="width:14px;height:14px;accent-color:var(--goal-daily)">
+      <span style="flex:1">${esc(item.text)}</span>
+      <button data-del="${i}">&#x2715;</button>
+    </div>`
+  ).join('');
+  el.querySelectorAll('input[type=checkbox]').forEach(chk => {
+    chk.addEventListener('change', () => { editingGoalChecklist[Number(chk.dataset.idx)].done = chk.checked; });
+  });
+  el.querySelectorAll('button[data-del]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      editingGoalChecklist.splice(Number(btn.dataset.del), 1);
+      renderEditChecklist();
+    });
+  });
+}
+document.getElementById('editChecklistBtn').addEventListener('click', () => {
+  const inp = document.getElementById('editChecklistInput');
+  const val = inp.value.trim();
+  if (val) { editingGoalChecklist.push({ text: val, done: false }); inp.value = ''; renderEditChecklist(); }
+});
+document.getElementById('editChecklistInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('editChecklistBtn').click(); }
+});
+
 document.getElementById('editGoalSave').addEventListener('click', () => {
   if (editingGoalId === null) return;
   const g = goals.find(x => x.id === editingGoalId);
@@ -3051,14 +3299,26 @@ document.getElementById('editGoalSave').addEventListener('click', () => {
     g.target   = Number(document.getElementById('eGoalTarget').value)||1;
     g.progress = Number(document.getElementById('eGoalProgress').value)||0;
     g.unit     = document.getElementById('eGoalUnit').value.trim();
-    fbSaveGoal(g); renderGoals();
+    g.period   = document.getElementById('eGoalPeriodType').value;
+    g.month    = Number(document.getElementById('eGoalMonth').value);
+    g.year     = Number(document.getElementById('eGoalYear').value);
+    if (g.period === 'daily') {
+      g.checklist = editingGoalChecklist;
+      if (g.checklist.length) {
+        g.target   = g.checklist.length;
+        g.progress = g.checklist.filter(c => c.done).length;
+      }
+    } else {
+      delete g.checklist;
+    }
+    fbSaveGoal(g); saveLs(); renderGoals();
   }
   closeEditGoalModal();
 });
 document.getElementById('deleteGoalBtn').addEventListener('click', () => {
   if (editingGoalId === null) return;
   goals = goals.filter(g => g.id !== editingGoalId);
-  fbDeleteGoal(editingGoalId); renderGoals(); closeEditGoalModal();
+  fbDeleteGoal(editingGoalId); saveLs(); renderGoals(); closeEditGoalModal();
 });
 
 // ── Links ─────────────────────────────────────────────
