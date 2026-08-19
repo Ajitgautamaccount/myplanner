@@ -2205,7 +2205,7 @@ body.has-install-banner #content { padding-bottom: 100px; }
 </div>
 
 <!-- Add Habit Modal -->
-<div class="modal-overlay" id="addHabitOverlay">
+<div class="backdrop" id="addHabitBackdrop">
   <div class="modal" style="max-width:420px">
     <div class="modal-header">
       <h3 class="modal-title">Add Habit</h3>
@@ -2247,7 +2247,7 @@ body.has-install-banner #content { padding-bottom: 100px; }
 </div>
 
 <!-- Edit Habit Modal -->
-<div class="modal-overlay" id="editHabitOverlay">
+<div class="backdrop" id="editHabitBackdrop">
   <div class="modal" style="max-width:420px">
     <div class="modal-header">
       <h3 class="modal-title">Edit Habit</h3>
@@ -2841,9 +2841,9 @@ function openAddHabitModal() {
   document.querySelectorAll('#habitColorRow .habit-color-swatch').forEach(s => {
     s.classList.toggle('selected', s.dataset.color === addHabitColor);
   });
-  document.getElementById('addHabitOverlay').classList.add('active');
+  document.getElementById('addHabitBackdrop').classList.add('open');
 }
-function closeAddHabitModal() { document.getElementById('addHabitOverlay').classList.remove('active'); }
+function closeAddHabitModal() { document.getElementById('addHabitBackdrop').classList.remove('open'); }
 
 function openEditHabitModal(id) {
   const h = habits.find(x => x.id === id); if (!h) return;
@@ -2855,9 +2855,9 @@ function openEditHabitModal(id) {
   document.querySelectorAll('#eHabitColorRow .habit-color-swatch').forEach(s => {
     s.classList.toggle('selected', s.dataset.color === editHabitColor);
   });
-  document.getElementById('editHabitOverlay').classList.add('active');
+  document.getElementById('editHabitBackdrop').classList.add('open');
 }
-function closeEditHabitModal() { document.getElementById('editHabitOverlay').classList.remove('active'); editingHabitId = null; }
+function closeEditHabitModal() { document.getElementById('editHabitBackdrop').classList.remove('open'); editingHabitId = null; }
 
 // Add habit save
 document.getElementById('addHabitSave').addEventListener('click', async () => {
@@ -2897,8 +2897,10 @@ document.getElementById('editHabitSave').addEventListener('click', async () => {
 document.getElementById('openAddHabitModal').addEventListener('click', openAddHabitModal);
 document.getElementById('closeAddHabitModal').addEventListener('click', closeAddHabitModal);
 document.getElementById('cancelAddHabitModal').addEventListener('click', closeAddHabitModal);
+document.getElementById('addHabitBackdrop').addEventListener('click', e => { if (e.target === document.getElementById('addHabitBackdrop')) closeAddHabitModal(); });
 document.getElementById('closeEditHabitModal').addEventListener('click', closeEditHabitModal);
 document.getElementById('cancelEditHabitModal').addEventListener('click', closeEditHabitModal);
+document.getElementById('editHabitBackdrop').addEventListener('click', e => { if (e.target === document.getElementById('editHabitBackdrop')) closeEditHabitModal(); });
 
 document.querySelectorAll('#habitColorRow .habit-color-swatch').forEach(s => {
   s.addEventListener('click', () => {
