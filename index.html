@@ -865,6 +865,33 @@ body {
 .kanban-card-progress-fill { height: 100%; border-radius: 4px; transition: width .3s; }
 .kanban-col-empty { font-size: .78rem; color: var(--text3); text-align: center; padding: 18px 0; }
 
+/* ── Habit Tracker ── */
+.habits-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+.habits-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; }
+.habit-card { background:var(--surface2); border-radius:var(--radius); padding:14px 14px 12px; border-left:4px solid #6366f1; position:relative; }
+.habit-card-top { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.habit-dot { width:11px; height:11px; border-radius:50%; flex-shrink:0; }
+.habit-card-title { font-size:.88rem; font-weight:700; flex:1; word-break:break-word; }
+.habit-card-freq { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; padding:2px 7px; border-radius:10px; background:var(--surface); color:var(--text3); }
+.habit-streak { display:flex; align-items:center; gap:6px; margin-bottom:10px; font-size:.78rem; color:var(--text2); }
+.habit-streak-num { font-size:1.35rem; font-weight:800; color:var(--accent); line-height:1; }
+.habit-streak-label { font-size:.7rem; color:var(--text3); }
+.habit-heatmap { display:flex; flex-wrap:wrap; gap:2px; margin-bottom:10px; }
+.habit-heatmap-cell { width:12px; height:12px; border-radius:2px; background:var(--surface); transition:background .2s; cursor:default; }
+.habit-heatmap-cell.done { background:#22c55e; }
+.habit-heatmap-cell.today-cell { outline:2px solid var(--accent); outline-offset:1px; }
+.habit-card-actions { display:flex; gap:6px; align-items:center; }
+.habit-mark-btn { flex:1; padding:6px 10px; border-radius:8px; font-size:.78rem; font-weight:700; cursor:pointer; border:none; background:var(--accent); color:#fff; transition:opacity .2s; }
+.habit-mark-btn:disabled { opacity:.45; cursor:default; }
+.habit-mark-btn.marked { background:#22c55e; }
+.habit-edit-btn,.habit-del-btn { padding:5px 8px; border-radius:8px; font-size:.78rem; cursor:pointer; border:1px solid var(--border); background:var(--surface); color:var(--text2); }
+.habit-del-btn:hover { background:var(--danger); color:#fff; border-color:var(--danger); }
+.habit-empty { text-align:center; padding:48px 0; color:var(--text3); font-size:.88rem; }
+/* Habit modal */
+.habit-color-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+.habit-color-swatch { width:26px; height:26px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:border-color .15s; }
+.habit-color-swatch.selected { border-color:#fff; box-shadow:0 0 0 2px var(--accent); }
+
 /* ── Quick Access views (Links, T-Codes) ── */
 .qview-header {
   display: flex;
@@ -1548,6 +1575,11 @@ body.has-install-banner #content { padding-bottom: 100px; }
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
     Goals &amp; Targets
   </button>
+  <button class="nav-item" data-view="habits" id="navHabits">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a9 9 0 0 1 9 9c0 3.18-1.65 5.96-4.13 7.56L16 21H8l-.87-2.44A9 9 0 0 1 12 2z"/><line x1="9" y1="9" x2="9" y2="15"/><line x1="15" y1="9" x2="15" y2="15"/></svg>
+    Habit Tracker
+    <span class="nav-count" id="navCountHabits" style="display:none">0</span>
+  </button>
 
   <div class="sidebar-section-label">Quick Access</div>
   <button class="nav-item" data-view="links" id="navLinks">
@@ -1739,6 +1771,21 @@ body.has-install-banner #content { padding-bottom: 100px; }
         <button class="goals-filter-chip" data-period="longterm">Long Term</button>
       </div>
       <div id="goalsList"></div>
+    </div>
+
+    <!-- Habit Tracker view -->
+    <div class="view" id="viewHabits">
+      <div class="habits-header">
+        <div>
+          <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:4px">Habit Tracker</div>
+          <div style="font-size:.85rem;color:var(--text2)">Build streaks, track daily &amp; weekly habits</div>
+        </div>
+        <button class="add-btn btn-goal" id="openAddHabitModal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span class="btn-text">Add Habit</span>
+        </button>
+      </div>
+      <div class="habits-grid" id="habitsList"></div>
     </div>
 
     <!-- Important Dates view -->
@@ -2157,6 +2204,90 @@ body.has-install-banner #content { padding-bottom: 100px; }
   </div>
 </div>
 
+<!-- Add Habit Modal -->
+<div class="modal-overlay" id="addHabitOverlay">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h3 class="modal-title">Add Habit</h3>
+      <button class="modal-close" id="closeAddHabitModal">&times;</button>
+    </div>
+    <div class="field">
+      <label for="habitName">Habit Name *</label>
+      <input type="text" id="habitName" placeholder="e.g. Morning walk, Read 20 pages…" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="habitCategory">Category</label>
+      <input type="text" id="habitCategory" placeholder="e.g. Health, Learning, Finance…" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="habitFreq">Frequency</label>
+      <select id="habitFreq">
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Color</label>
+      <div class="habit-color-row" id="habitColorRow">
+        <div class="habit-color-swatch selected" data-color="#6366f1" style="background:#6366f1"></div>
+        <div class="habit-color-swatch" data-color="#22c55e" style="background:#22c55e"></div>
+        <div class="habit-color-swatch" data-color="#f97316" style="background:#f97316"></div>
+        <div class="habit-color-swatch" data-color="#eab308" style="background:#eab308"></div>
+        <div class="habit-color-swatch" data-color="#ec4899" style="background:#ec4899"></div>
+        <div class="habit-color-swatch" data-color="#14b8a6" style="background:#14b8a6"></div>
+        <div class="habit-color-swatch" data-color="#a855f7" style="background:#a855f7"></div>
+        <div class="habit-color-swatch" data-color="#3b82f6" style="background:#3b82f6"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="cancelAddHabitModal">Cancel</button>
+      <button class="btn btn-primary" id="addHabitSave">Add Habit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Habit Modal -->
+<div class="modal-overlay" id="editHabitOverlay">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h3 class="modal-title">Edit Habit</h3>
+      <button class="modal-close" id="closeEditHabitModal">&times;</button>
+    </div>
+    <div class="field">
+      <label for="eHabitName">Habit Name *</label>
+      <input type="text" id="eHabitName" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="eHabitCategory">Category</label>
+      <input type="text" id="eHabitCategory" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="eHabitFreq">Frequency</label>
+      <select id="eHabitFreq">
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Color</label>
+      <div class="habit-color-row" id="eHabitColorRow">
+        <div class="habit-color-swatch selected" data-color="#6366f1" style="background:#6366f1"></div>
+        <div class="habit-color-swatch" data-color="#22c55e" style="background:#22c55e"></div>
+        <div class="habit-color-swatch" data-color="#f97316" style="background:#f97316"></div>
+        <div class="habit-color-swatch" data-color="#eab308" style="background:#eab308"></div>
+        <div class="habit-color-swatch" data-color="#ec4899" style="background:#ec4899"></div>
+        <div class="habit-color-swatch" data-color="#14b8a6" style="background:#14b8a6"></div>
+        <div class="habit-color-swatch" data-color="#a855f7" style="background:#a855f7"></div>
+        <div class="habit-color-swatch" data-color="#3b82f6" style="background:#3b82f6"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="cancelEditHabitModal">Cancel</button>
+      <button class="btn btn-primary" id="editHabitSave">Save Changes</button>
+    </div>
+  </div>
+</div>
+
 <!-- Important Dates Modal -->
 <!-- Date quick-add popup (anchored to topbar Dates button) -->
 <div id="dateQuickPopup" role="dialog" aria-label="Add Important Date">
@@ -2353,12 +2484,14 @@ const TODOS_COL  = "todos";
 const GOALS_COL  = "goals";
 const LINKS_COL  = "links";
 const TCODES_COL = "tcodes";
+const HABITS_COL = "habits";
 const THEME_KEY  = "planner_theme";
 const LS_TODOS   = "ap_todos_v1";
 const LS_GOALS   = "ap_goals_v1";
 const LS_LINKS   = "ap_links_v1";
 const LS_TCODES  = "ap_tcodes_v1";
 const LS_DATES   = "ap_dates_v1";
+const LS_HABITS  = "ap_habits_v1";
 
 // ── In-memory state ──────────────────────────────────
 // Seed immediately from localStorage so data is visible before Firebase loads
@@ -2370,6 +2503,7 @@ let goals   = JSON.parse(localStorage.getItem(LS_GOALS)   || '[]').filter(g => !
 let links   = JSON.parse(localStorage.getItem(LS_LINKS)   || '[]');
 let tcodes  = JSON.parse(localStorage.getItem(LS_TCODES)  || '[]');
 let importantDates = JSON.parse(localStorage.getItem(LS_DATES) || '[]');
+let habits  = JSON.parse(localStorage.getItem(LS_HABITS)  || '[]');
 
 // ── localStorage persistence ─────────────────────────
 function saveLs() {
@@ -2379,6 +2513,7 @@ function saveLs() {
     localStorage.setItem(LS_LINKS,  JSON.stringify(links));
     localStorage.setItem(LS_TCODES, JSON.stringify(tcodes));
     localStorage.setItem(LS_DATES,  JSON.stringify(importantDates));
+    localStorage.setItem(LS_HABITS, JSON.stringify(habits));
   } catch(e) { console.warn('localStorage write failed', e); }
 }
 
@@ -2403,7 +2538,8 @@ async function retrySync() {
       ...todos.map(t  => setDoc(doc(db, TODOS_COL,  String(t.id)),  { ...t,  _ts: serverTimestamp() })),
       ...goals.map(g  => setDoc(doc(db, GOALS_COL,  String(g.id)),  { ...g,  _ts: serverTimestamp() })),
       ...links.map(l  => setDoc(doc(db, LINKS_COL,  String(l.id)),  { ...l,  _ts: serverTimestamp() })),
-      ...tcodes.map(c => setDoc(doc(db, TCODES_COL, String(c.id)),  { ...c,  _ts: serverTimestamp() }))
+      ...tcodes.map(c => setDoc(doc(db, TCODES_COL, String(c.id)),  { ...c,  _ts: serverTimestamp() })),
+      ...habits.map(h => setDoc(doc(db, HABITS_COL, String(h.id)),  { ...h,  _ts: serverTimestamp() }))
     ]);
     setSyncStatus('online');
     alert('All data synced to cloud successfully!');
@@ -2459,6 +2595,22 @@ async function fbDeleteGoal(id) {
   try {
     await deleteDoc(doc(db, GOALS_COL, String(id)));
     clearDeletedGoal(id);
+    setSyncStatus('online');
+  } catch(e) { handleWriteError(e); }
+}
+async function fbSaveHabit(h) {
+  saveLs();
+  setSyncStatus('syncing');
+  try {
+    await setDoc(doc(db, HABITS_COL, String(h.id)), { ...h, _ts: serverTimestamp() });
+    setSyncStatus('online');
+  } catch(e) { handleWriteError(e); }
+}
+async function fbDeleteHabit(id) {
+  saveLs();
+  setSyncStatus('syncing');
+  try {
+    await deleteDoc(doc(db, HABITS_COL, String(id)));
     setSyncStatus('online');
   } catch(e) { handleWriteError(e); }
 }
@@ -2555,19 +2707,227 @@ document.getElementById('menuToggle').addEventListener('click', () => {
 overlay.addEventListener('click', closeSidebar);
 sidebar.querySelectorAll('.nav-item').forEach(n => n.addEventListener('click', closeSidebar));
 
+// ── Habit Tracker ─────────────────────────────────────
+const HABIT_COLORS = ['#6366f1','#22c55e','#f97316','#eab308','#ec4899','#14b8a6','#a855f7','#3b82f6'];
+let editingHabitId = null;
+let addHabitColor = HABIT_COLORS[0];
+let editHabitColor = HABIT_COLORS[0];
+
+function habitTodayStr() { return new Date().toISOString().slice(0,10); }
+
+function habitStreak(h) {
+  const today = habitTodayStr();
+  const logs = h.logs || {};
+  if (h.frequency === 'weekly') {
+    let streak = 0;
+    const d = new Date(); d.setHours(0,0,0,0);
+    for (let w = 0; w < 52; w++) {
+      const sun = new Date(d); sun.setDate(d.getDate() - d.getDay() - w*7);
+      const weekDays = Array.from({length:7}, (_,i) => { const x = new Date(sun); x.setDate(sun.getDate()+i); return x.toISOString().slice(0,10); });
+      if (weekDays.some(k => logs[k])) streak++;
+      else break;
+    }
+    return streak;
+  }
+  let streak = 0;
+  const d = new Date(); d.setHours(0,0,0,0);
+  const todayDone = logs[today];
+  let offset = todayDone ? 0 : 1;
+  while (true) {
+    const check = new Date(d); check.setDate(d.getDate() - offset);
+    const key = check.toISOString().slice(0,10);
+    if (logs[key]) { streak++; offset++; } else break;
+  }
+  return streak;
+}
+
+function habitHeatmapCells(h) {
+  const logs = h.logs || {};
+  const today = habitTodayStr();
+  const cells = [];
+  const d = new Date(); d.setHours(0,0,0,0);
+  for (let i = 41; i >= 0; i--) {
+    const x = new Date(d); x.setDate(d.getDate() - i);
+    const key = x.toISOString().slice(0,10);
+    cells.push({ key, done: !!logs[key], isToday: key === today });
+  }
+  return cells;
+}
+
+function renderHabits() {
+  const list = document.getElementById('habitsList');
+  if (!list) return;
+  const countEl = document.getElementById('navCountHabits');
+  if (countEl) {
+    countEl.textContent = habits.length;
+    countEl.style.display = habits.length ? '' : 'none';
+  }
+  if (!habits.length) {
+    list.innerHTML = '<div class="habit-empty">No habits yet — click <strong>Add Habit</strong> to start your first streak!</div>';
+    return;
+  }
+  const today = habitTodayStr();
+  list.innerHTML = '';
+  habits.forEach(h => {
+    const streak = habitStreak(h);
+    const cells = habitHeatmapCells(h);
+    const doneTodayOrThisWeek = h.frequency === 'daily'
+      ? !!(h.logs && h.logs[today])
+      : (function(){ const d=new Date();d.setHours(0,0,0,0);const sun=new Date(d);sun.setDate(d.getDate()-d.getDay());const weekDays=Array.from({length:7},(_,i)=>{const x=new Date(sun);x.setDate(sun.getDate()+i);return x.toISOString().slice(0,10);});return weekDays.some(k=>h.logs&&h.logs[k]); })();
+    const card = document.createElement('div');
+    card.className = 'habit-card';
+    card.style.borderLeftColor = h.color || '#6366f1';
+    card.innerHTML = `
+      <div class="habit-card-top">
+        <div class="habit-dot" style="background:${h.color||'#6366f1'}"></div>
+        <div class="habit-card-title">${h.name}</div>
+        <span class="habit-card-freq">${h.frequency==='weekly'?'Weekly':'Daily'}</span>
+      </div>
+      ${h.category ? `<div style="font-size:.7rem;color:var(--text3);margin-bottom:8px;padding-left:19px">${h.category}</div>` : ''}
+      <div class="habit-streak">
+        <div>
+          <div class="habit-streak-num">${streak}</div>
+          <div class="habit-streak-label">day streak</div>
+        </div>
+        <div style="font-size:.72rem;color:var(--text3);margin-left:8px">
+          ${streak >= 7 ? '🔥' : streak >= 3 ? '✨' : streak >= 1 ? '💪' : '🌱'} ${streak === 0 ? 'Start today!' : streak >= 30 ? 'Incredible!' : streak >= 7 ? 'On fire!' : 'Keep going!'}
+        </div>
+      </div>
+      <div class="habit-heatmap" title="Last 42 days">
+        ${cells.map(c=>`<div class="habit-heatmap-cell${c.done?' done':''}${c.isToday?' today-cell':''}" title="${c.key}"></div>`).join('')}
+      </div>
+      <div class="habit-card-actions">
+        <button class="habit-mark-btn${doneTodayOrThisWeek?' marked':''}" data-id="${h.id}" ${doneTodayOrThisWeek?'disabled':''}>
+          ${doneTodayOrThisWeek ? '✓ Done' : h.frequency==='weekly' ? 'Mark this week' : 'Mark today'}
+        </button>
+        <button class="habit-edit-btn" data-id="${h.id}">Edit</button>
+        <button class="habit-del-btn" data-id="${h.id}">✕</button>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+
+  list.querySelectorAll('.habit-mark-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = Number(btn.dataset.id);
+      const h = habits.find(x => x.id === id); if (!h) return;
+      if (!h.logs) h.logs = {};
+      h.logs[today] = true;
+      saveLs();
+      await fbSaveHabit(h);
+      renderHabits();
+    });
+  });
+  list.querySelectorAll('.habit-edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => openEditHabitModal(Number(btn.dataset.id)));
+  });
+  list.querySelectorAll('.habit-del-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Delete this habit and all its log data?')) return;
+      const id = Number(btn.dataset.id);
+      habits = habits.filter(x => x.id !== id);
+      saveLs();
+      await fbDeleteHabit(id);
+      renderHabits();
+    });
+  });
+}
+
+function openAddHabitModal() {
+  addHabitColor = HABIT_COLORS[0];
+  document.getElementById('habitName').value = '';
+  document.getElementById('habitCategory').value = '';
+  document.getElementById('habitFreq').value = 'daily';
+  document.querySelectorAll('#habitColorRow .habit-color-swatch').forEach(s => {
+    s.classList.toggle('selected', s.dataset.color === addHabitColor);
+  });
+  document.getElementById('addHabitOverlay').classList.add('active');
+}
+function closeAddHabitModal() { document.getElementById('addHabitOverlay').classList.remove('active'); }
+
+function openEditHabitModal(id) {
+  const h = habits.find(x => x.id === id); if (!h) return;
+  editingHabitId = id;
+  editHabitColor = h.color || HABIT_COLORS[0];
+  document.getElementById('eHabitName').value = h.name || '';
+  document.getElementById('eHabitCategory').value = h.category || '';
+  document.getElementById('eHabitFreq').value = h.frequency || 'daily';
+  document.querySelectorAll('#eHabitColorRow .habit-color-swatch').forEach(s => {
+    s.classList.toggle('selected', s.dataset.color === editHabitColor);
+  });
+  document.getElementById('editHabitOverlay').classList.add('active');
+}
+function closeEditHabitModal() { document.getElementById('editHabitOverlay').classList.remove('active'); editingHabitId = null; }
+
+// Add habit save
+document.getElementById('addHabitSave').addEventListener('click', async () => {
+  const name = document.getElementById('habitName').value.trim();
+  if (!name) { alert('Please enter a habit name.'); return; }
+  const h = {
+    id: Date.now(),
+    name,
+    category: document.getElementById('habitCategory').value.trim(),
+    frequency: document.getElementById('habitFreq').value,
+    color: addHabitColor,
+    logs: {}
+  };
+  habits.push(h);
+  saveLs();
+  closeAddHabitModal();
+  renderHabits();
+  await fbSaveHabit(h);
+});
+
+// Edit habit save
+document.getElementById('editHabitSave').addEventListener('click', async () => {
+  const h = habits.find(x => x.id === editingHabitId); if (!h) return;
+  const name = document.getElementById('eHabitName').value.trim();
+  if (!name) { alert('Please enter a habit name.'); return; }
+  h.name = name;
+  h.category = document.getElementById('eHabitCategory').value.trim();
+  h.frequency = document.getElementById('eHabitFreq').value;
+  h.color = editHabitColor;
+  saveLs();
+  closeEditHabitModal();
+  renderHabits();
+  await fbSaveHabit(h);
+});
+
+// Color swatch selection
+document.getElementById('openAddHabitModal').addEventListener('click', openAddHabitModal);
+document.getElementById('closeAddHabitModal').addEventListener('click', closeAddHabitModal);
+document.getElementById('cancelAddHabitModal').addEventListener('click', closeAddHabitModal);
+document.getElementById('closeEditHabitModal').addEventListener('click', closeEditHabitModal);
+document.getElementById('cancelEditHabitModal').addEventListener('click', closeEditHabitModal);
+
+document.querySelectorAll('#habitColorRow .habit-color-swatch').forEach(s => {
+  s.addEventListener('click', () => {
+    addHabitColor = s.dataset.color;
+    document.querySelectorAll('#habitColorRow .habit-color-swatch').forEach(x => x.classList.remove('selected'));
+    s.classList.add('selected');
+  });
+});
+document.querySelectorAll('#eHabitColorRow .habit-color-swatch').forEach(s => {
+  s.addEventListener('click', () => {
+    editHabitColor = s.dataset.color;
+    document.querySelectorAll('#eHabitColorRow .habit-color-swatch').forEach(x => x.classList.remove('selected'));
+    s.classList.add('selected');
+  });
+});
+
 // ── Navigation ────────────────────────────────────────
 function setView(view, preset) {
   currentView = view;
   filterViewPreset = preset || '';
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  const viewMap = { goals: 'viewGoals', links: 'viewLinks', tcodes: 'viewTcodes', dates: 'viewDates' };
+  const viewMap = { goals: 'viewGoals', habits: 'viewHabits', links: 'viewLinks', tcodes: 'viewTcodes', dates: 'viewDates' };
   document.getElementById(viewMap[view] || 'viewTasks').classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const navPresetMap = { '': 'navAll', today: 'navToday', overdue: 'navOverdue', upcoming: 'navUpcoming', done: 'navDone' };
-  const navId = { goals: 'navGoals', links: 'navLinks', tcodes: 'navTcodes', dates: 'navDates' }[view] || (navPresetMap[preset] || 'navAll');
+  const navId = { goals: 'navGoals', habits: 'navHabits', links: 'navLinks', tcodes: 'navTcodes', dates: 'navDates' }[view] || (navPresetMap[preset] || 'navAll');
   const nav = document.getElementById(navId);
   if (nav) nav.classList.add('active');
-  const titleMap = { goals: 'Goals & Targets', links: 'Links', tcodes: 'T-Codes', dates: 'Important Dates' };
+  const titleMap = { goals: 'Goals & Targets', habits: 'Habit Tracker', links: 'Links', tcodes: 'T-Codes', dates: 'Important Dates' };
   const taskTitles = { '': 'All Tasks', today: 'Today', overdue: 'Overdue', upcoming: 'Upcoming', done: 'Completed' };
   document.getElementById('viewTitle').textContent = titleMap[view] || (taskTitles[preset] || 'All Tasks');
   // Show/hide topbar task buttons based on view
@@ -2576,6 +2936,7 @@ function setView(view, preset) {
   document.getElementById('exportTasksBtn').style.display = isTask ? '' : 'none';
   if (view === 'tasks')  renderTasks();
   if (view === 'goals')  renderGoals();
+  if (view === 'habits') renderHabits();
   if (view === 'links')  renderLinks();
   if (view === 'tcodes') renderTcodes();
   if (view === 'dates')  renderDatesInlineList();
@@ -4248,6 +4609,14 @@ onSnapshot(collection(db, TCODES_COL), snap => {
   if (currentView === 'tcodes') renderTcodes();
 }, err => {
   console.warn('[onSnapshot] tcodes error:', err.code, err.message);
+});
+
+onSnapshot(collection(db, HABITS_COL), snap => {
+  const fbHabits = snap.docs.map(d => { const x = d.data(); delete x._ts; return x; });
+  if (fbHabits.length > 0) { habits = fbHabits; saveLs(); }
+  if (currentView === 'habits') renderHabits();
+}, err => {
+  console.warn('[onSnapshot] habits error:', err.code, err.message);
 });
 
 // Fallback: hide loading after 6s if Firestore is slow — localStorage data already shown
