@@ -792,6 +792,79 @@ body {
 .checklist-edit-item { display: flex; align-items: center; gap: 6px; font-size: .83rem; color: var(--text2); }
 .checklist-edit-item button { background: none; border: none; cursor: pointer; color: var(--danger); font-size: .9rem; padding: 2px 4px; }
 
+/* ── Goals Kanban board ── */
+.goals-kanban {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+@media (max-width: 860px) {
+  .goals-kanban { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 520px) {
+  .goals-kanban { grid-template-columns: 1fr; }
+}
+.kanban-col {
+  background: var(--surface2);
+  border-radius: var(--radius);
+  padding: 10px 8px 14px;
+  min-height: 120px;
+}
+.kanban-col-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text2);
+  margin-bottom: 10px;
+  padding: 0 4px;
+}
+.kanban-col-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.kanban-col[data-status="new"]        .kanban-col-dot { background: #94a3b8; }
+.kanban-col[data-status="inprogress"] .kanban-col-dot { background: var(--goal-weekly); }
+.kanban-col[data-status="pending"]    .kanban-col-dot { background: var(--goal-yearly); }
+.kanban-col[data-status="done"]       .kanban-col-dot { background: var(--goal-daily); }
+.kanban-col-count {
+  margin-left: auto;
+  background: var(--border);
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: .72rem;
+  font-weight: 700;
+  color: var(--text3);
+}
+.kanban-card {
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 11px 12px;
+  margin-bottom: 8px;
+  border-left: 3px solid var(--goal-monthly);
+  box-shadow: 0 1px 4px rgba(0,0,0,.12);
+  cursor: pointer;
+  transition: transform .12s, box-shadow .12s;
+}
+.kanban-card:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,.18); }
+.kanban-card:last-child { margin-bottom: 0; }
+.kanban-card[data-period="daily"]   { border-left-color: var(--goal-daily); }
+.kanban-card[data-period="weekly"]  { border-left-color: var(--goal-weekly); }
+.kanban-card[data-period="monthly"] { border-left-color: var(--goal-monthly); }
+.kanban-card[data-period="yearly"]  { border-left-color: var(--goal-yearly); }
+.kanban-card[data-period="longterm"]{ border-left-color: var(--goal-longterm); }
+.kanban-card-title { font-size: .86rem; font-weight: 600; margin-bottom: 5px; word-break: break-word; line-height: 1.35; }
+.kanban-card-meta { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; margin-bottom: 5px; }
+.kanban-card-date { font-size: .7rem; color: var(--text3); }
+.kanban-card-progress { height: 4px; background: var(--surface2); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+.kanban-card-progress-fill { height: 100%; border-radius: 4px; transition: width .3s; }
+.kanban-col-empty { font-size: .78rem; color: var(--text3); text-align: center; padding: 18px 0; }
+
 /* ── Quick Access views (Links, T-Codes) ── */
 .qview-header {
   display: flex;
@@ -1882,6 +1955,15 @@ body.has-install-banner #content { padding-bottom: 100px; }
         </div>
       </div>
     </div>
+    <div class="field">
+      <label for="goalStatus">Status</label>
+      <select id="goalStatus">
+        <option value="new" selected>New</option>
+        <option value="inprogress">In Progress</option>
+        <option value="pending">Pending</option>
+        <option value="done">Done</option>
+      </select>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" id="addGoalCancel">Cancel</button>
       <button class="btn btn-primary" id="addGoalSave">Add Goal</button>
@@ -1947,6 +2029,15 @@ body.has-install-banner #content { padding-bottom: 100px; }
           <button class="btn btn-ghost" id="editChecklistBtn" style="flex-shrink:0">+ Add</button>
         </div>
       </div>
+    </div>
+    <div class="field">
+      <label for="eGoalStatus">Status</label>
+      <select id="eGoalStatus">
+        <option value="new">New</option>
+        <option value="inprogress">In Progress</option>
+        <option value="pending">Pending</option>
+        <option value="done">Done</option>
+      </select>
     </div>
     <div class="modal-footer">
       <button class="btn btn-danger" id="deleteGoalBtn">Delete</button>
@@ -2995,7 +3086,8 @@ document.getElementById('editSave').addEventListener('click', () => {
 
 // ── Goals ─────────────────────────────────────────────
 const PERIOD_LABEL = { daily:'Daily', weekly:'Weekly', monthly:'Monthly', yearly:'Yearly', longterm:'Long Term' };
-const LONGTERM_ICONS = { default:'🎯', fir:'🏠', car:'🚗', home:'🏡', travel:'✈️', education:'📚', health:'💪', money:'💰', business:'💼' };
+const GOAL_STATUSES = ['new','inprogress','pending','done'];
+const GOAL_STATUS_LABEL = { new:'New', inprogress:'In Progress', pending:'Pending', done:'Done' };
 
 function goalSortKey(g) {
   if (g.period === 'longterm') return '9999-12';
@@ -3029,28 +3121,36 @@ function renderGoals() {
   }
 
   listEl.innerHTML = '';
-  const longterm = sorted.filter(g => g.period === 'longterm');
-  const regular  = sorted.filter(g => g.period !== 'longterm');
+  const board = document.createElement('div');
+  board.className = 'goals-kanban';
 
-  if (regular.length) {
-    if (!all && !goalsActiveFilters.has('longterm')) {} // no section header when filtered to one type
-    regular.forEach(g => listEl.appendChild(buildGoalCard(g)));
-  }
+  GOAL_STATUSES.forEach(status => {
+    const col = document.createElement('div');
+    col.className = 'kanban-col';
+    col.dataset.status = status;
+    const colGoals = sorted.filter(g => (g.goalStatus || 'new') === status);
+    col.innerHTML = `<div class="kanban-col-header">
+      <span class="kanban-col-dot"></span>
+      ${GOAL_STATUS_LABEL[status]}
+      <span class="kanban-col-count">${colGoals.length}</span>
+    </div>`;
+    if (!colGoals.length) {
+      col.innerHTML += `<div class="kanban-col-empty">No goals</div>`;
+    } else {
+      colGoals.forEach(g => col.appendChild(buildKanbanCard(g)));
+    }
+    board.appendChild(col);
+  });
 
-  if (longterm.length) {
-    const sec = document.createElement('div');
-    sec.className = 'goals-section-title';
-    sec.textContent = 'Long Term Goals';
-    listEl.appendChild(sec);
-    longterm.forEach(g => listEl.appendChild(buildGoalCard(g)));
-  }
+  listEl.appendChild(board);
 
-  listEl.querySelectorAll('[data-goal-id]').forEach(btn => {
-    btn.addEventListener('click', () => openEditGoalModal(Number(btn.dataset.goalId)));
+  listEl.querySelectorAll('.kanban-card').forEach(card => {
+    card.addEventListener('click', () => openEditGoalModal(Number(card.dataset.goalId)));
   });
   listEl.querySelectorAll('.goal-checklist-item input').forEach(chk => {
-    chk.addEventListener('change', () => {
-      const gId  = Number(chk.closest('[data-card-id]').dataset.cardId);
+    chk.addEventListener('change', e => {
+      e.stopPropagation();
+      const gId  = Number(chk.closest('[data-goal-id]').dataset.goalId);
       const idx  = Number(chk.dataset.idx);
       const goal = goals.find(x => x.id === gId);
       if (!goal || !goal.checklist) return;
@@ -3063,42 +3163,24 @@ function renderGoals() {
   });
 }
 
-function buildGoalCard(g) {
-  const period  = g.period || 'monthly';
+function buildKanbanCard(g) {
+  const period   = g.period || 'monthly';
   const target   = Math.max(Number(g.target)||1, 1);
   const progress = Math.min(Number(g.progress)||0, target);
   const pct      = Math.round(progress / target * 100);
-  const circ     = 2 * Math.PI * 20;
-  const offset   = circ * (1 - pct/100);
   const ringColor = period === 'daily' ? 'var(--goal-daily)' :
                     period === 'weekly' ? 'var(--goal-weekly)' :
                     period === 'monthly' ? 'var(--goal-monthly)' :
                     period === 'yearly' ? 'var(--goal-yearly)' : 'var(--goal-longterm)';
 
   const card = document.createElement('div');
-  card.className = 'goal-card';
+  card.className = 'kanban-card';
   card.dataset.period  = period;
-  card.dataset.cardId  = g.id;
-
-  let ringHtml = '';
-  if (period !== 'longterm') {
-    ringHtml = `<div class="goal-ring">
-      <svg width="56" height="56" viewBox="0 0 56 56">
-        <circle class="goal-ring-bg" cx="28" cy="28" r="20"/>
-        <circle class="goal-ring-fill" cx="28" cy="28" r="20"
-          stroke="${pct>=100?'#10b981':ringColor}"
-          stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"/>
-      </svg>
-      <div class="goal-ring-label">${pct}%</div>
-    </div>`;
-  } else {
-    const iconKey = Object.keys(LONGTERM_ICONS).find(k => g.title.toLowerCase().includes(k)) || 'default';
-    ringHtml = `<div class="goal-longterm-icon">${LONGTERM_ICONS[iconKey]}</div>`;
-  }
+  card.dataset.goalId  = g.id;
 
   let checklistHtml = '';
   if (period === 'daily' && g.checklist && g.checklist.length) {
-    checklistHtml = `<div class="goal-checklist">` +
+    checklistHtml = `<div class="goal-checklist" style="margin-top:7px">` +
       g.checklist.map((item, i) =>
         `<label class="goal-checklist-item${item.done?' checked':''}">
           <input type="checkbox" data-idx="${i}"${item.done?' checked':''}>
@@ -3107,26 +3189,21 @@ function buildGoalCard(g) {
       ).join('') + `</div>`;
   }
 
-  const subText = period !== 'longterm'
-    ? `${progress} / ${target} ${esc(g.unit||'')}${g.desc ? ' · ' + esc(g.desc) : ''}`
-    : esc(g.desc||'');
+  const longtermIcon = period === 'longterm' ? `<span style="font-size:1.1rem;margin-right:4px">🎯</span>` : '';
 
-  card.innerHTML = ringHtml + `
-    <div class="goal-body">
-      <div class="goal-top-row">
-        <div class="goal-title">${esc(g.title)}</div>
-        <span class="goal-type-badge ${period}">${PERIOD_LABEL[period]||period}</span>
-        <span class="goal-date-badge">${goalDateLabel(g)}</span>
-      </div>
-      ${subText ? `<div class="goal-sub">${subText}</div>` : ''}
-      ${period !== 'longterm' ? `<div class="goal-progress-track"><div class="goal-progress-fill" style="width:${pct}%;${pct>=100?'background:#10b981':'background:'+ringColor}"></div></div>` : ''}
-      ${checklistHtml}
+  card.innerHTML = `
+    <div class="kanban-card-title">${longtermIcon}${esc(g.title)}</div>
+    <div class="kanban-card-meta">
+      <span class="goal-type-badge ${period}" style="font-size:.6rem;padding:1px 6px">${PERIOD_LABEL[period]||period}</span>
+      <span class="kanban-card-date">${goalDateLabel(g)}</span>
     </div>
-    <div class="goal-actions">
-      <button class="task-action-btn" data-goal-id="${g.id}" aria-label="Edit goal">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-      </button>
-    </div>`;
+    ${g.desc ? `<div style="font-size:.75rem;color:var(--text3);margin-bottom:2px">${esc(g.desc)}</div>` : ''}
+    ${period !== 'longterm' ? `
+    <div style="font-size:.72rem;color:var(--text2);margin-bottom:2px">${progress} / ${target}${g.unit?' '+esc(g.unit):''}</div>
+    <div class="kanban-card-progress">
+      <div class="kanban-card-progress-fill" style="width:${pct}%;background:${pct>=100?'#10b981':ringColor}"></div>
+    </div>` : ''}
+    ${checklistHtml}`;
   return card;
 }
 
@@ -3205,6 +3282,7 @@ function openAddGoalModal() {
   populateGoalSelects('goalMonth', 'goalYear');
   ['goalTitle','goalDesc','goalTarget','goalUnit'].forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('goalPeriodType').value = 'monthly';
+  document.getElementById('goalStatus').value = 'new';
   toggleGoalDateFields('goalPeriodType', 'goalDateFields', 'goalChecklistSection');
   addGoalBackdrop.classList.add('open');
   setTimeout(() => document.getElementById('goalTitle').focus(), 80);
@@ -3222,15 +3300,16 @@ document.getElementById('addGoalSave').addEventListener('click', () => {
   const period = document.getElementById('goalPeriodType').value;
   const g = {
     id: Date.now(), title,
-    desc:      document.getElementById('goalDesc').value.trim(),
-    target:    period === 'daily' && addChecklistItems.length
-               ? addChecklistItems.length
-               : (Number(document.getElementById('goalTarget').value)||1),
-    unit:      document.getElementById('goalUnit').value.trim(),
-    progress:  0,
+    desc:       document.getElementById('goalDesc').value.trim(),
+    target:     period === 'daily' && addChecklistItems.length
+                ? addChecklistItems.length
+                : (Number(document.getElementById('goalTarget').value)||1),
+    unit:       document.getElementById('goalUnit').value.trim(),
+    progress:   0,
     period,
-    month:     Number(document.getElementById('goalMonth').value),
-    year:      Number(document.getElementById('goalYear').value)
+    goalStatus: document.getElementById('goalStatus').value || 'new',
+    month:      Number(document.getElementById('goalMonth').value),
+    year:       Number(document.getElementById('goalYear').value)
   };
   if (period === 'daily' && addChecklistItems.length)
     g.checklist = addChecklistItems.map(text => ({ text, done: false }));
@@ -3249,6 +3328,7 @@ function openEditGoalModal(id) {
   document.getElementById('eGoalProgress').value = g.progress||0;
   document.getElementById('eGoalUnit').value     = g.unit||'';
   document.getElementById('eGoalPeriodType').value = g.period||'monthly';
+  document.getElementById('eGoalStatus').value = g.goalStatus || 'new';
   populateGoalSelects('eGoalMonth', 'eGoalYear', g.month, g.year);
   toggleGoalDateFields('eGoalPeriodType', 'eGoalDateWrap', 'eGoalChecklistSection');
   renderEditChecklist();
@@ -3299,9 +3379,10 @@ document.getElementById('editGoalSave').addEventListener('click', () => {
     g.target   = Number(document.getElementById('eGoalTarget').value)||1;
     g.progress = Number(document.getElementById('eGoalProgress').value)||0;
     g.unit     = document.getElementById('eGoalUnit').value.trim();
-    g.period   = document.getElementById('eGoalPeriodType').value;
-    g.month    = Number(document.getElementById('eGoalMonth').value);
-    g.year     = Number(document.getElementById('eGoalYear').value);
+    g.period     = document.getElementById('eGoalPeriodType').value;
+    g.goalStatus = document.getElementById('eGoalStatus').value || 'new';
+    g.month      = Number(document.getElementById('eGoalMonth').value);
+    g.year       = Number(document.getElementById('eGoalYear').value);
     if (g.period === 'daily') {
       g.checklist = editingGoalChecklist;
       if (g.checklist.length) {
