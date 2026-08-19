@@ -887,6 +887,24 @@ body {
 .habit-edit-btn,.habit-del-btn { padding:5px 8px; border-radius:8px; font-size:.78rem; cursor:pointer; border:1px solid var(--border); background:var(--surface); color:var(--text2); }
 .habit-del-btn:hover { background:var(--danger); color:#fff; border-color:var(--danger); }
 .habit-empty { text-align:center; padding:48px 0; color:var(--text3); font-size:.88rem; }
+/* Habit report */
+.habit-report-card { background:var(--surface2); border-radius:var(--radius); padding:14px 16px; margin-bottom:14px; border-left:4px solid #6366f1; }
+.habit-report-card:last-child { margin-bottom:0; }
+.habit-report-title { font-size:.9rem; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+.habit-report-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px; }
+.habit-stat-box { background:var(--surface); border-radius:8px; padding:8px 10px; text-align:center; }
+.habit-stat-val { font-size:1.3rem; font-weight:800; color:var(--accent); line-height:1; }
+.habit-stat-label { font-size:.65rem; color:var(--text3); margin-top:2px; text-transform:uppercase; letter-spacing:.05em; }
+.habit-report-cal-label { font-size:.7rem; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
+.habit-report-cal { display:flex; flex-wrap:wrap; gap:2px; margin-bottom:4px; }
+.habit-report-cal-cell { width:14px; height:14px; border-radius:2px; background:var(--surface); }
+.habit-report-cal-cell.done { background:#22c55e; }
+.habit-report-cal-cell.today-cell { outline:2px solid var(--accent); outline-offset:1px; }
+.habit-report-dow { display:flex; gap:2px; margin-bottom:8px; }
+.habit-report-dow span { width:14px; font-size:.55rem; color:var(--text3); text-align:center; }
+.habit-report-empty { text-align:center; color:var(--text3); font-size:.88rem; padding:32px 0; }
+@media(max-width:520px) { .habit-report-stats { grid-template-columns:repeat(2,1fr); } }
+
 /* Habit modal */
 .habit-color-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
 .habit-color-swatch { width:26px; height:26px; border-radius:50%; cursor:pointer; border:3px solid transparent; transition:border-color .15s; }
@@ -1780,10 +1798,16 @@ body.has-install-banner #content { padding-bottom: 100px; }
           <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:4px">Habit Tracker</div>
           <div style="font-size:.85rem;color:var(--text2)">Build streaks, track daily &amp; weekly habits</div>
         </div>
-        <button class="add-btn btn-goal" id="openAddHabitModal">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span class="btn-text">Add Habit</span>
-        </button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="add-btn" id="openHabitReportModal" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 17v-4"/><path d="M12 17v-8"/><path d="M16 17v-6"/></svg>
+            <span class="btn-text">Report</span>
+          </button>
+          <button class="add-btn btn-goal" id="openAddHabitModal">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span class="btn-text">Add Habit</span>
+          </button>
+        </div>
       </div>
       <div class="habits-grid" id="habitsList"></div>
     </div>
@@ -2201,6 +2225,17 @@ body.has-install-banner #content { padding-bottom: 100px; }
       <button class="btn btn-ghost" id="editTcodeCancel">Cancel</button>
       <button class="btn btn-primary" id="editTcodeSave">Save</button>
     </div>
+  </div>
+</div>
+
+<!-- Habit Report Modal -->
+<div class="backdrop" id="habitReportBackdrop">
+  <div class="modal" style="max-width:640px;max-height:88vh;overflow-y:auto">
+    <div class="modal-header">
+      <h3 class="modal-title">Habit Report</h3>
+      <button class="modal-close" id="closeHabitReportModal">&times;</button>
+    </div>
+    <div id="habitReportBody"></div>
   </div>
 </div>
 
@@ -2832,6 +2867,118 @@ function renderHabits() {
     });
   });
 }
+
+function buildHabitReport() {
+  const body = document.getElementById('habitReportBody');
+  if (!habits.length) {
+    body.innerHTML = '<div class="habit-report-empty">No habits added yet.</div>';
+    return;
+  }
+  const today = habitTodayStr();
+  const todayDate = new Date(); todayDate.setHours(0,0,0,0);
+
+  body.innerHTML = habits.map(h => {
+    const logs = h.logs || {};
+    const allKeys = Object.keys(logs).filter(k => logs[k]).sort();
+    const total = allKeys.length;
+
+    // Last 7 days rate
+    let done7 = 0;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(todayDate); d.setDate(todayDate.getDate() - i);
+      if (logs[d.toISOString().slice(0,10)]) done7++;
+    }
+    const rate7 = h.frequency === 'daily' ? Math.round(done7/7*100) : '-';
+
+    // Last 30 days rate
+    let done30 = 0;
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(todayDate); d.setDate(todayDate.getDate() - i);
+      if (logs[d.toISOString().slice(0,10)]) done30++;
+    }
+    const rate30 = h.frequency === 'daily' ? Math.round(done30/30*100) : '-';
+
+    // Best streak
+    let bestStreak = 0, cur = 0;
+    if (allKeys.length) {
+      let prev = null;
+      for (const k of allKeys) {
+        if (prev) {
+          const diff = (new Date(k) - new Date(prev)) / 86400000;
+          cur = diff === 1 ? cur + 1 : 1;
+        } else { cur = 1; }
+        if (cur > bestStreak) bestStreak = cur;
+        prev = k;
+      }
+    }
+
+    // Current streak
+    const currentStreak = habitStreak(h);
+
+    // 90-day calendar
+    const calDays = 91;
+    const startDate = new Date(todayDate); startDate.setDate(todayDate.getDate() - calDays + 1);
+    // align to Sunday
+    const startOffset = startDate.getDay();
+    const paddedStart = new Date(startDate); paddedStart.setDate(startDate.getDate() - startOffset);
+    const cells = [];
+    const d = new Date(paddedStart);
+    const endDate = new Date(todayDate);
+    while (d <= endDate) {
+      const key = d.toISOString().slice(0,10);
+      cells.push({ key, done: !!logs[key], isToday: key === today, future: d > todayDate, pad: d < startDate });
+      d.setDate(d.getDate() + 1);
+    }
+
+    const calHtml = cells.map(c =>
+      `<div class="habit-report-cal-cell${c.done&&!c.pad?' done':''}${c.isToday?' today-cell':''}" title="${c.pad?'':c.key}" style="${c.pad?'opacity:0':''}" ></div>`
+    ).join('');
+
+    return `
+      <div class="habit-report-card" style="border-left-color:${h.color||'#6366f1'}">
+        <div class="habit-report-title">
+          <div style="width:10px;height:10px;border-radius:50%;background:${h.color||'#6366f1'};flex-shrink:0"></div>
+          ${h.name}
+          <span style="font-size:.7rem;font-weight:600;color:var(--text3);margin-left:4px">${h.frequency==='weekly'?'Weekly':'Daily'}${h.category?' · '+h.category:''}</span>
+        </div>
+        <div class="habit-report-stats">
+          <div class="habit-stat-box">
+            <div class="habit-stat-val">${currentStreak}</div>
+            <div class="habit-stat-label">Current Streak</div>
+          </div>
+          <div class="habit-stat-box">
+            <div class="habit-stat-val">${bestStreak}</div>
+            <div class="habit-stat-label">Best Streak</div>
+          </div>
+          <div class="habit-stat-box">
+            <div class="habit-stat-val">${h.frequency==='daily'?rate7+'%':done7}</div>
+            <div class="habit-stat-label">Last 7 Days</div>
+          </div>
+          <div class="habit-stat-box">
+            <div class="habit-stat-val">${h.frequency==='daily'?rate30+'%':done30}</div>
+            <div class="habit-stat-label">Last 30 Days</div>
+          </div>
+        </div>
+        <div class="habit-stat-box" style="text-align:left;margin-bottom:10px;padding:6px 10px;display:inline-flex;gap:16px">
+          <span style="font-size:.78rem;color:var(--text2)">Total completions: <strong>${total}</strong></span>
+          <span style="font-size:.78rem;color:var(--text2)">Started: <strong>${allKeys[0] || '—'}</strong></span>
+        </div>
+        <div class="habit-report-cal-label">Last 90 Days</div>
+        <div class="habit-report-dow">${['S','M','T','W','T','F','S'].map(x=>`<span>${x}</span>`).join('')}</div>
+        <div class="habit-report-cal">${calHtml}</div>
+      </div>`;
+  }).join('');
+}
+
+function openHabitReportModal() {
+  buildHabitReport();
+  document.getElementById('habitReportBackdrop').classList.add('open');
+}
+function closeHabitReportModal() { document.getElementById('habitReportBackdrop').classList.remove('open'); }
+
+document.getElementById('openHabitReportModal').addEventListener('click', openHabitReportModal);
+document.getElementById('closeHabitReportModal').addEventListener('click', closeHabitReportModal);
+document.getElementById('habitReportBackdrop').addEventListener('click', e => { if (e.target === document.getElementById('habitReportBackdrop')) closeHabitReportModal(); });
 
 function openAddHabitModal() {
   addHabitColor = HABIT_COLORS[0];
