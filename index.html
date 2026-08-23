@@ -4547,21 +4547,50 @@ document.getElementById('exportTcodesBtn').addEventListener('click', () => {
     if (aFav !== bFav) return aFav - bFav;
     return (a.tag || '').localeCompare(b.tag || '');
   });
-  const codeW = Math.max(8,  ...sorted.map(c => (c.code || '').length));
-  const tagW  = Math.max(5,  ...sorted.map(c => (c.tag  || '').length));
-  const pad = (s, n) => String(s).padEnd(n);
-  const sep = '-'.repeat(codeW + 2) + '-+-' + '-'.repeat(tagW + 2) + '-+-' + '-'.repeat(60);
-  const header = `${'T-CODE'.padEnd(codeW)}  | ${'TAG'.padEnd(tagW)}  | DESCRIPTION`;
-  const lines = [`SAP T-Codes / Tables Export`, `Generated: ${new Date().toLocaleString()}`, '', header, sep];
-  let lastTag = null;
+  const xe = v => String(v === null || v === undefined ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const tagColors = {};
+  const palette = ['#D9E1F2','#E2EFDA','#FCE4D6','#FFF2CC','#EDEDED','#F4CCCC','#D0E4F7','#EAD1DC'];
+  let pi = 0;
+  sorted.forEach(c => { if (c.tag && !tagColors[c.tag]) tagColors[c.tag] = palette[pi++ % palette.length]; });
+  const headerStyle = 'font-size:12pt;font-weight:bold;background:#4472C4;color:#FFFFFF;border:1pt solid #2F5496;';
+  const cellStyle   = 'font-size:10pt;border:1pt solid #BFC7D5;vertical-align:top;';
+  let rows = `<Row>
+    <Cell ss:StyleID="h"><Data ss:Type="String">T-Code</Data></Cell>
+    <Cell ss:StyleID="h"><Data ss:Type="String">Tag</Data></Cell>
+    <Cell ss:StyleID="h"><Data ss:Type="String">Description</Data></Cell>
+  </Row>`;
   sorted.forEach(c => {
-    if (c.tag !== lastTag) { if (lastTag !== null) lines.push(''); lastTag = c.tag; }
-    lines.push(`${pad(c.code || '', codeW)}  | ${pad(c.tag || '', tagW)}  | ${c.desc || ''}`);
+    const bg = tagColors[c.tag || ''] || '#FFFFFF';
+    rows += `<Row>
+    <Cell ss:StyleID="c${xe(c.tag)}"><Data ss:Type="String">${xe(c.code)}</Data></Cell>
+    <Cell ss:StyleID="c${xe(c.tag)}"><Data ss:Type="String">${xe(c.tag)}</Data></Cell>
+    <Cell ss:StyleID="c${xe(c.tag)}"><Data ss:Type="String">${xe(c.desc)}</Data></Cell>
+  </Row>`;
   });
-  const blob = new Blob([lines.join('\r\n')], { type: 'text/plain;charset=utf-8;' });
+  const styleBlocks = Object.entries(tagColors).map(([tag, bg]) =>
+    `<Style ss:ID="c${xe(tag)}"><Alignment ss:WrapText="1"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#BFC7D5"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#BFC7D5"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#BFC7D5"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#BFC7D5"/></Borders><Font ss:Size="10"/><Interior ss:Color="${bg}" ss:Pattern="Solid"/></Style>`
+  ).join('');
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+  <Styles>
+    <Style ss:ID="h"><Alignment ss:WrapText="1"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="#2F5496"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#2F5496"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#2F5496"/><Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="#2F5496"/></Borders><Font ss:Bold="1" ss:Size="12" ss:Color="#FFFFFF"/><Interior ss:Color="#4472C4" ss:Pattern="Solid"/></Style>
+    ${styleBlocks}
+  </Styles>
+  <Worksheet ss:Name="T-Codes">
+    <Table ss:DefaultColumnWidth="120">
+      <Column ss:Width="120"/>
+      <Column ss:Width="100"/>
+      <Column ss:Width="350"/>
+      ${rows}
+    </Table>
+  </Worksheet>
+</Workbook>`;
+  const blob = new Blob([xml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'tcodes.txt';
+  a.download = 'tcodes.xls';
   document.body.appendChild(a); a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 });
