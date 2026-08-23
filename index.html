@@ -4784,6 +4784,140 @@ onSnapshot(collection(db, HABITS_COL), snap => {
 
 // Fallback: hide loading after 6s if Firestore is slow — localStorage data already shown
 setTimeout(() => { if (!todosLoaded) { todosLoaded = true; goalsLoaded = true; hideLoading(); renderTasks(); } }, 6000);
+
+// ── SAP MM T-codes seed ───────────────────────────────
+const SAP_MM_SEED_KEY = 'ap_sap_mm_seeded_v1';
+function seedSapMmTcodes() {
+  if (localStorage.getItem(SAP_MM_SEED_KEY)) return;
+  const existing = new Set(tcodes.map(t => t.code.toUpperCase()));
+  const entries = [
+    // ── Purchasing / PO ──
+    { code:'ME21N', desc:'Create Purchase Order', tag:'MM Purchasing' },
+    { code:'ME22N', desc:'Change Purchase Order', tag:'MM Purchasing' },
+    { code:'ME23N', desc:'Display Purchase Order', tag:'MM Purchasing' },
+    { code:'ME2M',  desc:'Purchase Orders by Material', tag:'MM Purchasing' },
+    { code:'ME2L',  desc:'Purchase Orders by Vendor', tag:'MM Purchasing' },
+    { code:'ME2N',  desc:'Purchase Orders by PO Number', tag:'MM Purchasing' },
+    { code:'ME9F',  desc:'Print/Transmit Purchase Order', tag:'MM Purchasing' },
+    { code:'ME29N', desc:'Release Purchase Order', tag:'MM Purchasing' },
+    // ── Purchase Requisition ──
+    { code:'ME51N', desc:'Create Purchase Requisition', tag:'MM Purchasing' },
+    { code:'ME52N', desc:'Change Purchase Requisition', tag:'MM Purchasing' },
+    { code:'ME53N', desc:'Display Purchase Requisition', tag:'MM Purchasing' },
+    { code:'ME54N', desc:'Release Purchase Requisition', tag:'MM Purchasing' },
+    { code:'ME5A',  desc:'Purchase Requisitions: List Display', tag:'MM Purchasing' },
+    { code:'ME57',  desc:'Assign and Process Purchase Requisitions', tag:'MM Purchasing' },
+    { code:'ME58',  desc:'Ordering: Assigned Requisitions', tag:'MM Purchasing' },
+    // ── RFQ / Quotation ──
+    { code:'ME41',  desc:'Create Request for Quotation (RFQ)', tag:'MM Purchasing' },
+    { code:'ME42',  desc:'Change RFQ', tag:'MM Purchasing' },
+    { code:'ME43',  desc:'Display RFQ', tag:'MM Purchasing' },
+    { code:'ME47',  desc:'Maintain Quotation', tag:'MM Purchasing' },
+    { code:'ME48',  desc:'Display Quotation', tag:'MM Purchasing' },
+    { code:'ME49',  desc:'Price Comparison List', tag:'MM Purchasing' },
+    // ── Outline Agreements ──
+    { code:'ME31K', desc:'Create Contract', tag:'MM Purchasing' },
+    { code:'ME32K', desc:'Change Contract', tag:'MM Purchasing' },
+    { code:'ME33K', desc:'Display Contract', tag:'MM Purchasing' },
+    { code:'ME31L', desc:'Create Scheduling Agreement', tag:'MM Purchasing' },
+    { code:'ME32L', desc:'Change Scheduling Agreement', tag:'MM Purchasing' },
+    { code:'ME33L', desc:'Display Scheduling Agreement', tag:'MM Purchasing' },
+    { code:'ME3M',  desc:'Outline Agreements by Material', tag:'MM Purchasing' },
+    // ── Goods Receipt / Inventory ──
+    { code:'MIGO',  desc:'Goods Movement (GR, GI, Transfer)', tag:'MM Purchasing' },
+    { code:'MB51',  desc:'Material Document List', tag:'MM Purchasing' },
+    { code:'MB52',  desc:'Warehouse Stocks of Material', tag:'MM Purchasing' },
+    { code:'MB53',  desc:'Plant Availability', tag:'MM Purchasing' },
+    { code:'MMBE',  desc:'Stock Overview', tag:'MM Purchasing' },
+    { code:'MB1A',  desc:'Goods Withdrawal (GI)', tag:'MM Purchasing' },
+    { code:'MB1C',  desc:'Other Goods Receipts', tag:'MM Purchasing' },
+    // ── Invoice Verification ──
+    { code:'MIRO',  desc:'Enter Incoming Invoice (LIV)', tag:'MM Purchasing' },
+    { code:'MIR4',  desc:'Display Invoice Document', tag:'MM Purchasing' },
+    { code:'MIR7',  desc:'Park Incoming Invoice', tag:'MM Purchasing' },
+    { code:'MRBR',  desc:'Release Blocked Invoices', tag:'MM Purchasing' },
+    { code:'MR8M',  desc:'Cancel Invoice Document', tag:'MM Purchasing' },
+    { code:'MR11',  desc:'GR/IR Account Maintenance', tag:'MM Purchasing' },
+    // ── Master Data ──
+    { code:'MM01',  desc:'Create Material Master', tag:'MM Master Data' },
+    { code:'MM02',  desc:'Change Material Master', tag:'MM Master Data' },
+    { code:'MM03',  desc:'Display Material Master', tag:'MM Master Data' },
+    { code:'MM60',  desc:'Material Where-Used List', tag:'MM Master Data' },
+    { code:'MK01',  desc:'Create Vendor (Purchasing)', tag:'MM Master Data' },
+    { code:'MK02',  desc:'Change Vendor (Purchasing)', tag:'MM Master Data' },
+    { code:'MK03',  desc:'Display Vendor (Purchasing)', tag:'MM Master Data' },
+    { code:'MK12',  desc:'Change Vendor: Planned Changes', tag:'MM Master Data' },
+    { code:'ME11',  desc:'Create Purchasing Info Record', tag:'MM Master Data' },
+    { code:'ME12',  desc:'Change Purchasing Info Record', tag:'MM Master Data' },
+    { code:'ME13',  desc:'Display Purchasing Info Record', tag:'MM Master Data' },
+    { code:'ME15',  desc:'Flag Info Record for Deletion', tag:'MM Master Data' },
+    { code:'ME1M',  desc:'Info Records by Material', tag:'MM Master Data' },
+    // ── Source List / Quota ──
+    { code:'ME01',  desc:'Maintain Source List', tag:'MM Purchasing' },
+    { code:'ME03',  desc:'Display Source List', tag:'MM Purchasing' },
+    { code:'MEQ1',  desc:'Maintain Quota Arrangement', tag:'MM Purchasing' },
+    { code:'MEQ3',  desc:'Display Quota Arrangement', tag:'MM Purchasing' },
+    // ── Reporting / Analysis ──
+    { code:'ME2C',  desc:'Purchase Orders by Material Group', tag:'MM Reporting' },
+    { code:'ME2K',  desc:'Purchase Orders by Account Assignment', tag:'MM Reporting' },
+    { code:'ME4M',  desc:'RFQs by Material', tag:'MM Reporting' },
+    { code:'ME6H',  desc:'Vendor Evaluation Analysis', tag:'MM Reporting' },
+    { code:'MB25',  desc:'Reservation List', tag:'MM Reporting' },
+    { code:'ME80FN',desc:'General Analyses for Purchasing', tag:'MM Reporting' },
+    { code:'ME2W',  desc:'Purchase Orders by Supplying Plant', tag:'MM Reporting' },
+    // ── Tables (as reference entries) ──
+    { code:'EKKO',  desc:'TABLE: Purchasing Document Header (PO/Contract/SA header data — vendor, doc type, purch org, currency)', tag:'MM Tables' },
+    { code:'EKPO',  desc:'TABLE: Purchasing Document Item (line-level — material, qty, price, plant, storage loc, account assignment)', tag:'MM Tables' },
+    { code:'EKES',  desc:'TABLE: Vendor Confirmations (order acknowledgements, shipping notifications per PO line)', tag:'MM Tables' },
+    { code:'EKET',  desc:'TABLE: Scheduling Agreement Delivery Schedules (delivery dates & quantities per SA line)', tag:'MM Tables' },
+    { code:'EKBE',  desc:'TABLE: History per Purchasing Document (GR, IR, delivery cost postings linked to PO)', tag:'MM Tables' },
+    { code:'EKKN',  desc:'TABLE: Account Assignment in Purchasing (cost center, WBS, order per PO line)', tag:'MM Tables' },
+    { code:'EKPA',  desc:'TABLE: Partner Roles in Purchasing (ship-to, invoicing party, goods supplier per PO)', tag:'MM Tables' },
+    { code:'MARA',  desc:'TABLE: General Material Data (material type, industry sector, base UoM, dimensions)', tag:'MM Tables' },
+    { code:'MARC',  desc:'TABLE: Plant Data for Material (MRP type, lot size, lead time, procurement type per plant)', tag:'MM Tables' },
+    { code:'MARD',  desc:'TABLE: Storage Location Data (unrestricted, QI, blocked stock per plant/sloc)', tag:'MM Tables' },
+    { code:'MAKT',  desc:'TABLE: Material Descriptions (short text per language)', tag:'MM Tables' },
+    { code:'MBEW',  desc:'TABLE: Material Valuation (moving avg price, std price, valuation class per plant)', tag:'MM Tables' },
+    { code:'MKPF',  desc:'TABLE: Material Document Header (GR/GI/transfer header — posting date, user, doc type)', tag:'MM Tables' },
+    { code:'MSEG',  desc:'TABLE: Material Document Segment/Items (movement type, qty, plant, sloc, PO reference)', tag:'MM Tables' },
+    { code:'LFA1',  desc:'TABLE: Vendor Master General (vendor name, address, country, tax number)', tag:'MM Tables' },
+    { code:'LFB1',  desc:'TABLE: Vendor Master Company Code Data (reconciliation acct, payment terms, payment methods)', tag:'MM Tables' },
+    { code:'LFM1',  desc:'TABLE: Vendor Master Purchasing Org Data (order currency, Incoterms, min order value)', tag:'MM Tables' },
+    { code:'EINE',  desc:'TABLE: Purchasing Info Record — Purchasing Org Data (price, scales, planned delivery time)', tag:'MM Tables' },
+    { code:'EINA',  desc:'TABLE: Purchasing Info Record — General Data (material, vendor, order unit, tolerance)', tag:'MM Tables' },
+    { code:'RBKP',  desc:'TABLE: Invoice Receipt Document Header (MIRO posted invoices — vendor, amount, date)', tag:'MM Tables' },
+    { code:'RSEG',  desc:'TABLE: Invoice Receipt Document Items (line items linking invoice to PO/GR)', tag:'MM Tables' },
+    { code:'T001',  desc:'TABLE: Company Codes (company code, name, country, currency)', tag:'MM Tables' },
+    { code:'T001W', desc:'TABLE: Plants/Branches (plant name, company code, address, factory calendar)', tag:'MM Tables' },
+    { code:'T001L', desc:'TABLE: Storage Locations (sloc name per plant)', tag:'MM Tables' },
+    { code:'T024',  desc:'TABLE: Purchasing Groups (buyer group name and description)', tag:'MM Tables' },
+    { code:'T024E', desc:'TABLE: Purchasing Organizations (purch org name, company code assignment)', tag:'MM Tables' },
+    // ── Events ──
+    { code:'Event: PR Approval',     desc:'Purchase Requisition approval workflow triggered when PR is created/changed — approvers notified via workflow', tag:'MM Events' },
+    { code:'Event: PO Release',      desc:'PO Release Strategy — PO blocked until all release codes approved; triggers output message to vendor on final release', tag:'MM Events' },
+    { code:'Event: GR Posted',       desc:'Goods Receipt posted in MIGO — triggers 3-way match check, updates PO history, may auto-clear GR/IR account', tag:'MM Events' },
+    { code:'Event: Invoice Parked',  desc:'Invoice parked in MIR7 — not posted to FI yet; awaits review/approval before posting', tag:'MM Events' },
+    { code:'Event: Invoice Blocked', desc:'Invoice blocked (price/qty variance or manual) — visible in MRBR; requires buyer or AP to review and release', tag:'MM Events' },
+    { code:'Event: Invoice Posted',  desc:'Invoice posted in MIRO — 3-way match (PO qty/price vs GR vs invoice); creates FI document and vendor liability', tag:'MM Events' },
+    { code:'Event: PO Output',       desc:'PO output/message (print, email, EDI) triggered on save — medium and time configured in output determination', tag:'MM Events' },
+    { code:'Event: Sched Agmt Delivery', desc:'Scheduling Agreement delivery schedule released to vendor — triggers JIT or forecast delivery schedule output', tag:'MM Events' },
+    { code:'Event: MRP Run',         desc:'MRP (MD01/MD02) calculates net requirements and auto-creates planned orders or PRs based on MRP type and lot size', tag:'MM Events' },
+    { code:'Event: Contract Release', desc:'Release order against contract (ME21N with ref to contract) — reduces contract target value/qty, creates PO', tag:'MM Events' },
+  ];
+  let added = 0;
+  entries.forEach(e => {
+    if (!existing.has(e.code.toUpperCase())) {
+      const item = { id: Date.now() + added, code: e.code, desc: e.desc, tag: e.tag };
+      tcodes.push(item);
+      fbSaveTcode(item);
+      added++;
+    }
+  });
+  saveLs();
+  localStorage.setItem(SAP_MM_SEED_KEY, '1');
+  if (added > 0 && currentView === 'tcodes') renderTcodes();
+}
+setTimeout(seedSapMmTcodes, 3000);
 </script>
 <script>
 (function(){var Q=[{t:"The secret of getting ahead is getting started.",a:"Mark Twain"},{t:"It always seems impossible until it's done.",a:"Nelson Mandela"},{t:"Don't watch the clock; do what it does. Keep going.",a:"Sam Levenson"},{t:"The future depends on what you do today.",a:"Mahatma Gandhi"},{t:"Believe you can and you're halfway there.",a:"Theodore Roosevelt"},{t:"Act as if what you do makes a difference. It does.",a:"William James"},{t:"Start where you are. Use what you have. Do what you can.",a:"Arthur Ashe"},{t:"Well done is better than well said.",a:"Benjamin Franklin"},{t:"Opportunities don't happen. You create them.",a:"Chris Grosser"},{t:"Dream big and dare to fail.",a:"Norman Vaughan"},{t:"Hard work beats talent when talent doesn't work hard.",a:"Tim Notke"},{t:"Success usually comes to those too busy to be looking for it.",a:"Henry David Thoreau"},{t:"Do something today that your future self will thank you for.",a:"Sean Patrick Flanery"},{t:"Consistency is the key to achieving and maintaining momentum.",a:"Darren Hardy"},{t:"Either you run the day, or the day runs you.",a:"Jim Rohn"},{t:"The only way to do great work is to love what you do.",a:"Steve Jobs"},{t:"You are never too old to set another goal or dream a new dream.",a:"C.S. Lewis"},{t:"Don't stop when you're tired. Stop when you're done.",a:"Anonymous"},{t:"Wake up with determination. Go to bed with satisfaction.",a:"Anonymous"},{t:"Do what you can with all you have, wherever you are.",a:"Theodore Roosevelt"},{t:"In the middle of every difficulty lies opportunity.",a:"Albert Einstein"},{t:"Strive not to be a success, but rather to be of value.",a:"Albert Einstein"},{t:"It does not matter how slowly you go as long as you do not stop.",a:"Confucius"},{t:"Our greatest glory is not in never falling, but in rising every time we fall.",a:"Confucius"},{t:"You miss 100% of the shots you don't take.",a:"Wayne Gretzky"},{t:"Don't limit your challenges. Challenge your limits.",a:"Jerry Dunn"},{t:"Push yourself, because no one else is going to do it for you.",a:"Anonymous"},{t:"Great things never come from comfort zones.",a:"Anonymous"},{t:"Success is not final, failure is not fatal: courage to continue counts.",a:"Winston Churchill"},{t:"The man who moves a mountain begins by carrying away small stones.",a:"Confucius"}];var now=new Date();var slot=Math.floor((now-new Date(now.getFullYear(),0,0))/72e5);var q=Q[slot%Q.length];var te=document.getElementById('dailyQuoteText');var ae=document.getElementById('dailyQuoteAuthor');if(te)te.textContent='"'+q.t+'"';if(ae)ae.textContent='— '+q.a;})();
