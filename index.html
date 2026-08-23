@@ -4931,6 +4931,60 @@ function seedSapMmTcodes() {
   if (added > 0 && currentView === 'tcodes') renderTcodes();
 }
 setTimeout(seedSapMmTcodes, 3000);
+
+// ── Favorites T-codes seed (prepend to top) ───────────────────────────────
+const FAV_SEED_KEY = 'ap_fav_tcodes_seeded_v1';
+function seedFavTcodes() {
+  if (localStorage.getItem(FAV_SEED_KEY)) return;
+  const existing = new Set(tcodes.map(t => t.code.toUpperCase()));
+  const favEntries = [
+    { code:'SMARTFORMS',              desc:'SAP Smart Forms — design and print form-based outputs (invoices, POs, labels)', tag:'Favorites' },
+    { code:'SE16H',                   desc:'General Table Display — view any SAP table contents with filters',              tag:'Favorites' },
+    { code:'/ASADEV/ACI_SETTINGS',    desc:'ASAPIO Customizing — configure ASAPIO middleware settings',                    tag:'Favorites' },
+    { code:'/ASADEV/ACI_MONITOR',     desc:'ACI Monitor Transaction — monitor ASAPIO interface transactions',              tag:'Favorites' },
+    { code:'/SIE/AIF_IDOC_SEL2',      desc:'IDOC Support Gate 2 — Siemens AIF IDoc selection and processing',             tag:'Favorites' },
+    { code:'SWIA',                    desc:'Administration Work Items — manage and reassign workflow work items',           tag:'Favorites' },
+    { code:'/IWFND/GW_CLIENT',        desc:'SAP Gateway Client — test OData service calls directly in browser-like UI',   tag:'Favorites' },
+    { code:'SM51',                    desc:'Started AS Instances — monitor active SAP application server instances',       tag:'Favorites' },
+    { code:'/SIEAPI/MESSAGE_MONI',    desc:'Siemens API: Message Monitor — monitor API message processing and errors',     tag:'Favorites' },
+    { code:'BRF+',                    desc:'BRFplus Workbench — Business Rule Framework for configuring decision tables',  tag:'Favorites' },
+    { code:'/SIEC/PC_USERS_CHECK',    desc:'Check Approvers per Provider — verify approval chain configuration per PC',   tag:'Favorites' },
+    { code:'/SAPSLL/MENU_LEGALR3',    desc:'GTS: Global Trade Services Area Menu — access GTS compliance functions',      tag:'Favorites' },
+    { code:'/SAPSLL/BL_DOC_MM_R3',    desc:'GTS: LCI: Blocked MM Documents — view MM docs blocked by GTS compliance',    tag:'Favorites' },
+    { code:'/UI2/FLP',                desc:'SAP Fiori Launchpad — launch Fiori apps and manage Fiori configuration',      tag:'Favorites' },
+    { code:'/IWXBE/CONFIG',           desc:'Configure Enterprise Event Channel — set up SAP event mesh / event channels', tag:'Favorites' },
+    { code:'BP',                      desc:'Maintain Business Partner — create/change vendor, customer, or contact BP',   tag:'Favorites' },
+    { code:'/IWXBE/EVENT_MONITOR',    desc:'Event Monitor — monitor SAP Enterprise Messaging / event channel activity',   tag:'Favorites' },
+    { code:'ME23N',                   desc:'Display Purchase Order — read-only view of a purchase order',                  tag:'Favorites' },
+    { code:'ME53N',                   desc:'Display Purchase Requisition — read-only view of a purchase requisition',     tag:'Favorites' },
+    { code:'/IWFND/TRACES',           desc:'SAP Gateway Traces — capture and analyze OData request/response traces',      tag:'Favorites' },
+    { code:'/IWFND/ERROR_LOG',        desc:'SAP Gateway Error Log — view errors from OData / Gateway service calls',      tag:'Favorites' },
+    { code:'/AIF/ERR',                desc:'AIF: Monitoring and Error Handling — review and reprocess AIF interface errors',tag:'Favorites' },
+    { code:'/AIF/IFMON',              desc:'AIF Interface Monitor — monitor all AIF interface statuses and messages',     tag:'Favorites' },
+    { code:'/AIF/VMAP',               desc:'AIF Value Mapping — configure value mappings used in AIF interfaces',         tag:'Favorites' },
+    { code:'SU01D',                   desc:'User Display — display SAP user master record (read-only)',                    tag:'Favorites' },
+    { code:'/SIEC/PC_MENDIX',         desc:'SAT Mendix: Approvers and Levels — configure approval levels in Mendix app', tag:'Favorites' },
+    { code:'ST22',                    desc:'ABAP Dump Analysis — view short dumps (runtime errors) for debugging',        tag:'Favorites' },
+    { code:'/AIF/CUST',               desc:'AIF Customizing — configure AIF interfaces, namespaces, and error handling',  tag:'Favorites' },
+  ];
+  // Prepend new entries to the beginning of the tcodes array
+  let prepended = 0;
+  const toAdd = [];
+  favEntries.forEach(e => {
+    if (!existing.has(e.code.toUpperCase())) {
+      const item = { id: Date.now() + prepended, code: e.code, desc: e.desc, tag: e.tag };
+      toAdd.push(item);
+      fbSaveTcode(item);
+      prepended++;
+    }
+  });
+  // Insert at front so they appear first
+  tcodes.unshift(...toAdd.reverse());
+  saveLs();
+  localStorage.setItem(FAV_SEED_KEY, '1');
+  if (prepended > 0 && currentView === 'tcodes') renderTcodes();
+}
+setTimeout(seedFavTcodes, 4000);
 </script>
 <script>
 (function(){var Q=[{t:"The secret of getting ahead is getting started.",a:"Mark Twain"},{t:"It always seems impossible until it's done.",a:"Nelson Mandela"},{t:"Don't watch the clock; do what it does. Keep going.",a:"Sam Levenson"},{t:"The future depends on what you do today.",a:"Mahatma Gandhi"},{t:"Believe you can and you're halfway there.",a:"Theodore Roosevelt"},{t:"Act as if what you do makes a difference. It does.",a:"William James"},{t:"Start where you are. Use what you have. Do what you can.",a:"Arthur Ashe"},{t:"Well done is better than well said.",a:"Benjamin Franklin"},{t:"Opportunities don't happen. You create them.",a:"Chris Grosser"},{t:"Dream big and dare to fail.",a:"Norman Vaughan"},{t:"Hard work beats talent when talent doesn't work hard.",a:"Tim Notke"},{t:"Success usually comes to those too busy to be looking for it.",a:"Henry David Thoreau"},{t:"Do something today that your future self will thank you for.",a:"Sean Patrick Flanery"},{t:"Consistency is the key to achieving and maintaining momentum.",a:"Darren Hardy"},{t:"Either you run the day, or the day runs you.",a:"Jim Rohn"},{t:"The only way to do great work is to love what you do.",a:"Steve Jobs"},{t:"You are never too old to set another goal or dream a new dream.",a:"C.S. Lewis"},{t:"Don't stop when you're tired. Stop when you're done.",a:"Anonymous"},{t:"Wake up with determination. Go to bed with satisfaction.",a:"Anonymous"},{t:"Do what you can with all you have, wherever you are.",a:"Theodore Roosevelt"},{t:"In the middle of every difficulty lies opportunity.",a:"Albert Einstein"},{t:"Strive not to be a success, but rather to be of value.",a:"Albert Einstein"},{t:"It does not matter how slowly you go as long as you do not stop.",a:"Confucius"},{t:"Our greatest glory is not in never falling, but in rising every time we fall.",a:"Confucius"},{t:"You miss 100% of the shots you don't take.",a:"Wayne Gretzky"},{t:"Don't limit your challenges. Challenge your limits.",a:"Jerry Dunn"},{t:"Push yourself, because no one else is going to do it for you.",a:"Anonymous"},{t:"Great things never come from comfort zones.",a:"Anonymous"},{t:"Success is not final, failure is not fatal: courage to continue counts.",a:"Winston Churchill"},{t:"The man who moves a mountain begins by carrying away small stones.",a:"Confucius"}];var now=new Date();var slot=Math.floor((now-new Date(now.getFullYear(),0,0))/72e5);var q=Q[slot%Q.length];var te=document.getElementById('dailyQuoteText');var ae=document.getElementById('dailyQuoteAuthor');if(te)te.textContent='"'+q.t+'"';if(ae)ae.textContent='— '+q.a;})();
