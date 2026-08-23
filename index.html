@@ -4085,7 +4085,12 @@ function renderTcodesFilterBar() {
 function renderTcodes() {
   renderTcodesFilterBar();
   const listEl = document.getElementById('tcodesList');
-  const visible = tcodesFilterTag ? tcodes.filter(t => t.tag === tcodesFilterTag) : [...tcodes];
+  const sorted = [...tcodes].sort((a, b) => {
+    const aFav = (a.tag || '').toLowerCase() === 'favorites' ? 0 : 1;
+    const bFav = (b.tag || '').toLowerCase() === 'favorites' ? 0 : 1;
+    return aFav - bFav;
+  });
+  const visible = tcodesFilterTag ? sorted.filter(t => t.tag === tcodesFilterTag) : sorted;
   if (!visible.length) {
     listEl.innerHTML = `<div class="empty-state">
       <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
