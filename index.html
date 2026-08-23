@@ -3115,7 +3115,7 @@ function renderStats() {
   document.getElementById('navCountOverdue').textContent  = overdue.length;
   document.getElementById('navCountUpcoming').textContent = notDone.filter(t => { const d = dueDiff(t.dueDate); return d !== null && d > 0 && d <= 7; }).length;
   document.getElementById('navCountDone').textContent     = done.length;
-  const dueTasks = todos.filter(t => { const d = dueDiff(t.dueDate); return d !== null && d <= 0; });
+  const dueTasks = todos.filter(t => { const d = dueDiff(t.dueDate); return d !== null && d <= 0 && t.status !== 'pending'; });
   const dueTasksDone = dueTasks.filter(t => t.done);
   const pct = dueTasks.length ? Math.round(dueTasksDone.length / dueTasks.length * 100) : 0;
   const pctColor = pct < 40 ? '#ef4444' : pct < 70 ? '#f59e0b' : '#10b981';
