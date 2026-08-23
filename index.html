@@ -3295,6 +3295,10 @@ document.getElementById('list').addEventListener('click', e => {
   }
   if (editBtn) openEditModal(Number(editBtn.dataset.id));
   if (delBtn)  { const id = Number(delBtn.dataset.id); todos = todos.filter(t => t.id !== id); fbDeleteTask(id); renderTasks(); }
+  if (!check && !editBtn && !delBtn) {
+    const card = e.target.closest('.task');
+    if (card) openEditModal(Number(card.dataset.id));
+  }
 });
 // Keyboard check toggle
 document.getElementById('list').addEventListener('keydown', e => {
