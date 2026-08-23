@@ -1609,7 +1609,7 @@ body.has-install-banner #content { padding-bottom: 100px; }
   </button>
   <button class="nav-item" data-view="tcodes" id="navTcodes">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-    T-Codes
+    T-Codes/Tables
   </button>
 
   <button class="nav-item" data-view="dates" id="navDates">
@@ -1750,8 +1750,8 @@ body.has-install-banner #content { padding-bottom: 100px; }
     <div class="view" id="viewTcodes">
       <div class="qview-header">
         <div>
-          <div class="qview-title">T-Codes</div>
-          <div style="font-size:.85rem;color:var(--text2)">Your saved transaction codes</div>
+          <div class="qview-title">T-Codes / Tables</div>
+          <div style="font-size:.85rem;color:var(--text2)">Your saved transaction codes & tables</div>
         </div>
         <div class="qview-header-left">
           <button class="export-btn" id="exportTcodesBtn">
@@ -3081,7 +3081,7 @@ function setView(view, preset) {
   const navId = { goals: 'navGoals', habits: 'navHabits', links: 'navLinks', tcodes: 'navTcodes', dates: 'navDates' }[view] || (navPresetMap[preset] || 'navAll');
   const nav = document.getElementById(navId);
   if (nav) nav.classList.add('active');
-  const titleMap = { goals: 'Goals & Targets', habits: 'Habit Tracker', links: 'Links', tcodes: 'T-Codes', dates: 'Important Dates' };
+  const titleMap = { goals: 'Goals & Targets', habits: 'Habit Tracker', links: 'Links', tcodes: 'T-Codes / Tables', dates: 'Important Dates' };
   const taskTitles = { '': 'All Tasks', today: 'Today', overdue: 'Overdue', upcoming: 'Upcoming', done: 'Completed' };
   document.getElementById('viewTitle').textContent = titleMap[view] || (taskTitles[preset] || 'All Tasks');
   // Show/hide topbar task buttons based on view
