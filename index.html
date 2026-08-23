@@ -554,7 +554,7 @@ body {
 .kanban-col-title { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; flex: 1; }
 .kanban-col-count { font-size: .7rem; font-weight: 700; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 1px 8px; color: var(--text3); }
 .kb-overdue-pill { font-size: .65rem; font-weight: 700; background: var(--danger-light); color: var(--danger); border-radius: 20px; padding: 1px 7px; }
-@keyframes pct-flash { 0%,100%{opacity:1;text-shadow:0 0 10px var(--accent)} 50%{opacity:.35;text-shadow:none} }
+@keyframes pct-flash { 0%,100%{opacity:1} 50%{opacity:.35;text-shadow:none} }
 .completion-pct { font-size: 1.45rem; font-weight: 900; color: var(--accent); animation: pct-flash 1.4s ease-in-out infinite; letter-spacing: -.02em; line-height: 1; }
 .completion-label { font-size: .6rem; color: var(--text2); margin-top: 2px; text-transform: uppercase; letter-spacing: .05em; }
 .kb-pct { font-size: .65rem; font-weight: 700; background: var(--success-light); color: var(--success); border-radius: 20px; padding: 1px 7px; }
@@ -3116,8 +3116,9 @@ function renderStats() {
   document.getElementById('navCountUpcoming').textContent = notDone.filter(t => { const d = dueDiff(t.dueDate); return d !== null && d > 0 && d <= 7; }).length;
   document.getElementById('navCountDone').textContent     = done.length;
   const pct = todos.length ? Math.round(done.length / todos.length * 100) : 0;
+  const pctColor = pct < 40 ? '#ef4444' : pct < 70 ? '#f59e0b' : '#10b981';
   const banner = document.getElementById('completionBanner');
-  if (banner) banner.innerHTML = `<div class="completion-pct">${pct}%</div><div class="completion-label">Overall Completion</div>`;
+  if (banner) banner.innerHTML = `<div class="completion-pct" style="color:${pctColor};text-shadow:0 0 10px ${pctColor}40">${pct}%</div><div class="completion-label">Overall Completion</div>`;
 }
 
 // ── Sidebar tags ──────────────────────────────────────
