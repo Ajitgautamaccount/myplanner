@@ -3211,7 +3211,6 @@ function renderTasks() {
       <div class="task-check${todo.done?' checked':(isIP?' inprogress':'')}" data-id="${todo.id}" role="checkbox" aria-checked="${todo.done}" tabindex="0"></div>
       <div class="task-body">
         <div class="task-title">${esc(todo.title)}</div>
-        ${todo.notes ? `<div class="task-notes">${esc(todo.notes)}</div>` : ''}
         <div class="task-meta">
           ${todo.tag ? `<span class="badge badge-tag">${esc(todo.tag)}</span>` : ''}
           <span class="badge badge-p${todo.priority||4}">P${todo.priority||4}</span>
