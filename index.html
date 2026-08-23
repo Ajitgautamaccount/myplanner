@@ -4116,14 +4116,16 @@ function renderTcodes() {
     </td>
   </tr>`;
   const thead = `<thead><tr><th>Description</th><th>T-Code</th><th>Tag</th><th></th></tr></thead>`;
-  const third = Math.ceil(visible.length / 3);
-  const col1  = visible.slice(0, third).map(makeRow).join('');
-  const col2  = visible.slice(third, third * 2).map(makeRow).join('');
-  const col3  = visible.slice(third * 2).map(makeRow).join('');
+  const tables  = visible.filter(t => (t.tag || '').toLowerCase() === 'mm tables');
+  const tcodeItems = visible.filter(t => (t.tag || '').toLowerCase() !== 'mm tables');
+  const half  = Math.ceil(tcodeItems.length / 2);
+  const col1  = tcodeItems.slice(0, half).map(makeRow).join('');
+  const col2  = tcodeItems.slice(half).map(makeRow).join('');
+  const col3  = tables.map(makeRow).join('');
   listEl.innerHTML = `<div class="mc-grid">
     <div class="qa-table-wrap"><table class="qa-table compact">${thead}<tbody>${col1}</tbody></table></div>
     <div class="qa-table-wrap"><table class="qa-table compact">${thead}<tbody>${col2}</tbody></table></div>
-    <div class="qa-table-wrap"><table class="qa-table compact">${thead}<tbody>${col3}</tbody></table></div>
+    <div class="qa-table-wrap"><table class="qa-table compact">${thead}<tbody>${col3 || '<tr><td colspan="4" style="color:var(--text2);text-align:center;padding:1rem">No tables</td></tr>'}</tbody></table></div>
   </div>`;
   listEl.querySelectorAll('.copy-code-btn').forEach(btn =>
     btn.addEventListener('click', () => {
