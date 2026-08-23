@@ -4541,9 +4541,29 @@ document.getElementById('exportLinksBtn').addEventListener('click', () => {
 });
 
 document.getElementById('exportTcodesBtn').addEventListener('click', () => {
-  const rows = [csvRow(['Description','T-Code','Tag'])];
-  tcodes.forEach(c => rows.push(csvRow([c.desc || '', c.code, c.tag || ''])));
-  downloadCsv('tcodes.csv', rows);
+  const sorted = [...tcodes].sort((a, b) => {
+    const aFav = (a.tag || '').toLowerCase() === 'favorites' ? 0 : 1;
+    const bFav = (b.tag || '').toLowerCase() === 'favorites' ? 0 : 1;
+    if (aFav !== bFav) return aFav - bFav;
+    return (a.tag || '').localeCompare(b.tag || '');
+  });
+  const codeW = Math.max(8,  ...sorted.map(c => (c.code || '').length));
+  const tagW  = Math.max(5,  ...sorted.map(c => (c.tag  || '').length));
+  const pad = (s, n) => String(s).padEnd(n);
+  const sep = '-'.repeat(codeW + 2) + '-+-' + '-'.repeat(tagW + 2) + '-+-' + '-'.repeat(60);
+  const header = `${'T-CODE'.padEnd(codeW)}  | ${'TAG'.padEnd(tagW)}  | DESCRIPTION`;
+  const lines = [`SAP T-Codes / Tables Export`, `Generated: ${new Date().toLocaleString()}`, '', header, sep];
+  let lastTag = null;
+  sorted.forEach(c => {
+    if (c.tag !== lastTag) { if (lastTag !== null) lines.push(''); lastTag = c.tag; }
+    lines.push(`${pad(c.code || '', codeW)}  | ${pad(c.tag || '', tagW)}  | ${c.desc || ''}`);
+  });
+  const blob = new Blob([lines.join('\r\n')], { type: 'text/plain;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'tcodes.txt';
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 });
 
 // ── Dark mode ─────────────────────────────────────────
