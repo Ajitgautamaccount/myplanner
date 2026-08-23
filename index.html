@@ -554,6 +554,9 @@ body {
 .kanban-col-title { font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; flex: 1; }
 .kanban-col-count { font-size: .7rem; font-weight: 700; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 1px 8px; color: var(--text3); }
 .kb-overdue-pill { font-size: .65rem; font-weight: 700; background: var(--danger-light); color: var(--danger); border-radius: 20px; padding: 1px 7px; }
+@keyframes pct-flash { 0%,100%{opacity:1;text-shadow:0 0 18px var(--accent)} 50%{opacity:.35;text-shadow:none} }
+.completion-pct { font-size: 3.6rem; font-weight: 900; color: var(--accent); animation: pct-flash 1.4s ease-in-out infinite; letter-spacing: -.02em; line-height: 1; }
+.completion-label { font-size: .85rem; color: var(--text2); margin-top: 2px; }
 .kb-pct { font-size: .65rem; font-weight: 700; background: var(--success-light); color: var(--success); border-radius: 20px; padding: 1px 7px; }
 .kanban-cards { padding: 10px 8px; display: flex; flex-direction: column; gap: 7px; min-height: 60px; }
 .kanban-cards.drag-over { background: var(--accent-light); border-radius: 0 0 var(--radius) var(--radius); outline: 2px dashed var(--accent); outline-offset: -4px; }
@@ -1707,12 +1710,13 @@ body.has-install-banner #content { padding-bottom: 100px; }
         <button class="filter-chip" data-due="nodue">No Due Date</button>
         <select class="sort-select" id="sortSelect">
           <option value="date">Sort: Date</option>
-          <option value="due">Sort: Due Date</option>
+          <option value="due" selected>Sort: Due Date</option>
           <option value="priority">Sort: Priority</option>
           <option value="status">Sort: Status</option>
           <option value="alpha">Sort: A–Z</option>
         </select>
       </div>
+      <div id="completionBanner" style="text-align:center;padding:10px 0 4px"></div>
       <div id="list"></div>
     </div>
 
@@ -2722,7 +2726,7 @@ let filterViewPreset = '';
 let filterStatus     = 'all';
 let filterDue        = '';
 let filterTag        = '';
-let sortMode         = 'date';
+let sortMode         = 'due';
 let searchQ          = '';
 let goalsActiveFilters = new Set(['all']);
 let editingGoalChecklist = [];
@@ -3111,6 +3115,9 @@ function renderStats() {
   document.getElementById('navCountOverdue').textContent  = overdue.length;
   document.getElementById('navCountUpcoming').textContent = notDone.filter(t => { const d = dueDiff(t.dueDate); return d !== null && d > 0 && d <= 7; }).length;
   document.getElementById('navCountDone').textContent     = done.length;
+  const pct = todos.length ? Math.round(done.length / todos.length * 100) : 0;
+  const banner = document.getElementById('completionBanner');
+  if (banner) banner.innerHTML = `<div class="completion-pct">${pct}%</div><div class="completion-label">Overall Completion</div>`;
 }
 
 // ── Sidebar tags ──────────────────────────────────────
