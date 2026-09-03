@@ -7,7 +7,7 @@
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#0f1117",
-  "theme_color": "#5b6af7",
+  "theme_color": "#6366f1",
   "categories": ["productivity", "utilities"],
   "icons": [
     { "src": "icons/icon-72.png",   "sizes": "72x72",   "type": "image/png", "purpose": "any maskable" },
