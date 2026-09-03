@@ -1524,6 +1524,28 @@ body.has-install-banner #content { padding-bottom: 100px; }
 #dateQuickPopup .dqp-row button { flex: 1; padding: 6px; border: none; border-radius: 6px; cursor: pointer; font-size: .78rem; font-weight: 700; font-family: var(--font); }
 #dateQuickPopup #dqpSaveBtn { background: var(--accent); color: #fff; }
 #dateQuickPopup #dqpCancelBtn { background: var(--surface2); color: var(--text2); }
+
+/* ── Voice input button ── */
+.voice-btn {
+  flex-shrink: 0;
+  width: 42px; height: 42px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  color: var(--text2);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.voice-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.voice-btn.voice-active {
+  background: #fef2f2;
+  border-color: var(--danger);
+  color: var(--danger);
+  animation: voice-pulse .8s ease-in-out infinite;
+}
+[data-theme="dark"] .voice-btn.voice-active { background: #2d1515; }
+@keyframes voice-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.45)} 50%{box-shadow:0 0 0 6px rgba(239,68,68,0)} }
 </style>
 </head>
 <body>
@@ -1876,7 +1898,17 @@ body.has-install-banner #content { padding-bottom: 100px; }
     </div>
     <div class="field">
       <label for="addTitle">Title *</label>
-      <input type="text" id="addTitle" placeholder="What needs to be done?" autocomplete="off">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input type="text" id="addTitle" placeholder="What needs to be done?" autocomplete="off" style="flex:1;">
+        <button type="button" id="voiceBtn" class="voice-btn" aria-label="Speak task title" title="Voice input">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="2" width="6" height="12" rx="3"/>
+            <path d="M5 10a7 7 0 0 0 14 0"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+      </div>
     </div>
     <div class="field">
       <label for="addNotes">Notes</label>
@@ -3567,6 +3599,54 @@ addBackdrop.addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'TEXTAREA')
     document.getElementById('addSave').click();
 });
+
+// ── Voice input ───────────────────────────────────────
+(function setupVoiceInput() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const btn = document.getElementById('voiceBtn');
+  if (!SR) { btn.style.display = 'none'; return; }
+
+  const recog = new SR();
+  recog.lang = 'en-US';
+  recog.interimResults = false;
+  recog.maxAlternatives = 1;
+
+  let listening = false;
+
+  btn.addEventListener('click', () => {
+    if (listening) { recog.stop(); return; }
+    recog.start();
+  });
+
+  recog.addEventListener('start', () => {
+    listening = true;
+    btn.classList.add('voice-active');
+    btn.title = 'Listening… click to stop';
+  });
+
+  recog.addEventListener('result', e => {
+    const transcript = e.results[0][0].transcript;
+    const titleEl = document.getElementById('addTitle');
+    titleEl.value = transcript;
+    titleEl.focus();
+  });
+
+  recog.addEventListener('end', () => {
+    listening = false;
+    btn.classList.remove('voice-active');
+    btn.title = 'Voice input';
+  });
+
+  recog.addEventListener('error', e => {
+    listening = false;
+    btn.classList.remove('voice-active');
+    btn.title = 'Voice input';
+    if (e.error !== 'aborted') {
+      const msgs = { 'not-allowed': 'Microphone access denied.', 'no-speech': 'No speech detected.', 'network': 'Network error.' };
+      alert(msgs[e.error] || `Voice error: ${e.error}`);
+    }
+  });
+})();
 
 // ── Edit task ─────────────────────────────────────────
 const editBackdrop = document.getElementById('editBackdrop');
