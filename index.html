@@ -1919,6 +1919,7 @@ body.has-install-banner #content { padding-bottom: 100px; }
           </svg>
         </button>
       </div>
+      <div id="voiceLiveText" style="display:none;margin-top:6px;font-size:.82rem;color:var(--danger);min-height:1.2em;font-style:italic;transition:opacity .2s;"></div>
     </div>
     <div class="field">
       <label for="addNotes">Notes</label>
@@ -3615,12 +3616,123 @@ addBackdrop.addEventListener('keydown', e => {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   const modalBtn  = document.getElementById('voiceBtn');
   const headerBtn = document.getElementById('voiceBtnHeader');
+  const liveText  = document.getElementById('voiceLiveText');
   if (!SR) { modalBtn.style.display = 'none'; headerBtn.style.display = 'none'; return; }
 
-  function makeRecognizer(onResult) {
+  // ── Date parser ──────────────────────────────────────
+  function parseDueDate(text) {
+    const t = text.toLowerCase();
+    const now = new Date();
+    function fmt(d) { return d.toISOString().slice(0,10); }
+    function daysAhead(n) { const d = new Date(now); d.setDate(d.getDate() + n); return fmt(d); }
+
+    if (/\btoday\b/.test(t))     return { date: fmt(now), clean: t.replace(/\b(by\s+)?today\b/gi,'') };
+    if (/\btomorrow\b/.test(t))  return { date: daysAhead(1), clean: t.replace(/\b(by\s+)?tomorrow\b/gi,'') };
+    if (/\bday after tomorrow\b/.test(t)) return { date: daysAhead(2), clean: t.replace(/\b(by\s+)?day after tomorrow\b/gi,'') };
+
+    // "next monday" / "next week" / "next month"
+    const nextDay = t.match(/\bnext\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/);
+    if (nextDay) {
+      const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+      const target = days.indexOf(nextDay[1]);
+      let d = new Date(now); d.setDate(d.getDate() + 1);
+      while (d.getDay() !== target) d.setDate(d.getDate() + 1);
+      return { date: fmt(d), clean: t.replace(nextDay[0],'') };
+    }
+    if (/\bnext week\b/.test(t)) return { date: daysAhead(7), clean: t.replace(/\b(by\s+)?next week\b/gi,'') };
+    if (/\bnext month\b/.test(t)) { const d = new Date(now); d.setMonth(d.getMonth()+1); return { date: fmt(d), clean: t.replace(/\b(by\s+)?next month\b/gi,'') }; }
+
+    // "this monday" etc.
+    const thisDay = t.match(/\bthis\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/);
+    if (thisDay) {
+      const days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+      const target = days.indexOf(thisDay[1]);
+      let d = new Date(now); d.setDate(d.getDate() + 1);
+      while (d.getDay() !== target) d.setDate(d.getDate() + 1);
+      return { date: fmt(d), clean: t.replace(thisDay[0],'') };
+    }
+
+    // "in 3 days" / "in 2 weeks"
+    const inDays = t.match(/\bin\s+(\d+)\s+days?\b/);
+    if (inDays) return { date: daysAhead(parseInt(inDays[1])), clean: t.replace(inDays[0],'') };
+    const inWeeks = t.match(/\bin\s+(\d+)\s+weeks?\b/);
+    if (inWeeks) return { date: daysAhead(parseInt(inWeeks[1])*7), clean: t.replace(inWeeks[0],'') };
+
+    // "on the 15th" / "on 15th august" / "august 30" / "30th august"
+    const months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+    const mdMatch = t.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2})(?:st|nd|rd|th)?\b/);
+    const dmMatch = t.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s+(january|february|march|april|may|june|july|august|september|october|november|december)\b/);
+    const onlyDay = t.match(/\bon\s+(?:the\s+)?(\d{1,2})(?:st|nd|rd|th)?\b/);
+    if (mdMatch) {
+      const mo = months.indexOf(mdMatch[1]); const dy = parseInt(mdMatch[2]);
+      let yr = now.getFullYear(); const d = new Date(yr, mo, dy);
+      if (d < now) d.setFullYear(yr+1);
+      return { date: fmt(d), clean: t.replace(mdMatch[0],'') };
+    }
+    if (dmMatch) {
+      const dy = parseInt(dmMatch[1]); const mo = months.indexOf(dmMatch[2]);
+      let yr = now.getFullYear(); const d = new Date(yr, mo, dy);
+      if (d < now) d.setFullYear(yr+1);
+      return { date: fmt(d), clean: t.replace(dmMatch[0],'') };
+    }
+    if (onlyDay) {
+      const dy = parseInt(onlyDay[1]);
+      let d = new Date(now.getFullYear(), now.getMonth(), dy);
+      if (d <= now) d.setMonth(d.getMonth()+1);
+      return { date: fmt(d), clean: t.replace(onlyDay[0],'') };
+    }
+
+    // No date found — default to today
+    return { date: fmt(now), clean: t };
+  }
+
+  function cleanTitle(s) {
+    return s.replace(/\s+/g,' ').replace(/^\s*(by|on|for)\s+/i,'').trim();
+  }
+
+  // ── Show / hide live text ─────────────────────────────
+  function showLive(txt) {
+    liveText.textContent = txt ? `"${txt}"` : '';
+    liveText.style.display = txt ? 'block' : 'none';
+  }
+
+  // ── Save task directly from voice ─────────────────────
+  function voiceSaveTask(title, dueDate) {
+    const date = todayStr();
+    const tag  = document.getElementById('addTag').value.trim();
+    const t = {
+      id: Date.now(), title,
+      notes: '', tag,
+      date, dueDate,
+      priority: getPriority('addPriority'),
+      done: false
+    };
+    todos.push(t); fbSaveTask(t); renderTasks(); closeAddModal();
+  }
+
+  // ── Handle final transcript ───────────────────────────
+  function handleTranscript(raw, fromHeader) {
+    showLive('');
+    const { date, clean } = parseDueDate(raw);
+    const title = cleanTitle(clean) || raw.trim();
+
+    if (fromHeader) {
+      openAddModal();
+      setTimeout(() => {
+        document.getElementById('addDueDate').value = date;
+        voiceSaveTask(title, date);
+      }, 100);
+    } else {
+      document.getElementById('addDueDate').value = date;
+      voiceSaveTask(title, date);
+    }
+  }
+
+  // ── Build recognizer ──────────────────────────────────
+  function makeRecog(fromHeader) {
     const recog = new SR();
     recog.lang = 'en-US';
-    recog.interimResults = false;
+    recog.interimResults = true;
     recog.maxAlternatives = 1;
     let listening = false;
     let activeBtn = null;
@@ -3633,18 +3745,31 @@ addBackdrop.addEventListener('keydown', e => {
 
     recog.addEventListener('start', () => {
       listening = true;
+      showLive('Listening…');
       if (activeBtn) { activeBtn.classList.add('voice-active'); activeBtn.title = 'Listening… click to stop'; }
     });
+
     recog.addEventListener('result', e => {
-      onResult(e.results[0][0].transcript);
+      let interim = '', final = '';
+      for (let i = 0; i < e.results.length; i++) {
+        const txt = e.results[i][0].transcript;
+        if (e.results[i].isFinal) final += txt;
+        else interim += txt;
+      }
+      if (interim) showLive(interim);
+      if (final)   handleTranscript(final, fromHeader);
     });
+
     recog.addEventListener('end', () => {
       listening = false;
+      showLive('');
       if (activeBtn) { activeBtn.classList.remove('voice-active'); activeBtn.title = activeBtn.dataset.defaultTitle || 'Voice input'; }
       activeBtn = null;
     });
+
     recog.addEventListener('error', e => {
       listening = false;
+      showLive('');
       if (activeBtn) { activeBtn.classList.remove('voice-active'); activeBtn.title = activeBtn.dataset.defaultTitle || 'Voice input'; }
       activeBtn = null;
       if (e.error !== 'aborted') {
@@ -3656,24 +3781,11 @@ addBackdrop.addEventListener('keydown', e => {
     return { start };
   }
 
-  // Modal mic — fills title field only (modal already open)
-  const modalRecog = makeRecognizer(transcript => {
-    const titleEl = document.getElementById('addTitle');
-    titleEl.value = transcript;
-    titleEl.focus();
-  });
+  const modalRecog = makeRecog(false);
   modalBtn.dataset.defaultTitle = 'Voice input';
   modalBtn.addEventListener('click', () => modalRecog.start(modalBtn));
 
-  // Header mic — listens, opens Add Task modal, pre-fills title
-  const headerRecog = makeRecognizer(transcript => {
-    openAddModal();
-    setTimeout(() => {
-      const titleEl = document.getElementById('addTitle');
-      titleEl.value = transcript;
-      titleEl.focus();
-    }, 120);
-  });
+  const headerRecog = makeRecog(true);
   headerBtn.dataset.defaultTitle = 'Speak to add a task';
   headerBtn.addEventListener('click', () => headerRecog.start(headerBtn));
 })();
