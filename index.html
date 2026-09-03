@@ -1708,7 +1708,17 @@ body.has-install-banner #content { padding-bottom: 100px; }
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Export
     </button>
-    <div id="completionBanner" style="display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1"></div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <div id="completionBanner" style="display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1"></div>
+      <button type="button" id="voiceBtnHeader" class="voice-btn" aria-label="Voice add task" title="Speak to add a task" style="width:34px;height:34px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="2" width="6" height="12" rx="3"/>
+          <path d="M5 10a7 7 0 0 0 14 0"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </button>
+    </div>
     <div class="daily-quote" id="dailyQuote">
       <span class="daily-quote-text" id="dailyQuoteText"></span>
       <span class="daily-quote-author" id="dailyQuoteAuthor"></span>
@@ -3603,49 +3613,69 @@ addBackdrop.addEventListener('keydown', e => {
 // ── Voice input ───────────────────────────────────────
 (function setupVoiceInput() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const btn = document.getElementById('voiceBtn');
-  if (!SR) { btn.style.display = 'none'; return; }
+  const modalBtn  = document.getElementById('voiceBtn');
+  const headerBtn = document.getElementById('voiceBtnHeader');
+  if (!SR) { modalBtn.style.display = 'none'; headerBtn.style.display = 'none'; return; }
 
-  const recog = new SR();
-  recog.lang = 'en-US';
-  recog.interimResults = false;
-  recog.maxAlternatives = 1;
+  function makeRecognizer(onResult) {
+    const recog = new SR();
+    recog.lang = 'en-US';
+    recog.interimResults = false;
+    recog.maxAlternatives = 1;
+    let listening = false;
+    let activeBtn = null;
 
-  let listening = false;
+    function start(btn) {
+      if (listening) { recog.stop(); return; }
+      activeBtn = btn;
+      recog.start();
+    }
 
-  btn.addEventListener('click', () => {
-    if (listening) { recog.stop(); return; }
-    recog.start();
-  });
+    recog.addEventListener('start', () => {
+      listening = true;
+      if (activeBtn) { activeBtn.classList.add('voice-active'); activeBtn.title = 'Listening… click to stop'; }
+    });
+    recog.addEventListener('result', e => {
+      onResult(e.results[0][0].transcript);
+    });
+    recog.addEventListener('end', () => {
+      listening = false;
+      if (activeBtn) { activeBtn.classList.remove('voice-active'); activeBtn.title = activeBtn.dataset.defaultTitle || 'Voice input'; }
+      activeBtn = null;
+    });
+    recog.addEventListener('error', e => {
+      listening = false;
+      if (activeBtn) { activeBtn.classList.remove('voice-active'); activeBtn.title = activeBtn.dataset.defaultTitle || 'Voice input'; }
+      activeBtn = null;
+      if (e.error !== 'aborted') {
+        const msgs = { 'not-allowed': 'Microphone access denied.', 'no-speech': 'No speech detected.', 'network': 'Network error.' };
+        alert(msgs[e.error] || `Voice error: ${e.error}`);
+      }
+    });
 
-  recog.addEventListener('start', () => {
-    listening = true;
-    btn.classList.add('voice-active');
-    btn.title = 'Listening… click to stop';
-  });
+    return { start };
+  }
 
-  recog.addEventListener('result', e => {
-    const transcript = e.results[0][0].transcript;
+  // Modal mic — fills title field only (modal already open)
+  const modalRecog = makeRecognizer(transcript => {
     const titleEl = document.getElementById('addTitle');
     titleEl.value = transcript;
     titleEl.focus();
   });
+  modalBtn.dataset.defaultTitle = 'Voice input';
+  modalBtn.addEventListener('click', () => modalRecog.start(modalBtn));
 
-  recog.addEventListener('end', () => {
-    listening = false;
-    btn.classList.remove('voice-active');
-    btn.title = 'Voice input';
+  // Header mic — listens, opens Add Task modal, pre-fills title
+  const headerRecog = makeRecognizer(transcript => {
+    openAddModal();
+    setTimeout(() => {
+      const titleEl = document.getElementById('addTitle');
+      titleEl.value = transcript;
+      titleEl.focus();
+    }, 120);
   });
-
-  recog.addEventListener('error', e => {
-    listening = false;
-    btn.classList.remove('voice-active');
-    btn.title = 'Voice input';
-    if (e.error !== 'aborted') {
-      const msgs = { 'not-allowed': 'Microphone access denied.', 'no-speech': 'No speech detected.', 'network': 'Network error.' };
-      alert(msgs[e.error] || `Voice error: ${e.error}`);
-    }
-  });
+  headerBtn.dataset.defaultTitle = 'Speak to add a task';
+  headerBtn.addEventListener('click', () => headerRecog.start(headerBtn));
 })();
 
 // ── Edit task ─────────────────────────────────────────
