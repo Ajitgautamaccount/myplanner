@@ -525,55 +525,48 @@ body {
 
 /* ── Topbar Quick-Add Buttons ── */
 .topbar-qa {
-  display: flex; gap: 6px; align-items: center;
+  display: flex; gap: 4px; align-items: center;
 }
 .tqa-btn {
-  padding: 6px 12px;
-  font-size: .75rem; font-weight: 700; font-family: var(--font);
-  color: #fff; border: none; border-radius: 8px;
-  cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 7px;
+  font-size: .6rem; font-weight: 700; font-family: var(--font);
+  color: #fff; border: none; border-radius: 5px;
+  cursor: pointer; display: inline-flex; align-items: center; gap: 2px;
   white-space: nowrap; letter-spacing: .02em;
   transition: all .15s ease;
+  line-height: 1.2;
 }
 .tqa-task {
   background: linear-gradient(180deg, #818cf8 0%, #6366f1 100%);
-  border-bottom: 2px solid #4f46e5;
-  box-shadow: 0 2px 6px rgba(99,102,241,.4), inset 0 1px 0 rgba(255,255,255,.18);
+  border-bottom: 1.5px solid #4f46e5;
+  box-shadow: 0 1px 4px rgba(99,102,241,.35), inset 0 1px 0 rgba(255,255,255,.15);
 }
-.tqa-task:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,.5); }
-.tqa-task:active { transform: translateY(1px); border-bottom-width: 0; box-shadow: 0 1px 3px rgba(99,102,241,.3); }
+.tqa-task:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(99,102,241,.45); }
+.tqa-task:active { transform: translateY(1px); border-bottom-width: 0; }
 
 .tqa-tcode {
   background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
-  border-bottom: 2px solid #b45309;
-  box-shadow: 0 2px 6px rgba(217,119,6,.4), inset 0 1px 0 rgba(255,255,255,.18);
+  border-bottom: 1.5px solid #b45309;
+  box-shadow: 0 1px 4px rgba(217,119,6,.35), inset 0 1px 0 rgba(255,255,255,.15);
 }
-.tqa-tcode:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(217,119,6,.5); }
-.tqa-tcode:active { transform: translateY(1px); border-bottom-width: 0; box-shadow: 0 1px 3px rgba(217,119,6,.3); }
+.tqa-tcode:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(217,119,6,.45); }
+.tqa-tcode:active { transform: translateY(1px); border-bottom-width: 0; }
 
 .tqa-link {
   background: linear-gradient(180deg, #34d399 0%, #0fb89d 100%);
-  border-bottom: 2px solid #059669;
-  box-shadow: 0 2px 6px rgba(15,184,157,.4), inset 0 1px 0 rgba(255,255,255,.18);
+  border-bottom: 1.5px solid #059669;
+  box-shadow: 0 1px 4px rgba(15,184,157,.35), inset 0 1px 0 rgba(255,255,255,.15);
 }
-.tqa-link:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15,184,157,.5); }
-.tqa-link:active { transform: translateY(1px); border-bottom-width: 0; box-shadow: 0 1px 3px rgba(15,184,157,.3); }
+.tqa-link:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(15,184,157,.45); }
+.tqa-link:active { transform: translateY(1px); border-bottom-width: 0; }
 
 .tqa-date {
   background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%);
-  border-bottom: 2px solid #c2410c;
-  box-shadow: 0 2px 6px rgba(234,88,12,.4), inset 0 1px 0 rgba(255,255,255,.18);
+  border-bottom: 1.5px solid #c2410c;
+  box-shadow: 0 1px 4px rgba(234,88,12,.35), inset 0 1px 0 rgba(255,255,255,.15);
 }
-.tqa-date:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(234,88,12,.5); }
-.tqa-date:active { transform: translateY(1px); border-bottom-width: 0; box-shadow: 0 1px 3px rgba(234,88,12,.3); }
-
-.tqa-goal {
-  background: linear-gradient(180deg, #f472b6 0%, #db2777 100%);
-  border-bottom: 2px solid #be185d;
-  box-shadow: 0 2px 6px rgba(219,39,119,.4), inset 0 1px 0 rgba(255,255,255,.18);
-}
-.tqa-goal:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(219,39,119,.5); }
-.tqa-goal:active { transform: translateY(1px); border-bottom-width: 0; box-shadow: 0 1px 3px rgba(219,39,119,.3); }
+.tqa-date:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(234,88,12,.45); }
+.tqa-date:active { transform: translateY(1px); border-bottom-width: 0; }
 
 /* ── Content ── */
 #content { padding: 28px; flex: 1; }
@@ -1159,59 +1152,6 @@ body {
 .date-item-meta.urgent { color: var(--warning); font-weight: 700; }
 .date-item-meta.overdue { color: var(--danger); font-weight: 700; }
 
-/* ── Topbar quick-add buttons ── */
-.topbar-quick-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 7px 14px;
-  border-radius: var(--radius-sm);
-  border: none;
-  color: #fff;
-  font-size: .75rem;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  position: relative;
-  font-family: var(--font);
-  letter-spacing: .01em;
-  transition: all .18s ease;
-  min-height: 36px;
-}
-.topbar-quick-btn:hover  { transform: translateY(-1px); }
-.topbar-quick-btn:active { transform: translateY(1px); }
-
-.topbar-task-btn {
-  background: #22c55e;
-  box-shadow: 0 2px 8px rgba(34,197,94,.3);
-}
-.topbar-task-btn:hover  { box-shadow: 0 4px 12px rgba(34,197,94,.4); }
-
-.topbar-link-btn {
-  background: #0fb89d;
-  box-shadow: 0 2px 8px rgba(15,184,157,.3);
-}
-.topbar-link-btn:hover  { box-shadow: 0 4px 12px rgba(15,184,157,.4); }
-
-.topbar-tcode-btn {
-  background: #d97706;
-  box-shadow: 0 2px 8px rgba(217,119,6,.3);
-  color: #fff;
-}
-.topbar-tcode-btn:hover  { box-shadow: 0 4px 12px rgba(217,119,6,.4); }
-
-.topbar-dates-btn {
-  background: #ea580c;
-  box-shadow: 0 2px 8px rgba(234,88,12,.3);
-}
-.topbar-dates-btn:hover  { box-shadow: 0 4px 12px rgba(234,88,12,.4); }
-.topbar-dates-btn.has-upcoming { background: #dc2626; }
-
-.topbar-goal-btn {
-  background: #db2777;
-  box-shadow: 0 2px 8px rgba(219,39,119,.3);
-}
-.topbar-goal-btn:hover  { box-shadow: 0 4px 12px rgba(219,39,119,.4); }
 .dates-badge {
   position: absolute;
   top: -5px; right: -5px;
@@ -1496,10 +1436,8 @@ body.has-install-banner #content { padding-bottom: 100px; }
   #topbar { padding: 0 16px; gap: 10px; }
   #topbar h2 { display: none; }
   .search-wrap { max-width: none; flex: 1; }
-  .topbar-quick-btn .btn-text { display: none; }
-  .topbar-quick-btn { padding: 8px; border-radius: 50%; width: 38px; height: 38px; justify-content: center; }
-  .topbar-qa { gap: 4px; }
-  .tqa-btn { padding: 5px 8px; font-size: .68rem; border-radius: 6px; }
+  .topbar-qa { gap: 3px; }
+  .tqa-btn { padding: 2px 5px; font-size: .55rem; border-radius: 4px; }
   .export-btn { display: none; }
   .daily-quote { display: none; }
   .dev-credit { display: none; }
@@ -1711,22 +1649,19 @@ body.has-install-banner #content { padding-bottom: 100px; }
       <input type="text" id="searchInput" placeholder="Search all… (/)">
       <div id="globalSuggest"></div>
     </div>
-    <!-- Quick-add buttons -->
+    <!-- Quick-add tiny buttons -->
     <div class="topbar-qa" id="topbarQA">
-      <button class="tqa-btn tqa-task" id="openAddModal">+ Task</button>
-      <button class="tqa-btn tqa-tcode" id="topbarAddTcodeBtn">+ T-Code</button>
-      <button class="tqa-btn tqa-link" id="topbarAddLinkBtn">+ Link</button>
-      <button class="tqa-btn tqa-date" id="topbarDatesBtn">+ Date
-        <span class="dates-badge" id="datesBadge" style="display:none;position:static;margin-left:4px"></span>
-      </button>
-      <button class="tqa-btn tqa-goal" id="topbarAddGoalBtn">+ Goal</button>
+      <button class="tqa-btn tqa-task" id="openAddModal">Task</button>
+      <button class="tqa-btn tqa-tcode" id="topbarAddTcodeBtn">T-Code</button>
+      <button class="tqa-btn tqa-link" id="topbarAddLinkBtn">Link</button>
+      <button class="tqa-btn tqa-date" id="topbarDatesBtn">Date<span class="dates-badge" id="datesBadge" style="display:none;position:static;margin-left:3px"></span></button>
     </div>
+    <div id="completionBanner" style="display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1"></div>
     <button class="export-btn" id="exportTasksBtn">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Export
     </button>
     <div style="display:flex;align-items:center;gap:6px;">
-      <div id="completionBanner" style="display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1"></div>
       <button type="button" id="voiceBtnHeader" class="voice-btn" aria-label="Voice add task" title="Speak to add a task" style="width:34px;height:34px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="9" y="2" width="6" height="12" rx="3"/>
@@ -4641,7 +4576,6 @@ document.getElementById('dateAddBtn').addEventListener('click', () => {
 
 document.getElementById('topbarAddLinkBtn').addEventListener('click', function(){ openAddLinkModal(); });
 document.getElementById('topbarAddTcodeBtn').addEventListener('click', function(){ openAddTcodeModal(); });
-document.getElementById('topbarAddGoalBtn').addEventListener('click', function(){ openAddGoalModal(); });
 
 // Add Task from Links / T-Codes / Dates views
 document.getElementById('addTaskFromLinksBtn').addEventListener('click', openAddModal);
