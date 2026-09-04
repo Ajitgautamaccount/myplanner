@@ -660,11 +660,11 @@ body {
 .task {
   background: var(--surface);
   border-radius: var(--radius-sm);
-  padding: 14px 16px;
-  margin-bottom: 0;
+  padding: 10px 12px;
+  margin-bottom: 4px;
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 10px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
   border-left: 4px solid transparent;
@@ -691,15 +691,15 @@ body {
 .task.border-today { border-left-color: var(--warning); }
 
 .task-check {
-  width: 20px; height: 20px;
+  width: 18px; height: 18px;
   border: 2px solid var(--border);
   border-radius: 50%;
   cursor: pointer;
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: 1px;
   transition: all .18s ease;
   display: flex; align-items: center; justify-content: center;
-  min-width: 20px;
+  min-width: 18px;
 }
 .task-check:hover { border-color: var(--accent); background: var(--accent-soft); }
 .task-check.checked { background: var(--accent); border-color: var(--accent); }
@@ -712,8 +712,8 @@ body {
   display: block;
 }
 .task-body { flex: 1; min-width: 0; }
-.task-title { font-size: .92rem; font-weight: 500; word-break: break-word; margin-bottom: 4px; line-height: 1.4; }
-.task-notes { font-size: .8rem; color: var(--text2); margin-bottom: 5px; white-space: pre-line; word-break: break-word; line-height: 1.4; }
+.task-title { font-size: .85rem; font-weight: 500; word-break: break-word; margin-bottom: 3px; line-height: 1.35; }
+.task-notes { font-size: .75rem; color: var(--text2); margin-bottom: 4px; white-space: pre-line; word-break: break-word; line-height: 1.35; }
 .task-meta { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
 .badge { font-size: .67rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; letter-spacing: .01em; }
 .badge-tag { background: var(--accent-light); color: var(--accent); }
