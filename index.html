@@ -523,6 +523,56 @@ body {
 }
 .add-btn.btn-dates:hover  { box-shadow: 0 4px 14px rgba(234,88,12,.35); }
 
+/* ── Quick-Action Buttons (Home) ── */
+.quick-actions {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px;
+}
+.qa-btn {
+  flex: 1 1 0; min-width: 110px;
+  padding: 12px 18px;
+  font-size: .88rem; font-weight: 800; font-family: var(--font);
+  color: #fff; border: none; border-radius: 12px;
+  cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  letter-spacing: .02em; text-transform: uppercase;
+  transition: all .15s ease;
+}
+.qa-task {
+  background: linear-gradient(180deg, #818cf8 0%, #6366f1 100%);
+  border-bottom: 3px solid #4f46e5;
+  box-shadow: 0 4px 12px rgba(99,102,241,.4), inset 0 1px 0 rgba(255,255,255,.2);
+}
+.qa-task:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,.5), inset 0 1px 0 rgba(255,255,255,.25); }
+.qa-task:active { transform: translateY(1px); border-bottom-width: 1px; box-shadow: 0 1px 4px rgba(99,102,241,.3); }
+
+.qa-tcode {
+  background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
+  border-bottom: 3px solid #b45309;
+  box-shadow: 0 4px 12px rgba(217,119,6,.4), inset 0 1px 0 rgba(255,255,255,.2);
+}
+.qa-tcode:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(217,119,6,.5), inset 0 1px 0 rgba(255,255,255,.25); }
+.qa-tcode:active { transform: translateY(1px); border-bottom-width: 1px; box-shadow: 0 1px 4px rgba(217,119,6,.3); }
+
+.qa-link {
+  background: linear-gradient(180deg, #34d399 0%, #0fb89d 100%);
+  border-bottom: 3px solid #059669;
+  box-shadow: 0 4px 12px rgba(15,184,157,.4), inset 0 1px 0 rgba(255,255,255,.2);
+}
+.qa-link:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(15,184,157,.5), inset 0 1px 0 rgba(255,255,255,.25); }
+.qa-link:active { transform: translateY(1px); border-bottom-width: 1px; box-shadow: 0 1px 4px rgba(15,184,157,.3); }
+
+.qa-date {
+  background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%);
+  border-bottom: 3px solid #c2410c;
+  box-shadow: 0 4px 12px rgba(234,88,12,.4), inset 0 1px 0 rgba(255,255,255,.2);
+}
+.qa-date:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(234,88,12,.5), inset 0 1px 0 rgba(255,255,255,.25); }
+.qa-date:active { transform: translateY(1px); border-bottom-width: 1px; box-shadow: 0 1px 4px rgba(234,88,12,.3); }
+
+@media (max-width: 480px) {
+  .quick-actions { gap: 8px; }
+  .qa-btn { min-width: 0; flex: 1 1 calc(50% - 4px); padding: 10px 10px; font-size: .78rem; }
+}
+
 /* ── Content ── */
 #content { padding: 28px; flex: 1; }
 
@@ -1794,6 +1844,12 @@ body.has-install-banner #content { padding-bottom: 100px; }
           <option value="status">Sort: Status</option>
           <option value="alpha">Sort: A–Z</option>
         </select>
+      </div>
+      <div class="quick-actions">
+        <button class="qa-btn qa-task" id="qaAddTask">+ Task</button>
+        <button class="qa-btn qa-tcode" id="qaAddTcode">+ T-Code</button>
+        <button class="qa-btn qa-link" id="qaAddLink">+ Link</button>
+        <button class="qa-btn qa-date" id="qaAddDate">+ Imp Date</button>
       </div>
       <div id="list"></div>
     </div>
@@ -3188,6 +3244,12 @@ function setView(view, preset) {
 document.querySelectorAll('.nav-item[data-view]').forEach(btn => {
   btn.addEventListener('click', () => setView(btn.dataset.view, btn.dataset.filterView || ''));
 });
+
+// ── Quick-Action Buttons (Home) ──────────────────────
+document.getElementById('qaAddTask').addEventListener('click', openAddModal);
+document.getElementById('qaAddTcode').addEventListener('click', openAddTcodeModal);
+document.getElementById('qaAddLink').addEventListener('click', openAddLinkModal);
+document.getElementById('qaAddDate').addEventListener('click', openDateQuickPopup);
 
 // ── Stats ─────────────────────────────────────────────
 function renderStats() {

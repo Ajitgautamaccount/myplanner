@@ -1,4 +1,4 @@
-const CACHE = 'ajit-planner-v6';
+const CACHE = 'ajit-planner-v7';
 const OFFLINE_URL = '/myplanner/';
 
 const PRECACHE = [
