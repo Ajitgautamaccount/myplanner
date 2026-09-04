@@ -523,55 +523,57 @@ body {
 }
 .add-btn.btn-dates:hover  { box-shadow: 0 4px 14px rgba(234,88,12,.35); }
 
-/* ── Quick-Action Buttons (Home) ── */
-.quick-actions {
-  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px;
+/* ── Topbar Quick-Add Buttons ── */
+.topbar-qa {
+  display: flex; gap: 6px; align-items: center;
 }
-.qa-btn {
-  flex: 1 1 0; min-width: 110px;
-  padding: 12px 18px;
-  font-size: .88rem; font-weight: 800; font-family: var(--font);
-  color: #fff; border: none; border-radius: 12px;
-  cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  letter-spacing: .02em; text-transform: uppercase;
+.tqa-btn {
+  padding: 6px 12px;
+  font-size: .75rem; font-weight: 700; font-family: var(--font);
+  color: #fff; border: none; border-radius: 8px;
+  cursor: pointer; display: inline-flex; align-items: center; gap: 4px;
+  white-space: nowrap; letter-spacing: .02em;
   transition: all .15s ease;
 }
-.qa-task {
+.tqa-task {
   background: linear-gradient(180deg, #818cf8 0%, #6366f1 100%);
-  border-bottom: 3px solid #4f46e5;
-  box-shadow: 0 4px 12px rgba(99,102,241,.4), inset 0 1px 0 rgba(255,255,255,.2);
+  border-bottom: 2px solid #4f46e5;
+  box-shadow: 0 2px 6px rgba(99,102,241,.4), inset 0 1px 0 rgba(255,255,255,.18);
 }
-.qa-task:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,.5), inset 0 1px 0 rgba(255,255,255,.25); }
-.qa-task:active { transform: translateY(1px); border-bottom-width: 1px; box-shadow: 0 1px 4px rgba(99,102,241,.3); }
+.tqa-task:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,.5); }
+.tqa-task:active { transform: translateY(1px); border-bottom-width: 0; box-shadow: 0 1px 3px rgba(99,102,241,.3); }
 
-.qa-tcode {
+.tqa-tcode {
   background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
-  border-bottom: 3px solid #b45309;
-  box-shadow: 0 4px 12px rgba(217,119,6,.4), inset 0 1px 0 rgba(255,255,255,.2);
+  border-bottom: 2px solid #b45309;
+  box-shadow: 0 2px 6px rgba(217,119,6,.4), inset 0 1px 0 rgba(255,255,255,.18);
 }
-.qa-tcode:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(217,119,6,.5), inset 0 1px 0 rgba(255,255,255,.25); }
-.qa-tcode:active { transform: translateY(1px); border-bottom-width: 1px; box-shadow: 0 1px 4px rgba(217,119,6,.3); }
+.tqa-tcode:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(217,119,6,.5); }
+.tqa-tcode:active { transform: translateY(1px); border-bottom-width: 0; box-shadow: 0 1px 3px rgba(217,119,6,.3); }
 
-.qa-link {
+.tqa-link {
   background: linear-gradient(180deg, #34d399 0%, #0fb89d 100%);
-  border-bottom: 3px solid #059669;
-  box-shadow: 0 4px 12px rgba(15,184,157,.4), inset 0 1px 0 rgba(255,255,255,.2);
+  border-bottom: 2px solid #059669;
+  box-shadow: 0 2px 6px rgba(15,184,157,.4), inset 0 1px 0 rgba(255,255,255,.18);
 }
-.qa-link:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(15,184,157,.5), inset 0 1px 0 rgba(255,255,255,.25); }
-.qa-link:active { transform: translateY(1px); border-bottom-width: 1px; box-shadow: 0 1px 4px rgba(15,184,157,.3); }
+.tqa-link:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15,184,157,.5); }
+.tqa-link:active { transform: translateY(1px); border-bottom-width: 0; box-shadow: 0 1px 3px rgba(15,184,157,.3); }
 
-.qa-date {
+.tqa-date {
   background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%);
-  border-bottom: 3px solid #c2410c;
-  box-shadow: 0 4px 12px rgba(234,88,12,.4), inset 0 1px 0 rgba(255,255,255,.2);
+  border-bottom: 2px solid #c2410c;
+  box-shadow: 0 2px 6px rgba(234,88,12,.4), inset 0 1px 0 rgba(255,255,255,.18);
 }
-.qa-date:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(234,88,12,.5), inset 0 1px 0 rgba(255,255,255,.25); }
-.qa-date:active { transform: translateY(1px); border-bottom-width: 1px; box-shadow: 0 1px 4px rgba(234,88,12,.3); }
+.tqa-date:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(234,88,12,.5); }
+.tqa-date:active { transform: translateY(1px); border-bottom-width: 0; box-shadow: 0 1px 3px rgba(234,88,12,.3); }
 
-@media (max-width: 480px) {
-  .quick-actions { gap: 8px; }
-  .qa-btn { min-width: 0; flex: 1 1 calc(50% - 4px); padding: 10px 10px; font-size: .78rem; }
+.tqa-goal {
+  background: linear-gradient(180deg, #f472b6 0%, #db2777 100%);
+  border-bottom: 2px solid #be185d;
+  box-shadow: 0 2px 6px rgba(219,39,119,.4), inset 0 1px 0 rgba(255,255,255,.18);
 }
+.tqa-goal:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(219,39,119,.5); }
+.tqa-goal:active { transform: translateY(1px); border-bottom-width: 0; box-shadow: 0 1px 3px rgba(219,39,119,.3); }
 
 /* ── Content ── */
 #content { padding: 28px; flex: 1; }
@@ -1156,69 +1158,6 @@ body {
 .date-item-meta  { font-size: .75rem; color: var(--text2); }
 .date-item-meta.urgent { color: var(--warning); font-weight: 700; }
 .date-item-meta.overdue { color: var(--danger); font-weight: 700; }
-/* ── Add dropdown menu ── */
-.add-menu-wrap { position: relative; flex-shrink: 0; }
-.add-menu-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border-radius: var(--radius-sm);
-  border: none;
-  background: var(--accent);
-  color: #fff;
-  font-size: .8rem;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: var(--font);
-  letter-spacing: .01em;
-  box-shadow: 0 2px 8px rgba(99,102,241,.35);
-  transition: all .18s ease;
-  min-height: 38px;
-  white-space: nowrap;
-}
-.add-menu-btn:hover  { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99,102,241,.4); background: var(--accent-hover); }
-.add-menu-btn:active { transform: translateY(1px);  box-shadow: 0 1px 4px rgba(99,102,241,.3); }
-.add-menu-caret { transition: transform .18s; }
-.add-menu-wrap.open .add-menu-caret { transform: rotate(180deg); }
-.add-menu-dropdown {
-  display: none;
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: 0 12px 40px rgba(0,0,0,.18);
-  min-width: 190px;
-  padding: 6px 0;
-  z-index: 500;
-  animation: menuPop .15s ease;
-}
-@keyframes menuPop { from { opacity:0; transform:translateY(-6px) scale(.97); } to { opacity:1; transform:translateY(0) scale(1); } }
-.add-menu-wrap.open .add-menu-dropdown { display: block; }
-.add-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 10px 16px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: .85rem;
-  font-weight: 600;
-  color: var(--text);
-  font-family: var(--font);
-  text-align: left;
-  transition: background .1s;
-}
-.add-menu-item:hover { background: var(--surface2); }
-.add-menu-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
 
 /* ── Topbar quick-add buttons ── */
 .topbar-quick-btn {
@@ -1559,10 +1498,8 @@ body.has-install-banner #content { padding-bottom: 100px; }
   .search-wrap { max-width: none; flex: 1; }
   .topbar-quick-btn .btn-text { display: none; }
   .topbar-quick-btn { padding: 8px; border-radius: 50%; width: 38px; height: 38px; justify-content: center; }
-  .add-menu-btn span { display: none; }
-  .add-menu-btn { padding: 8px; border-radius: 50%; width: 38px; height: 38px; justify-content: center; }
-  .add-menu-caret { display: none; }
-  .add-menu-dropdown { right: 0; left: auto; min-width: 200px; }
+  .topbar-qa { gap: 4px; }
+  .tqa-btn { padding: 5px 8px; font-size: .68rem; border-radius: 6px; }
   .export-btn { display: none; }
   .daily-quote { display: none; }
   .dev-credit { display: none; }
@@ -1774,31 +1711,15 @@ body.has-install-banner #content { padding-bottom: 100px; }
       <input type="text" id="searchInput" placeholder="Search all… (/)">
       <div id="globalSuggest"></div>
     </div>
-    <!-- Add dropdown -->
-    <div class="add-menu-wrap" id="addMenuWrap">
-      <button class="add-menu-btn" id="addMenuBtn" aria-label="Add">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        <span>Add</span>
-        <svg class="add-menu-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+    <!-- Quick-add buttons -->
+    <div class="topbar-qa" id="topbarQA">
+      <button class="tqa-btn tqa-task" id="openAddModal">+ Task</button>
+      <button class="tqa-btn tqa-tcode" id="topbarAddTcodeBtn">+ T-Code</button>
+      <button class="tqa-btn tqa-link" id="topbarAddLinkBtn">+ Link</button>
+      <button class="tqa-btn tqa-date" id="topbarDatesBtn">+ Date
+        <span class="dates-badge" id="datesBadge" style="display:none;position:static;margin-left:4px"></span>
       </button>
-      <div class="add-menu-dropdown" id="addMenuDropdown">
-        <button class="add-menu-item" id="openAddModal">
-          <span class="add-menu-dot" style="background:#6c7aff"></span>Add Task
-        </button>
-        <button class="add-menu-item" id="topbarAddLinkBtn">
-          <span class="add-menu-dot" style="background:#0fb89d"></span>Add Link
-        </button>
-        <button class="add-menu-item" id="topbarAddTcodeBtn">
-          <span class="add-menu-dot" style="background:#d97706"></span>Add T-Code
-        </button>
-        <button class="add-menu-item" id="topbarDatesBtn">
-          <span class="add-menu-dot" style="background:#ea580c"></span>Important Dates
-          <span class="dates-badge" id="datesBadge" style="display:none;position:static;margin-left:auto"></span>
-        </button>
-        <button class="add-menu-item" id="topbarAddGoalBtn">
-          <span class="add-menu-dot" style="background:#db2777"></span>Add Goal
-        </button>
-      </div>
+      <button class="tqa-btn tqa-goal" id="topbarAddGoalBtn">+ Goal</button>
     </div>
     <button class="export-btn" id="exportTasksBtn">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1844,12 +1765,6 @@ body.has-install-banner #content { padding-bottom: 100px; }
           <option value="status">Sort: Status</option>
           <option value="alpha">Sort: A–Z</option>
         </select>
-      </div>
-      <div class="quick-actions">
-        <button class="qa-btn qa-task" id="qaAddTask">+ Task</button>
-        <button class="qa-btn qa-tcode" id="qaAddTcode">+ T-Code</button>
-        <button class="qa-btn qa-link" id="qaAddLink">+ Link</button>
-        <button class="qa-btn qa-date" id="qaAddDate">+ Imp Date</button>
       </div>
       <div id="list"></div>
     </div>
@@ -3229,9 +3144,8 @@ function setView(view, preset) {
   const titleMap = { goals: 'Goals & Targets', habits: 'Habit Tracker', links: 'Links', tcodes: 'T-Codes / Tables', dates: 'Important Dates' };
   const taskTitles = { '': 'All Tasks', today: 'Today', overdue: 'Overdue', upcoming: 'Upcoming', done: 'Completed' };
   document.getElementById('viewTitle').textContent = titleMap[view] || (taskTitles[preset] || 'All Tasks');
-  // Show/hide topbar task buttons based on view
+  // Show/hide export button based on view
   const isTask = !view || view === '';
-  document.getElementById('openAddModal').style.display   = isTask ? '' : 'none';
   document.getElementById('exportTasksBtn').style.display = isTask ? '' : 'none';
   if (view === 'tasks')  renderTasks();
   if (view === 'goals')  renderGoals();
@@ -3244,12 +3158,6 @@ function setView(view, preset) {
 document.querySelectorAll('.nav-item[data-view]').forEach(btn => {
   btn.addEventListener('click', () => setView(btn.dataset.view, btn.dataset.filterView || ''));
 });
-
-// ── Quick-Action Buttons (Home) ──────────────────────
-document.getElementById('qaAddTask').addEventListener('click', openAddModal);
-document.getElementById('qaAddTcode').addEventListener('click', openAddTcodeModal);
-document.getElementById('qaAddLink').addEventListener('click', openAddLinkModal);
-document.getElementById('qaAddDate').addEventListener('click', openDateQuickPopup);
 
 // ── Stats ─────────────────────────────────────────────
 function renderStats() {
@@ -4711,7 +4619,7 @@ function openDatesModal() {
 }
 function closeDatesModal() { datesBackdrop.classList.remove('open'); }
 
-document.getElementById('topbarDatesBtn').addEventListener('click', function(){ closeAddMenu(); openDateQuickPopup(); });
+document.getElementById('topbarDatesBtn').addEventListener('click', function(){ openDateQuickPopup(); });
 document.getElementById('datesClose').addEventListener('click', closeDatesModal);
 datesBackdrop.addEventListener('click', e => { if (e.target === datesBackdrop) closeDatesModal(); });
 
@@ -4731,31 +4639,9 @@ document.getElementById('dateAddBtn').addEventListener('click', () => {
   document.getElementById('dateLabel').focus();
 });
 
-document.getElementById('topbarAddLinkBtn').addEventListener('click', function(){ closeAddMenu(); openAddLinkModal(); });
-document.getElementById('topbarAddTcodeBtn').addEventListener('click', function(){ closeAddMenu(); openAddTcodeModal(); });
-document.getElementById('topbarAddGoalBtn').addEventListener('click', function(){ closeAddMenu(); openAddGoalModal(); });
-
-// Add dropdown toggle
-(function(){
-  var wrap = document.getElementById('addMenuWrap');
-  var btn  = document.getElementById('addMenuBtn');
-  function closeAddMenu(){ wrap.classList.remove('open'); }
-  window.closeAddMenu = closeAddMenu;
-  btn.addEventListener('click', function(e){
-    e.stopPropagation();
-    wrap.classList.toggle('open');
-  });
-  document.addEventListener('click', function(e){
-    if (!wrap.contains(e.target)) closeAddMenu();
-  });
-  document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape') closeAddMenu();
-  });
-  // Close menu when any item inside is clicked
-  document.getElementById('addMenuDropdown').addEventListener('click', function(){
-    setTimeout(closeAddMenu, 50);
-  });
-})();
+document.getElementById('topbarAddLinkBtn').addEventListener('click', function(){ openAddLinkModal(); });
+document.getElementById('topbarAddTcodeBtn').addEventListener('click', function(){ openAddTcodeModal(); });
+document.getElementById('topbarAddGoalBtn').addEventListener('click', function(){ openAddGoalModal(); });
 
 // Add Task from Links / T-Codes / Dates views
 document.getElementById('addTaskFromLinksBtn').addEventListener('click', openAddModal);
@@ -4787,7 +4673,7 @@ function openDateQuickPopup() {
   document.getElementById('dqpLabel').value = '';
   document.getElementById('dqpDate').value  = '';
   // Position popup below the Add menu button
-  const anchorEl = document.getElementById('addMenuBtn') || topbarDatesBtnEl;
+  const anchorEl = topbarDatesBtnEl;
   const rect = anchorEl.getBoundingClientRect();
   dateQuickPopup.style.top  = (rect.bottom + 6) + 'px';
   dateQuickPopup.style.left = Math.max(8, rect.right - 300) + 'px';
